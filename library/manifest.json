@@ -374,6 +374,134 @@
    ]
   },
   {
+   "id": "before-after",
+   "file": "compositions/tpl/before-after.html",
+   "title": "Before / After",
+   "category": "Cards & Panels",
+   "t": 2.2,
+   "vars": {
+    "dur": 5
+   },
+   "desc": "Glass-framed comparison: a divider with a glass handle sweeps across, revealing the after image over the before.",
+   "use": {
+    "when": "The speaker contrasts the old way with the new result: a cleanup, a redesign, a messy sheet turned into a pipeline. Hold 4-6 s. On full-frame talking head use side left/right with width 800-900.",
+    "cues": [
+     "\"before / after\"",
+     "\"this is what it looked like\"",
+     "\"compare that to\"",
+     "\"from this... to this\"",
+     "\"the old way\""
+    ],
+    "pairs": [
+     "camera: speaker PiP while it plays",
+     "metric-counter (the improvement in numbers)"
+    ],
+    "avoid": "Images with different aspect ratios (set aspect), or results with no visual difference."
+   },
+   "examples": [
+    {
+     "name": "Spreadsheet to CRM",
+     "vars": {}
+    },
+    {
+     "name": "Side, custom labels",
+     "vars": {
+      "side": "left",
+      "width": 900,
+      "top": 260,
+      "beforeLabel": "Old sheet",
+      "afterLabel": "Acme CRM"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s)",
+     "default": 5
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face",
+     "default": true
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Side (left | right | center)",
+     "default": "center"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Top (px)",
+     "default": 230
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Label and handle scale",
+     "default": 1
+    },
+    {
+     "id": "width",
+     "type": "number",
+     "label": "Frame width (px)",
+     "default": 1100
+    },
+    {
+     "id": "before",
+     "type": "string",
+     "label": "Before image",
+     "default": "assets/demo/dashboard-before.svg"
+    },
+    {
+     "id": "after",
+     "type": "string",
+     "label": "After image",
+     "default": "assets/demo/dashboard.svg"
+    },
+    {
+     "id": "beforeLabel",
+     "type": "string",
+     "label": "Before label",
+     "default": "Before"
+    },
+    {
+     "id": "afterLabel",
+     "type": "string",
+     "label": "After label",
+     "default": "After"
+    },
+    {
+     "id": "aspect",
+     "type": "number",
+     "label": "Image aspect (width / height)",
+     "default": 1.8251
+    }
+   ]
+  },
+  {
    "id": "chapter-pill",
    "file": "compositions/tpl/chapter-pill.html",
    "title": "Chapter Pill",
@@ -479,6 +607,138 @@
      "type": "string",
      "label": "Schedule [{t,step,label}] (step 5 = all done) (JSON)",
      "default": "[{\"t\":5.8,\"step\":1,\"label\":\"Method 01: Manual\"},{\"t\":8.8,\"step\":2,\"label\":\"Method 02: Spreadsheet\"},{\"t\":11.6,\"step\":3,\"label\":\"Method 03: Lead Form\"},{\"t\":14.5,\"step\":4,\"label\":\"Verification Climax\"},{\"t\":18.2,\"step\":5,\"label\":\"Details Verified ✓\"}]"
+    }
+   ]
+  },
+  {
+   "id": "checklist",
+   "file": "compositions/tpl/checklist.html",
+   "title": "Checklist",
+   "category": "Cards & Panels",
+   "t": 2.6,
+   "vars": {
+    "dur": 4.5
+   },
+   "desc": "Recap list that ticks off one item at a time, with a running \"N of N\" counter.",
+   "use": {
+    "when": "The speaker sums up the steps just covered, or lists what to have ready. Set stagger to the speaking pace.",
+    "cues": [
+     "\"to recap\"",
+     "\"quick recap\"",
+     "\"make sure you've\"",
+     "\"before you move on\""
+    ],
+    "pairs": [
+     "glass-card (the steps earlier)",
+     "title-card outro (right after)"
+    ],
+    "avoid": "More than 5 items, or new information: it is a recap, not a teaching card."
+   },
+   "examples": [
+    {
+     "name": "Recap",
+     "vars": {}
+    },
+    {
+     "name": "Prep list, left",
+     "vars": {
+      "side": "left",
+      "eyebrow": "Before you start",
+      "title": "Have these ready",
+      "items": [
+       "A list of contacts",
+       "Your booking link",
+       "A form template",
+       "Ten minutes"
+      ],
+      "stagger": 0.55
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s)",
+     "default": 4.5
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face",
+     "default": true
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Side (left | right | center)",
+     "default": "right"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Top (px)",
+     "default": 200
+    },
+    {
+     "id": "width",
+     "type": "number",
+     "label": "Width (px)",
+     "default": 520
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Text scale",
+     "default": 1
+    },
+    {
+     "id": "eyebrow",
+     "type": "string",
+     "label": "Eyebrow",
+     "default": "Recap"
+    },
+    {
+     "id": "title",
+     "type": "string",
+     "label": "Title",
+     "default": "Before you move on"
+    },
+    {
+     "id": "items",
+     "type": "string",
+     "label": "Items (JSON list of strings)",
+     "default": "[\"Add the contact\",\"Send the form\",\"Check the details\"]"
+    },
+    {
+     "id": "first",
+     "type": "number",
+     "label": "First tick (s after start)",
+     "default": 0.9
+    },
+    {
+     "id": "stagger",
+     "type": "number",
+     "label": "Seconds between ticks",
+     "default": 0.7
     }
    ]
   },
@@ -629,6 +889,106 @@
      "type": "number",
      "label": "Tile stagger (s)",
      "default": 0.45
+    }
+   ]
+  },
+  {
+   "id": "fast-forward",
+   "file": "compositions/tpl/fast-forward.html",
+   "title": "Fast-Forward Badge",
+   "category": "Overlays",
+   "t": 1.4,
+   "vars": {
+    "dur": 3
+   },
+   "desc": "Glass pill with a pulsing fast-forward glyph and a speed label in tabular figures, shown while footage is sped up.",
+   "use": {
+    "when": "Mount for exactly the span where footage is sped up or a long wait is compressed (installs, imports, loading).",
+    "cues": [
+     "\"let me speed this up\"",
+     "\"this takes a minute\"",
+     "\"skipping ahead\"",
+     "\"while it loads\""
+    ],
+    "pairs": [
+     "transition blur (out of the sped-up span)"
+    ],
+    "avoid": "Real-time footage, or spans under ~1.5 s."
+   },
+   "examples": [
+    {
+     "name": "2x",
+     "vars": {}
+    },
+    {
+     "name": "Skip ahead",
+     "vars": {
+      "label": "8×",
+      "caption": "Skipping the import",
+      "side": "left"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s), the length of the sped-up span",
+     "default": 3
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face",
+     "default": true
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Side (left | right | center)",
+     "default": "right"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Top (px)",
+     "default": 60
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Scale",
+     "default": 1
+    },
+    {
+     "id": "label",
+     "type": "string",
+     "label": "Speed label",
+     "default": "2×"
+    },
+    {
+     "id": "caption",
+     "type": "string",
+     "label": "Caption",
+     "default": "Fast-forward"
     }
    ]
   },
@@ -933,6 +1293,116 @@
    ]
   },
   {
+   "id": "keys",
+   "file": "compositions/tpl/keys.html",
+   "title": "Keyboard Shortcut",
+   "category": "Overlays",
+   "t": 1.6,
+   "vars": {
+    "dur": 2.5
+   },
+   "desc": "Keycaps that pop in and press as a chord, with an optional caption. Shows what was pressed when the viewer cannot see the keyboard.",
+   "use": {
+    "when": "The speaker presses or names a shortcut. Show it the moment it is pressed, hold 2-3 s.",
+    "cues": [
+     "\"press command K\"",
+     "\"hit ...\"",
+     "\"use the shortcut\"",
+     "\"hold shift and ...\""
+    ],
+    "pairs": [
+     "app-window / screen share (the result of the shortcut)",
+     "spotlight (where it opened)"
+    ],
+    "avoid": "Long sequences of shortcuts back to back; one per beat."
+   },
+   "examples": [
+    {
+     "name": "Command bar",
+     "vars": {
+      "keys": [
+       "⌘",
+       "K"
+      ],
+      "label": "Open command bar"
+     }
+    },
+    {
+     "name": "Save, three keys",
+     "vars": {
+      "keys": [
+       "⌘",
+       "⇧",
+       "S"
+      ],
+      "label": "Save a copy"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s)",
+     "default": 2.5
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face",
+     "default": true
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Side (left | right | center)",
+     "default": "center"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Top (px)",
+     "default": 820
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Scale",
+     "default": 1
+    },
+    {
+     "id": "keys",
+     "type": "string",
+     "label": "Keys, in press order (JSON list)",
+     "default": "[\"⌘\",\"K\"]"
+    },
+    {
+     "id": "label",
+     "type": "string",
+     "label": "Caption (optional)",
+     "default": "Open command bar"
+    }
+   ]
+  },
+  {
    "id": "kinetic-subtitle",
    "file": "compositions/tpl/kinetic-subtitle.html",
    "title": "Kinetic Subtitles",
@@ -996,6 +1466,113 @@
      "type": "string",
      "label": "Cues [{start,end,text}] - wrap punch words in *stars* (JSON)",
      "default": "[{\"start\":1.8,\"end\":2.5,\"text\":\"In this video,\"},{\"start\":2.5,\"end\":3.4,\"text\":\"I'll show you\"},{\"start\":3.4,\"end\":4.4,\"text\":\"Three *ways*\"},{\"start\":4.4,\"end\":5.0,\"text\":\"to add contacts\"},{\"start\":5.0,\"end\":5.8,\"text\":\"to *Acme CRM.*\"},{\"start\":5.8,\"end\":6.6,\"text\":\"You can add\"},{\"start\":6.6,\"end\":7.9,\"text\":\"someone *manually,*\"},{\"start\":8.8,\"end\":10.2,\"text\":\"from a *spreadsheet,*\"},{\"start\":10.2,\"end\":11.6,\"text\":\"or collect their details\"},{\"start\":11.6,\"end\":13.5,\"text\":\"through a *form.*\"},{\"start\":14.5,\"end\":15.6,\"text\":\"And after each *one,*\"},{\"start\":15.6,\"end\":17.0,\"text\":\"we'll open the *contact*\"},{\"start\":17.0,\"end\":18.2,\"text\":\"and make *sure*\"},{\"start\":18.2,\"end\":20.8,\"text\":\"the *details* are there.\"}]"
+    }
+   ]
+  },
+  {
+   "id": "link-chip",
+   "file": "compositions/tpl/link-chip.html",
+   "title": "Link Chip",
+   "category": "Overlays",
+   "t": 1.6,
+   "vars": {
+    "dur": 4
+   },
+   "desc": "Glass pill with an accent icon, a call to action and a URL. Bouncy entrance, small icon nudge.",
+   "use": {
+    "when": "The speaker points the viewer to a resource: description link, download, booking page. 3-5 s.",
+    "cues": [
+     "\"link in the description\"",
+     "\"grab the template\"",
+     "\"I'll put it below\"",
+     "\"go to acme.com\""
+    ],
+    "pairs": [
+     "kinetic-subtitle (captions bottom-centre, chip bottom-right)"
+    ],
+    "avoid": "Long URLs (use a short path) or more than one chip on screen."
+   },
+   "examples": [
+    {
+     "name": "Description link",
+     "vars": {}
+    },
+    {
+     "name": "Booking",
+     "vars": {
+      "text": "Book a free call",
+      "url": "acme.com/book",
+      "icon": "calendar",
+      "side": "left"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s)",
+     "default": 4
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face",
+     "default": true
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Side (left | right | center)",
+     "default": "right"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Top (px)",
+     "default": 900
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Scale",
+     "default": 1
+    },
+    {
+     "id": "text",
+     "type": "string",
+     "label": "Text",
+     "default": "Link in the description"
+    },
+    {
+     "id": "url",
+     "type": "string",
+     "label": "URL",
+     "default": "acme.com/guide"
+    },
+    {
+     "id": "icon",
+     "type": "string",
+     "label": "Icon",
+     "default": "link"
     }
    ]
   },
@@ -1412,6 +1989,126 @@
    ]
   },
   {
+   "id": "quote",
+   "file": "compositions/tpl/quote.html",
+   "title": "Pull Quote",
+   "category": "Text",
+   "t": 2.6,
+   "vars": {
+    "dur": 4
+   },
+   "desc": "One key line on glass: accent quotation mark, word-by-word reveal, punch words in blue, attribution last.",
+   "use": {
+    "when": "The speaker says the line worth remembering (the thesis), or quotes a customer.",
+    "cues": [
+     "\"the one thing to remember\"",
+     "\"as one client put it\"",
+     "\"here's the rule\"",
+     "the thesis sentence"
+    ],
+    "pairs": [
+     "camera punch-in (same beat)",
+     "kinetic-subtitle (cut that cue)"
+    ],
+    "avoid": "More than ~20 words, or more than one quote per minute."
+   },
+   "examples": [
+    {
+     "name": "Thesis",
+     "vars": {}
+    },
+    {
+     "name": "Customer quote, right",
+     "vars": {
+      "side": "right",
+      "text": "We stopped losing leads *overnight*.",
+      "attribution": "Jane Doe",
+      "role": "Owner, Acme Dental"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s)",
+     "default": 4
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face",
+     "default": true
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Side (left | right | center)",
+     "default": "left"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Top (px)",
+     "default": 260
+    },
+    {
+     "id": "width",
+     "type": "number",
+     "label": "Width (px)",
+     "default": 620
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Text scale",
+     "default": 1
+    },
+    {
+     "id": "text",
+     "type": "string",
+     "label": "Quote - wrap punch words in *stars*",
+     "default": "Reply in the first five minutes and the *booking* is yours."
+    },
+    {
+     "id": "attribution",
+     "type": "string",
+     "label": "Attribution",
+     "default": "John Smith"
+    },
+    {
+     "id": "role",
+     "type": "string",
+     "label": "Role (optional)",
+     "default": "Founder, Acme"
+    },
+    {
+     "id": "size",
+     "type": "number",
+     "label": "Quote size (px, 34-44)",
+     "default": 40
+    }
+   ]
+  },
+  {
    "id": "spotlight",
    "file": "compositions/tpl/spotlight.html",
    "title": "Spotlight",
@@ -1502,6 +2199,283 @@
      "default": true
     }
    ]
+  },
+  {
+   "id": "title-card",
+   "file": "compositions/tpl/title-card.html",
+   "title": "Title Card",
+   "category": "Titles",
+   "t": 1.8,
+   "vars": {
+    "dur": 3.5
+   },
+   "desc": "Intro: full-frame blurred scrim with a word-by-word title reveal. Outro: an \"Up next\" card with a thumbnail and call to action.",
+   "use": {
+    "when": "Intro on the opening line that names the topic; outro on the sign-off that points to the next video. Hold 3-4 s.",
+    "cues": [
+     "\"in this video\"",
+     "\"today we're going to\"",
+     "\"watch this one next\"",
+     "\"see you in the next one\""
+    ],
+    "pairs": [
+     "lower-third (after the intro clears)",
+     "kinetic-subtitle (off during the intro)"
+    ],
+    "avoid": "Mid-video section breaks: use transition (chapter). More than one intro per video."
+   },
+   "examples": [
+    {
+     "name": "Intro",
+     "vars": {
+      "mode": "intro",
+      "eyebrow": "Acme CRM tutorial",
+      "title": "Add contacts the *easy* way",
+      "subtitle": "Three methods, under five minutes"
+     }
+    },
+    {
+     "name": "Up next",
+     "vars": {
+      "mode": "outro",
+      "safe": true,
+      "eyebrow": "Up next",
+      "title": "Build your first *workflow*",
+      "cta": "Link in the description"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s)",
+     "default": 3.5
+    },
+    {
+     "id": "mode",
+     "type": "string",
+     "label": "Mode (intro | outro)",
+     "default": "intro"
+    },
+    {
+     "id": "safe",
+     "type": "boolean",
+     "label": "Keep clear of the face (outro only; intro is full frame)",
+     "default": false
+    },
+    {
+     "id": "side",
+     "type": "string",
+     "label": "Outro side (left | right | center)",
+     "default": "right"
+    },
+    {
+     "id": "top",
+     "type": "number",
+     "label": "Outro top (px)",
+     "default": 200
+    },
+    {
+     "id": "width",
+     "type": "number",
+     "label": "Outro width (px)",
+     "default": 600
+    },
+    {
+     "id": "offsetX",
+     "type": "number",
+     "label": "Offset X",
+     "default": 0
+    },
+    {
+     "id": "offsetY",
+     "type": "number",
+     "label": "Offset Y",
+     "default": 0
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Text scale",
+     "default": 1
+    },
+    {
+     "id": "eyebrow",
+     "type": "string",
+     "label": "Eyebrow",
+     "default": "Acme CRM tutorial"
+    },
+    {
+     "id": "title",
+     "type": "string",
+     "label": "Title - wrap accent words in *stars*",
+     "default": "Add contacts the *easy* way"
+    },
+    {
+     "id": "subtitle",
+     "type": "string",
+     "label": "Subtitle (intro)",
+     "default": "Three methods, under five minutes"
+    },
+    {
+     "id": "src",
+     "type": "string",
+     "label": "Outro thumbnail image (optional)",
+     "default": ""
+    },
+    {
+     "id": "cta",
+     "type": "string",
+     "label": "Outro call to action",
+     "default": "Link in the description"
+    },
+    {
+     "id": "scrim",
+     "type": "number",
+     "label": "Intro scrim darkness (0-1)",
+     "default": 0.55
+    }
+   ]
+  },
+  {
+   "id": "transition",
+   "file": "compositions/tpl/transition.html",
+   "title": "Transition",
+   "category": "Transitions",
+   "t": 0.4,
+   "vars": {
+    "at": 0,
+    "dur": 0.8
+   },
+   "desc": "Full-frame transition library over a cut: dip, flash, blur, glass-wipe, iris, light-sweep, chapter. The cut sits at at + dur/2; clear at both ends.",
+   "use": {
+    "when": "Cover a cut in the footage: put the cut at the midpoint (at + dur/2). dip = calm scene or time change; flash = energetic reveal (sparingly); blur = soft jump cut in the same setup; glass-wipe = moving to a new screen or app, direction = travel; iris = focusing in on a detail or closing a topic; light-sweep = upbeat \"next up\" or a win; chapter = named section break (set dur 1.4-2 s).",
+    "cues": [
+     "\"next\"",
+     "\"now let's open / switch to ...\"",
+     "\"moving on\"",
+     "\"later that day\"",
+     "\"and here's the result\"",
+     "\"part two\""
+    ],
+    "pairs": [
+     "chapter-pill (advance on the chapter kind)",
+     "camera reframe right after the cut",
+     "glass-card on the new section"
+    ],
+    "avoid": "Stacking transitions on every cut (most cuts need none), and more than one flash per video. Never on a mid-sentence jump cut."
+   },
+   "examples": [
+    {
+     "name": "Dip to black",
+     "vars": {
+      "kind": "dip",
+      "dur": 1
+     }
+    },
+    {
+     "name": "Flash",
+     "vars": {
+      "kind": "flash",
+      "dur": 0.5
+     }
+    },
+    {
+     "name": "Blur-through",
+     "vars": {
+      "kind": "blur",
+      "dur": 0.8
+     }
+    },
+    {
+     "name": "Glass wipe",
+     "vars": {
+      "kind": "glass-wipe",
+      "dur": 1,
+      "direction": "right"
+     }
+    },
+    {
+     "name": "Iris",
+     "vars": {
+      "kind": "iris",
+      "dur": 1
+     }
+    },
+    {
+     "name": "Light sweep",
+     "vars": {
+      "kind": "light-sweep",
+      "dur": 1
+     }
+    },
+    {
+     "name": "Chapter break",
+     "vars": {
+      "kind": "chapter",
+      "dur": 1.6,
+      "eyebrow": "Chapter 2",
+      "title": "Import your contacts"
+     }
+    }
+   ],
+   "variables": [
+    {
+     "id": "at",
+     "type": "number",
+     "label": "Start (s, absolute)",
+     "default": 0
+    },
+    {
+     "id": "dur",
+     "type": "number",
+     "label": "Duration (s); the cut sits at at + dur/2 (chapter: use 1.6)",
+     "default": 0.8
+    },
+    {
+     "id": "kind",
+     "type": "string",
+     "label": "Kind (dip | flash | blur | glass-wipe | iris | light-sweep | chapter)",
+     "default": "dip"
+    },
+    {
+     "id": "color",
+     "type": "color",
+     "label": "Colour (dip, iris)",
+     "default": "#000000"
+    },
+    {
+     "id": "direction",
+     "type": "string",
+     "label": "Direction (left | right | up | down)",
+     "default": "right"
+    },
+    {
+     "id": "eyebrow",
+     "type": "string",
+     "label": "Chapter eyebrow",
+     "default": "Chapter 2"
+    },
+    {
+     "id": "title",
+     "type": "string",
+     "label": "Chapter title",
+     "default": "Import your contacts"
+    },
+    {
+     "id": "scale",
+     "type": "number",
+     "label": "Chapter text scale",
+     "default": 1
+    }
+   ]
   }
  ],
  "motion": [
@@ -1574,6 +2548,46 @@
    "cue": "SCREEN SHARE: speaker talks without touching the screen",
    "motion": "Overview, PiP at rest size (1.0x)",
    "how": "PiP stays bottom-left on the margin; never move it to another corner"
+  },
+  {
+   "cue": "SCREEN SHARE: a zoom holds longer than ~2 s",
+   "motion": "Slow drift: +3.5% push-in on the same point until the next keyframe",
+   "how": "share.js drift: true (or { amount, minHold }); a static zoom looks frozen"
+  },
+  {
+   "cue": "SCREEN SHARE: \"click this\", \"this button\", \"right here\"",
+   "motion": "Callout: accent ring + label pill, locked to the spot through zooms",
+   "how": "share.js callouts: [{ t, end, x, y, w, h, label, side }] in screen 0-1 coords; usually inside a zoom"
+  },
+  {
+   "cue": "SCREEN SHARE: \"look at this section\", \"notice\"",
+   "motion": "Focus dim: everything except the region darkens to 55%",
+   "how": "share.js focus: [{ t, end, x, y, w, h, dim }]; softer than a callout, for areas not buttons"
+  },
+  {
+   "cue": "SCREEN SHARE: an email, API key, phone number or client name is visible",
+   "motion": "Redact: frosted blur (or solid) box that follows every zoom",
+   "how": "share.js redact: [{ x, y, w, h }] (whole video) or with t/end; run cue-plan to catch spoken ones"
+  },
+  {
+   "cue": "SCREEN SHARE: talking straight to the viewer (intro, opinion, sign-off)",
+   "motion": "Webcam swap: the card grows to full screen, then back",
+   "how": "share.js cam: [{ t, mode: 'full' }, { t, mode: 'pip' }]; no re-crop, face stays centred"
+  },
+  {
+   "cue": "SCREEN SHARE: dense screen, the card covers content",
+   "motion": "Hide webcam: card slides down and out, returns on the next topic",
+   "how": "share.js cam: [{ t, mode: 'hide' }, { t, mode: 'pip' }]"
+  },
+  {
+   "cue": "A pause or filler was cut (jump cut)",
+   "motion": "Jump-cut punch: framing alternates 1.0 / 1.06 at each cut",
+   "how": "node scripts/auto-trim.mjs <voice file>, then paste its cuts into share.js cuts or camera.js cuts"
+  },
+  {
+   "cue": "Section change, new app or screen, a cut that should feel intended",
+   "motion": "Transition over the cut (cut at the midpoint): blur 0.8 s by default, glass-wipe for a new screen, chapter 1.6 s for a named section",
+   "how": "transition template, kind = dip | flash | blur | glass-wipe | iris | light-sweep | chapter; z-index 90; most cuts need none"
   },
   {
    "cue": "Breath, filler, mid-sentence pause",

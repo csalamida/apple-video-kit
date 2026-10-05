@@ -45,6 +45,7 @@
         transform-origin: 50% 50%;
         will-change: transform, filter;
       }
+      #punch { position: absolute; inset: 0; }
       #footage {
         position: absolute;
         inset: 0;
@@ -91,7 +92,7 @@
     <div data-hf-id="hf-jqlq" id="root-composition" class="clip" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="21.92">
       <!-- Video Footage & Camera Rig Layer -->
       <div data-hf-id="hf-jtq0" id="camera-rig" data-layout-allow-overflow="">
-        <div id="camera-pan" class="hf-pan"><video data-hf-id="hf-o9gz" id="footage" class="clip" src="inputs/_demo/speaker.mp4" data-start="0" data-duration="21.92" data-media-start="0" data-has-audio="true" data-layout-allow-overflow="" playsinline></video></div>
+        <div id="camera-pan" class="hf-pan"><div id="punch"><video data-hf-id="hf-o9gz" id="footage" class="clip" src="inputs/_demo/speaker.mp4" data-start="0" data-duration="21.92" data-media-start="0" data-has-audio="true" data-layout-allow-overflow="" playsinline></video></div></div>
       </div>
 
       <!-- Studio Stage Backdrop Layer -->
@@ -108,6 +109,9 @@
       <div data-hf-id="hf-50mc" id="card-method-2" class="clip subcomp-host" style="z-index: 40;" data-composition-id="glass-card-2" data-composition-src="compositions/tpl/glass-card.html" data-start="8.8" data-duration="2.8" data-variable-values='{"width": 560, "height": 440, "eyebrow": "Method 02", "badge": "Bulk Ingestion", "titlePre": "Import a", "titleAccent": "Spreadsheet", "kind": "rows", "stagger": 0.6, "items": [{"left": "contacts_q4_leads.csv", "right": "1,240 Rows"}, {"left": "Column Mapping", "right": "Auto-Matched (100%)", "tone": "good"}], "footer": {"label": "Bulk Operations", "text": "Automated tag assignment & smart list sync"}, "at": 8.8, "dur": 2.8}'></div>
       <div data-hf-id="hf-rrxs" id="card-method-3" class="clip subcomp-host" style="z-index: 40;" data-composition-id="glass-card-3" data-composition-src="compositions/tpl/glass-card.html" data-start="11.6" data-duration="2.9" data-variable-values='{"width": 820, "height": 520, "scale": 1.0, "eyebrow": "Method 03", "badge": "Auto Inbound", "titlePre": "Collect via", "titleAccent": "Lead Form", "kind": "rows", "stagger": 0.5, "items": [{"left": "Landing page opt-in form", "right": "→ Acme CRM"}, {"left": "Hands-free lead nurture", "right": "24/7 Active", "tone": "good"}], "footer": {"label": "Instant SMS", "text": "Notification dispatched"}, "aside": {"contact": "John Smith", "initials": "JS", "thread": [{"from": "them", "text": "New Lead: Jane Doe (Opt-in Form)", "at": 0.98}, {"from": "me", "text": "AI qualified & booked for 2 PM!", "at": 1.55}]}, "at": 11.6, "dur": 2.9}'></div>
       <div data-hf-id="hf-qogp" id="card-climax" class="clip subcomp-host" style="z-index: 40;" data-layout-allow-occlusion="" data-composition-id="app-window-0" data-composition-src="compositions/tpl/app-window.html" data-start="14.5" data-duration="3.7" data-variable-values='{"at": 14.5, "dur": 3.7, "layout": "rail", "railNote": "Open the record and confirm every field synced."}'></div>
+
+      <div id="tr-out-host" class="clip subcomp-host" style="z-index: 110;" data-composition-id="transition-0" data-composition-src="compositions/tpl/transition.html" data-start="17.8" data-duration="0.8" data-variable-values='{"at": 17.8, "dur": 0.8, "kind": "blur"}'></div>
+      <div id="link-host" class="clip subcomp-host" style="z-index: 55;" data-composition-id="link-chip-0" data-composition-src="compositions/tpl/link-chip.html" data-start="19.3" data-duration="2.5" data-variable-values='{"at": 19.3, "dur": 2.5}'></div>
 
       <!-- Kinetic Subtitles (template: cues are data) -->
       <div data-hf-id="hf-iqoi" id="subtitles" class="clip subcomp-host" style="z-index: 75;" data-composition-id="kinetic-subtitle-0" data-composition-src="compositions/tpl/kinetic-subtitle.html" data-start="0" data-duration="21.92" data-variable-values='{"at": 0, "dur": 21.92}'></div>
@@ -127,6 +131,11 @@
         const end = R.cameraAt(m.t + m.dur);
         G.to(mainTl, cam.rig, win, end, { start: m.t, duration: m.dur, boxShadow: m.chrome && m.chrome.boxShadow, front: m.front });
       });
+
+      // Jump-cut punch: alternate framing at every cut, centred on the face
+      const f0 = window.__hfFace && window.__hfFace.track[0];
+      mainTl.set("#punch", { scale: 1, transformOrigin: f0 ? `${(f0.x0 + f0.x1) / 2}px ${(f0.y0 + f0.y1) / 2}px` : "50% 40%" }, 0);
+      (cam.cuts || []).forEach((t, i) => mainTl.set("#punch", { scale: i % 2 === 0 ? (cam.punch || 1.06) : 1 }, t));
 
       // Edge-defocus pulses on the two big reframes
       mainTl.fromTo("#edge-defocus", { opacity: 0 }, { opacity: 0.8, duration: 0.25, yoyo: true, repeat: 1, ease: "sine.inOut" }, 5.8);

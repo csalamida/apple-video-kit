@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s); the cut sits at at + dur/2 (chapter: use 1.6)","default":0.8},
+  {"id":"kind","type":"string","label":"Kind (dip | flash | blur | glass-wipe | iris | light-sweep | chapter)","default":"dip"},
+  {"id":"color","type":"color","label":"Colour (dip, iris)","default":"#000000"},
+  {"id":"direction","type":"string","label":"Direction (left | right | up | down)","default":"right"},
+  {"id":"eyebrow","type":"string","label":"Chapter eyebrow","default":"Chapter 2"},
+  {"id":"title","type":"string","label":"Chapter title","default":"Import your contacts"},
+  {"id":"scale","type":"number","label":"Chapter text scale","default":1}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      .fx { position: absolute; inset: 0; opacity: 0; will-change: opacity, transform; }
+      /* blur-through / chapter: the backdrop is blurred, lifted (or dimmed) and slightly saturated */
+      .fx-blur { --b: 0px; --br: 1; --sa: 1; opacity: 1;
+        -webkit-backdrop-filter: blur(var(--b)) brightness(var(--br)) saturate(var(--sa));
+        backdrop-filter: blur(var(--b)) brightness(var(--br)) saturate(var(--sa)); }
+      .fx-flash { background: radial-gradient(ellipse 120% 110% at 50% 42%, #fff 0%, #fff 48%, rgba(250, 252, 255, 0.94) 100%); }
+      .fx-lift { -webkit-backdrop-filter: brightness(1.9) saturate(1.15) blur(10px); backdrop-filter: brightness(1.9) saturate(1.15) blur(10px); }
+      /* glass wipe: frosted pane, crisp specular leading edge, feathered trailing edge */
+      .pane { position: absolute; opacity: 1;
+        -webkit-backdrop-filter: blur(56px) saturate(175%) brightness(1.06);
+        backdrop-filter: blur(56px) saturate(175%) brightness(1.06); }
+      .pane .tint { position: absolute; inset: 0; }
+      .pane .edge { position: absolute; }
+      .pane .rim { position: absolute; }
+      /* iris: a squircle hole in a solid field (huge spread shadow) with a faint glass rim */
+      .iris { position: absolute; left: 50%; top: 50%; opacity: 1; corner-shape: var(--corner);
+        transform: translate(-50%, -50%); }
+      /* light sweep */
+      .streak { position: absolute; opacity: 1; filter: blur(34px);
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.10) 30%, rgba(255,255,255,0.62) 50%, rgba(214,234,255,0.14) 68%, rgba(255,255,255,0) 100%); }
+      .streak.core { filter: blur(10px);
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%); }
+      .bloom { background: radial-gradient(ellipse 90% 80% at 50% 45%, rgba(255,255,255,0.20), rgba(255,255,255,0.08));
+        -webkit-backdrop-filter: brightness(1.7) saturate(1.35) blur(18px); backdrop-filter: brightness(1.7) saturate(1.35) blur(18px); }
+      /* chapter pill */
+      #pill { left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; gap: calc(6px*var(--s));
+        padding: calc(24px*var(--s)) calc(60px*var(--s)) calc(28px*var(--s)); border-radius: calc(44px*var(--s)); white-space: nowrap; }
+      #pill .eb { font-size: calc(19px*var(--s)); font-weight: 600; color: var(--accent-text); letter-spacing: 0.01em; }
+      #pill .tt { font-size: calc(50px*var(--s)); font-weight: 700; letter-spacing: var(--track-display); color: var(--label); line-height: 1.08; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="transition" data-width="1920" data-height="1080" data-start="0" data-duration="600"></div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        /*
+         * WHEN TO USE EACH KIND  (the cut in the footage sits at at + dur/2; the overlay is clear at both ends)
+         * ---------------------------------------------------------------------------------------------------
+         *  dip          Calm scene change, time skip, end of a section. Neutral; the default.        0.8-1.2 s
+         *  flash        Energetic hard cut, "and... done", reveal of a result. Use sparingly.        0.4-0.6 s
+         *  blur         Soft jump cut inside the same setup (trimmed pause, second take).            0.6-0.9 s
+         *  glass-wipe   Moving to a new screen or app ("now let's open..."); direction = travel.     0.9-1.2 s
+         *  iris         Focus in / "zooming into" one detail, or closing a topic.                    0.9-1.2 s
+         *  light-sweep  Upbeat section change, "next up", a win or a new feature.                    0.8-1.1 s
+         *  chapter      Named chapter break: blur-through plus a centred glass title pill.           1.4-2.0 s
+         */
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebrow:"Chapter 2",title:"Import your contacts",scale:1}, window.__hyperframes);
+        var root = document.getElementById("root");
+        var D = Math.max(0.2, +V.dur || 0.8), M = D / 2, W = 1920, H = 1080;
+        var dir = /^(left|right|up|down)$/.test(V.direction) ? V.direction : "right";
+        var tl = gsap.timeline({paused:true}); window.__timelines["transition"] = tl;
+        function el(cls, parent) { var d = document.createElement("div"); d.className = cls; (parent || root).appendChild(d); return d; }
+
+        // Shared blur-through ramp: up to peak by `rise`, hold, back to 0 at D.
+        function blurThrough(node, peak, br, sa, rise) {
+          tl.fromTo(node, {"--b":"0px","--br":1,"--sa":1}, {"--b":peak+"px","--br":br,"--sa":sa,duration:rise,ease:"sine.inOut"}, 0);
+          tl.to(node, {"--b":"0px","--br":1,"--sa":1,duration:rise,ease:"sine.inOut"}, D - rise);
+        }
+
+        var kind = V.kind;
+        if (kind === "dip") {
+          var dip = el("fx"); dip.style.background = V.color;
+          tl.fromTo(dip, {opacity:0}, {opacity:1,duration:D*0.42,ease:"power2.inOut"}, 0);
+          tl.to(dip, {opacity:0,duration:D*0.42,ease:"power2.inOut"}, D*0.58);
+
+        } else if (kind === "flash") {
+          // Overexposure lift first, then the white peak exactly on the cut, long soft decay.
+          var lift = el("fx fx-lift"), fl = el("fx fx-flash");
+          var atk = Math.min(0.16, M*0.7), hold = Math.min(0.05, D*0.08);
+          tl.fromTo(lift, {opacity:0}, {opacity:1,duration:M,ease:"power2.in"}, 0);
+          tl.to(lift, {opacity:0,duration:M*0.9,ease:"power2.out"}, M + hold/2);
+          tl.fromTo(fl, {opacity:0}, {opacity:1,duration:atk,ease:"power2.in"}, M - hold/2 - atk);
+          tl.to(fl, {opacity:0,duration:D - (M + hold/2),ease:"power3.out"}, M + hold/2);
+
+        } else if (kind === "blur") {
+          var bl = el("fx fx-blur");
+          blurThrough(bl, 40, 1.12, 1.25, D*0.45);
+
+        } else if (kind === "glass-wipe") {
+          var horiz = dir === "left" || dir === "right", pos = dir === "right" || dir === "down";
+          var L = horiz ? W : H, F = horiz ? 420 : 300, PL = L + F + 300;   // pane length along travel, F = feathered tail
+          var pane = el("pane"); pane.setAttribute("data-layout-allow-overflow", "");
+          pane.style.width = (horiz ? PL : W) + "px"; pane.style.height = (horiz ? H : PL) + "px";
+          pane.style.left = "0px"; pane.style.top = "0px";
+          // trailing edge feathered, leading edge crisp
+          var toLead = {right:"to right",left:"to left",down:"to bottom",up:"to top"}[dir];
+          var mask = "linear-gradient(" + toLead + ", transparent 0px, #000 " + F + "px, #000 100%)";
+          pane.style.webkitMaskImage = mask; pane.style.maskImage = mask;
+          var tint = el("tint", pane);
+          tint.style.background = "linear-gradient(" + toLead + ", rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.10) 70%, rgba(255,255,255,0.16) 100%)," +
+            "linear-gradient(" + (horiz ? "180deg" : "90deg") + ", rgba(255,255,255,0.08), rgba(255,255,255,0) 40%, rgba(255,255,255,0.05))";
+          // leading edge: wide soft glow + bright specular line + faint accent refraction just behind it
+          var glow = el("edge", pane), rim = el("rim", pane);
+          var gw = 220, side = {right:"right",left:"left",down:"bottom",up:"top"}[dir];
+          var back = {right:"to left",left:"to right",down:"to top",up:"to bottom"}[dir];
+          glow.style[side] = "0px"; rim.style[side] = "0px";
+          if (horiz) { glow.style.top = rim.style.top = "0px"; glow.style.height = rim.style.height = H + "px"; glow.style.width = gw + "px"; rim.style.width = "3px"; }
+          else { glow.style.left = rim.style.left = "0px"; glow.style.width = rim.style.width = W + "px"; glow.style.height = gw + "px"; rim.style.height = "3px"; }
+          glow.style.background = "linear-gradient(" + back + ", rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.14) 12%, rgba(120,189,255,0.10) 34%, rgba(255,255,255,0) 100%)";
+          rim.style.background = "rgba(255,255,255,0.92)";
+          rim.style.boxShadow = "0 0 14px 2px rgba(255,255,255,0.55)";
+          // positions of the pane's near (low-coordinate) edge along the travel axis
+          var cover = -(F + 150);                       // fully covering: feather and leading edge both off-frame
+          var s0 = pos ? -PL : L, c0 = pos ? cover : L - PL - cover, e0 = pos ? L : -PL;
+          var prop = horiz ? "x" : "y";
+          var a = {}, b = {}, c = {}; a[prop] = s0; b[prop] = c0; c[prop] = e0;
+          b.duration = D*0.47; b.ease = E.smooth; c.duration = D*0.47; c.ease = "power2.in";
+          tl.fromTo(pane, a, b, 0);
+          tl.to(pane, c, D*0.53);
+
+        } else if (kind === "iris") {
+          var ir = el("iris"); ir.setAttribute("data-layout-allow-overflow", "");
+          var big = {w: W + 380, h: H + 320};   // smallest squircle whose curved corners still clear the frame corners
+          ir.style.boxShadow = "0 0 0 4000px " + V.color + ", inset 0 0 0 1.5px rgba(255,255,255,0.28), inset 0 0 40px rgba(255,255,255,0.10)";
+          function rr(w, h) { return Math.min(w, h) * 0.34 + "px"; }
+          tl.fromTo(ir, {width:big.w, height:big.h, borderRadius:rr(big.w, big.h)},
+                        {width:0, height:0, borderRadius:"0px", duration:D*0.45, ease:"power2.in"}, 0);
+          tl.to(ir, {width:big.w, height:big.h, borderRadius:rr(big.w, big.h), duration:D*0.45, ease:"power2.out"}, D*0.55);
+
+        } else if (kind === "light-sweep") {
+          var horiz2 = dir === "left" || dir === "right", pos2 = dir === "right" || dir === "down";
+          var bloom = el("fx bloom");
+          var wrap = el("fx"); wrap.style.opacity = 1; wrap.setAttribute("data-layout-allow-overflow", "");
+          var halo = el("streak", wrap), core = el("streak core", wrap);
+          // a tall, tilted band; travel along the chosen axis
+          var bw = 700, cw = 160, len = 2300, tilt = horiz2 ? 14 : 104;
+          [[halo, bw], [core, cw]].forEach(function (p) {
+            var n = p[0], w = p[1];
+            n.style.width = w + "px"; n.style.height = len + "px";
+            n.style.left = (W/2 - w/2) + "px"; n.style.top = (H/2 - len/2) + "px";
+          });
+          var span = (horiz2 ? W : H) / 2 + bw / 2 + 300;   // band fully off-frame at both ends
+          var from = {}, to = {}, k = horiz2 ? "x" : "y";
+          from[k] = pos2 ? -span : span; from.rotation = tilt;
+          to[k] = pos2 ? span : -span; to.rotation = tilt; to.duration = D; to.ease = "sine.inOut";
+          tl.fromTo([halo, core], from, to, 0);
+          tl.fromTo(bloom, {opacity:0}, {opacity:1,duration:M*0.8,ease:"power2.in"}, M*0.2);
+          tl.to(bloom, {opacity:0,duration:M*0.8,ease:"power2.out"}, M);
+
+        } else if (kind === "chapter") {
+          var cb = el("fx fx-blur");
+          blurThrough(cb, 30, 0.8, 1.15, D*0.3);
+          var pill = el("hf-glass"); pill.id = "pill";
+          pill.style.setProperty("--s", V.scale);
+          pill.innerHTML = (V.eyebrow ? '<div class="eb">' + esc(V.eyebrow) + '</div>' : '') + '<div class="tt">' + esc(V.title) + '</div>';
+          gsap.set(pill, {xPercent:-50, yPercent:-50});
+          tl.fromTo(pill, {opacity:0, scale:0.9, y:16}, {opacity:1, scale:1, y:0, duration:Math.min(0.6, D*0.36), ease:E.snappy}, D*0.18);
+          tl.to(pill, {opacity:0, scale:0.97, y:-8, duration:Math.min(0.3, D*0.18), ease:"power2.in"}, D*0.66);
+        }
+      })();
+    </script>
+  </body>
+</html>

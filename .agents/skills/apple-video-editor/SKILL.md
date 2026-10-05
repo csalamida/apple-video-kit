@@ -9,8 +9,8 @@ description: >
   a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request.
 license: MIT
 metadata:
-  author: Antigravity & Apple Design Integration
-  version: "4.0.0"
+  author: Apple Video Kit contributors
+  version: "5.0.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -33,13 +33,15 @@ Trigger on: an `.mp4/.mov/.webm` + optional `.srt/transcript.json`; "package thi
 
 **Screen share**
 1. Sources: a silent screen/window recording -> `#screen`, the webcam (carries the voice) -> `#cam` in `projects/screen-share/index.html`. Set `data-duration` on both.
-2. Read the script/transcript; write zoom keyframes in `share.js`: `{ t, x, y, z }` (zoom to z centred on x,y of the screen, 0-1), `{ t, z: 1 }` to return to overview. Overview before each new topic.
-3. Mount templates on top (captions at minimum): host tags with `data-variable-values`. `place()` keeps them off the PiP rectangle.
-4. `npm run share:check` (lint, runtime, layout, motion, contrast) then `npm run share:render`.
-5. The cursor is baked into the screen recording; do not synthesise one.
+2. Optional: `npm run trim -- inputs/webcam.mp4 --also inputs/screen.mp4` cuts pauses; paste its clips into index.html and its `cuts` into share.js.
+3. `npm run plan -- transcript.srt --mode screen` drafts the cue plan (zooms, callouts, focus, redact, webcam moments, templates). Review it: it is a draft, coordinates are TODOs.
+4. Write `share.js`: `zooms` `{ t, x, y, z }` (screen 0-1 coords) and `{ t, z: 1 }` for overview before each new topic; `drift: true`; `cam` moments (`full` / `pip` / `hide`); `callouts`, `focus`, `redact` regions; `cuts`.
+5. Mount templates on top (captions at minimum): host tags with `data-variable-values`. `place()` keeps them off the PiP rectangle. Host ids must not equal an id inside the template (use `<name>-host`).
+6. `npm run share:check` (host checks + lint, runtime, layout, motion, contrast) then `npm run share:render`.
+7. The cursor is baked into the screen recording; do not synthesise one. Redact anything private you see (emails, keys, client names) even if it is not spoken.
 
 **Talking head**
-1. Footage -> `index.html`; transcript for cues. Camera moves go in `components/camera.js`, never inline tweens.
+1. Footage -> `index.html` (`#footage` inside `#punch`); `npm run plan -- transcript.srt --mode talking` for cues. Camera moves and jump `cuts` go in `components/camera.js`, never inline tweens.
 2. Mount templates as host tags; set `at`/`dur` equal to the host's `data-start`/`data-duration`.
 3. `npm run check` and `npm run check:face` must both pass; then `npm run render`.
 
@@ -52,41 +54,51 @@ Editorial guide, not an automated parser. The full, editable version is the cue 
 
 | Spoken cue | Template | Motion / camera |
 |---|---|---|
-| Video start (0-4 s) | `lower-third` + `chapter-pill` | none; first caption at 1.8 s |
+| Video start (0-4 s), "in this video" | `title-card` intro, then `lower-third` + `chapter-pill` | screen share: `cam` full, then `pip` |
 | "method one / first / three ways" | `glass-card` (one per step) | chapter-pill advances; snappy spring from the side away from the face |
 | "let me show you / dashboard / open the..." | `app-window` (+ `spotlight`) | talking head: speaker PiP/split rail, `layout:"rail"`. Screen share: zoom to the target |
+| "click / press / this button" | none | screen share: zoom 1.5-1.9x + `callouts` ring and label |
+| "press command K" | `keys` | none |
+| "look at / notice this section" | `spotlight` (talking head) | screen share: `focus` dim |
+| email, API key, phone, client name on screen | none | screen share: `redact` (blur), always, spoken or not |
 | "the contact / this lead / details" | `contact-card` or an `app-window` contact panel | none |
 | "incoming / notification / alert" | `notification-stack` | bouncy drop-in |
 | "text / SMS / reply" | `imessage-phone` (or `glass-card` with `aside`) | typing indicator then message |
 | "percent / seconds / money" | `metric-counter` (or `app-window` stats panel) | counter roll 1.4 s |
+| "before / after / it used to" | `before-after` | speaker PiP while it plays |
+| "the key is / remember this" | `quote` | camera punch-in; screen share: `cam` full |
 | thesis / punchline | `kinetic-subtitle` punch word | camera punch-in 1.2x + edge defocus |
-| screen share: pointing at a control | none | zoom 1.5-1.9x (0.7 s spring), PiP tucks to 0.7x |
-| screen share: tiny text / modal | none | zoom 2.0-2.5x, hold 2-4 s, then back to overview |
-| conclusion / CTA | none | undock to full bleed + 1.2x punch-in (talking head) |
-| breath / filler / mid-sentence pause | none | no motion; trim dead air > 0.4 s |
+| "wait / loading / this takes a minute" | `fast-forward` (and speed up or trim the footage) | none |
+| "moving on / now let's / step two" | `transition` (`chapter` kind 1.6 s, or `blur` 0.8 s) | zoom back to overview |
+| "to recap" | `checklist` | none |
+| "link in the description" | `link-chip` | none |
+| sign-off, "see you next time" | `title-card` outro | screen share: `cam` full; talking head: full bleed + 1.2x |
+| screen share: zoom held > 2 s | none | `drift: true` |
+| screen share: dense screen, webcam in the way | none | `cam` hide, then pip |
+| breath / filler / mid-sentence pause | none | no motion; `npm run trim` and jump-cut punch (`cuts`) |
 
 ---
 
 ## 4. Architecture
 
 ```
-projects/screen-share/   index.html + share.js (zooms, PiP overrides)        <- primary mode
+projects/screen-share/   index.html + share.js (zooms, cam, callouts, focus, redact, cuts) <- primary mode
 index.html               talking-head root; mounts templates, builds camera from camera.js
-compositions/tpl/        10 templates (variables = the API)
+compositions/tpl/        18 templates (variables = the API), incl. the transition library
 components/
   tokens.css             ONLY place for colour, type, glass, corner values
   glass-components.js    __hfGlass: spring eases + stage engine + presets
   tpl-runtime.js         vars(), place() (face/PiP-safe), cameraAt/windowAt/faceAt, enter/exit
-  tpl-parts.js           SF symbols, iPhone, panel registry (pipeline|contact|table|list|stats|chat|text|terminal|image)
-  screen-stage.js        screen-share engine (window, zooms, PiP scale)
+  tpl-parts.js           icon set, iPhone, panel registry (pipeline|contact|table|list|stats|chat|text|terminal|image)
+  screen-stage.js        screen-share engine (window, zooms + drift, webcam modes, annotations, jump-cut punch)
   camera.js              talking-head camera + speaker window moves as DATA
-inputs/face-track.js     face boxes (scripts/detect-face.py, opencv in a temp venv)
+inputs/face-track.js     face boxes (scripts/detect-face.py, opencv in a temp venv); demo track ships for the placeholder
+inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated catalog (live previews, props editor, cue sheets)
-scripts/                 check-face-clear.mjs, build-library.mjs, library-meta.mjs, sync-share.mjs
+scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear, check-privacy, build-library, library-meta, sync-share, demo-media
 ```
 
-**Templates (`compositions/tpl/*.html`)** - `glass-card`, `app-window`, `contact-card`, `lower-third`, `chapter-pill`,
-`notification-stack`, `spotlight`, `kinetic-subtitle`, `metric-counter`, `imessage-phone`. Mount:
+**Templates (`compositions/tpl/*.html`)** - cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`; overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`; text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`; titles: `title-card` (intro | outro); devices: `imessage-phone`; transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint, z-index 90+). Mount:
 
 ```html
 <div id="card-1" class="clip subcomp-host" style="z-index: 40;"
@@ -100,9 +112,13 @@ Rules every template follows:
 - Lists/objects are JSON text variables (HyperFrames has no json type); a host may pass real arrays.
 - Common props: `side`, `top`, `offsetX/Y`, `scale`, `safe`. `safe:true` shrinks or flips the card so it never covers the head (talking head) or the PiP (screen share).
 - `app-window` hosts any mix of panels (add a kind in `tpl-parts.js` PANELS); `layout:"rail"` puts the headline in the free left column above the PiP.
+- Host ids must not equal an id inside the template (it would render into the host); use `<name>-host`. The checks catch it.
+- Placeholder copy only in defaults and examples (John Smith, Jane Doe, Acme, lorem ipsum).
 - Add a template: new file in `compositions/tpl/`, an entry (`use`, `examples`) in `scripts/library-meta.mjs`, then `npm run build:library`.
 
 **Stage engine (`__hfGlass.stage`)** - the speaker is a WINDOW (left/top/width/height/radius, squircle, ring+shadow as box-shadow) whose footage lives in a fixed-size `.hf-pan` that is only translated/scaled. Nothing re-crops while it morphs and radius/ring stay true pixels. `dockPiP`, `undockPiP`, `splitStage`, `unsplitStage`, `keynoteEmphasis` all use it. Never animate `width`/`height` on a `<video>`. Moves in `camera.js`: `win`, `fit: 'frame'|'cover'` (cover is face-centred), `front`, `chrome`.
+
+**Screen-share moves (`share.js`, engine `components/screen-stage.js`)** - `drift` (slow +3.5% push-in while a zoom holds), `cam: [{t, mode: 'full'|'pip'|'hide'}]` (webcam to full screen without re-crop, back to the card, or tucked away), `cuts` + `punch` (jump-cut punch on the webcam), and screen-space annotations that live inside the zoomed screen so they stay locked to their spot: `callouts` (ring + label, label keeps its size), `focus` (dim the rest), `redact` (blur or solid; whole video when no t/end).
 
 **Screen-share PiP spec (measured from a real reference export)** - 267x427 at 1920x1080 (14% x 40%, about 5:8), bottom-left at (26, 24), radius 42, soft shadow, NO ring. Stays on screen while the screen zooms and tucks to 0.7x from its bottom-left corner as the zoom nears 1.7x. Never move it to another corner. Screen window: about 93.5% wide, centred, 18px radius, soft shadow, over a macOS-style wallpaper.
 
@@ -113,6 +129,7 @@ Rules every template follows:
 - Glass: about 50% translucent base + blur + saturate + dim, specular top rim. The footage must show through.
 - Motion: spring eases only (`__hfGlass.ease.smooth | snappy | bouncy`). GSAP silently ignores `cubic-bezier(...)` strings and falls back to `power1.out`.
 - Subtitles: one highlight colour, 1-3 punch words per cue (`*star*` them), sentence case.
+- Privacy: never commit footage or real names; `npm run check:privacy` (with a local `.privacy-denylist`) guards it.
 - Determinism: no `Date.now()`, unseeded `Math.random()`, or network fetches; no CDN fonts.
 
 ---
@@ -139,7 +156,7 @@ window.__hfGlass.revealCard(tl, "#target-card", { start: 3.2, duration: 0.48 });
 ```
 
 ### 4. macOS / iPhone Stacked Notification Center Banner
-Faithfully replicates macOS Sequoia and iOS 18 Notification Center stacked notifications with physical background tiers, squircle app icons, corner Apple Color Emoji badges, channel context, and optional right avatar thumbnails:
+Faithfully replicates macOS Sequoia and iOS 18 Notification Center stacked notifications with physical background tiers, squircle app icons, corner icon badges, channel context, and optional right avatar thumbnails:
 ```html
 <div class="apple-notification-stack">
   <div class="apple-notif-stack-layer apple-notif-stack-layer-2"></div>
@@ -148,7 +165,7 @@ Faithfully replicates macOS Sequoia and iOS 18 Notification Center stacked notif
     <div class="apple-notif-dismiss">✕</div>
     <div class="apple-notif-icon-wrap">
       <div class="apple-notif-app-icon"><svg>...</svg></div>
-      <div class="apple-notif-badge"><img class="apple-emoji" src="assets/emojis/zap.png" /></div>
+      <div class="apple-notif-badge">${__hfParts.icon('bolt', 11)}</div>
     </div>
     <div class="apple-notif-content">
       <div class="apple-notif-header">
@@ -240,18 +257,12 @@ window.__hfGlass.unsplitStage(tl, "#speaker-card", "#macos-app-window", { start:
 
 ---
 
-## 6. Apple Color Emoji Asset Library (`assets/emojis/`)
+## 6. Icons (`__hfParts.icon`)
 
-Always use the **36 local 160×160 Apple Color Emoji PNG assets** in `assets/emojis/` to ensure offline, broadcast-safe rendering without system font fallbacks:
+The kit ships its own 24x24 icon set (MIT, `components/tpl-parts.js`); no Apple SF Symbols or Apple Color Emoji are included, because their licences do not allow redistribution.
 
-* **Available Emojis:** `rocket`, `zap`, `fire`, `sparkles`, `target`, `robot`, `brain`, `bulb`, `phone`, `chat`, `bell`, `clock`, `stopwatch`, `check`, `chart`, `barchart`, `money`, `lock`, `shield`, `diamond`, `trophy`, `crown`, `star`, `handshake`, `alert`, `mail`, `globe`, `mic`, `gear`, `package`, `thumbsup`, `heart`, `pin`, `warning`, `key`, `calendar`.
-
-### Usage:
-* **HTML:** `<img class="apple-emoji" src="assets/emojis/zap.png" alt="zap" />`
-* **Frosted Pill:** `<div class="apple-emoji-pill"><img class="apple-emoji" src="assets/emojis/robot.png" /><span>Autonomous AI</span></div>`
-* **JavaScript:** `window.__hfGlass.emoji('rocket', { size: 'lg' })`
-
----
+* **Names:** `check`, `seal`, `cellular`, `wifi`, `battery`, `chevron-left`, `chevron-right`, `arrow-right`, `video`, `plus-circle`, `arrow-up-circle`, `waveform`, `person-plus`, `table`, `doc`, `bolt`, `bell`, `money`, `chat`, `mail`, `calendar`, `sparkle`, `lock`, `link`, `play`, `star`, `chart`, `clock`, `eye-off` (aliases: `zap` = bolt, `dollar` = money, `message` = chat).
+* **Usage:** `__hfParts.icon('bolt', 20)` returns an inline `<svg>`; call `__hfParts.ensureSymbols()` once after inserting. Icons use `currentColor`.
 
 ## 7. Verification & Quality Gate
 

@@ -7,10 +7,15 @@
      win     speaker WINDOW {x,y,w,h,r} in screen px (omit or 'full' = full frame). Radius/ring stay true pixels.
      fit     'frame' (whole frame inside win) | 'cover' (fill win, face-centred) - replaces explicit x/y/scale.
      front   true = raise above templates while windowed, false = drop back down at the end.
-     chrome  {boxShadow} tweened alongside (ring + shadow). */
+     chrome  {boxShadow} tweened alongside (ring + shadow).
+
+   cuts  jump-cut times (from scripts/auto-trim.mjs). At each cut the framing alternates 1.0 / punch, so the
+         jump reads as a deliberate edit. It scales #punch (a wrapper around the video), never the <video>. */
 window.__hfCamera = {
   rig: "#camera-rig",
   origin: [960, 540],           // rig transform-origin (50% 50% of 1920x1080)
+  cuts: [],                     // e.g. [3.42, 7.9] - paste `cuts` from auto-trim's .cuts.json
+  punch: 1.06,
   moves: [
     { t: 2.0,  dur: 2.5, x: 40,   scale: 1.05 },
     { t: 5.8,  dur: 0.6, x: 35,   scale: 1.15 },

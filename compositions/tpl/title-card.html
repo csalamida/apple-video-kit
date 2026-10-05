@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3.5},
+  {"id":"mode","type":"string","label":"Mode (intro | outro)","default":"intro"},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face (outro only; intro is full frame)","default":false},
+  {"id":"side","type":"string","label":"Outro side (left | right | center)","default":"right"},
+  {"id":"top","type":"number","label":"Outro top (px)","default":200},
+  {"id":"width","type":"number","label":"Outro width (px)","default":600},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Text scale","default":1},
+  {"id":"eyebrow","type":"string","label":"Eyebrow","default":"Acme CRM tutorial"},
+  {"id":"title","type":"string","label":"Title - wrap accent words in *stars*","default":"Add contacts the *easy* way"},
+  {"id":"subtitle","type":"string","label":"Subtitle (intro)","default":"Three methods, under five minutes"},
+  {"id":"src","type":"string","label":"Outro thumbnail image (optional)","default":""},
+  {"id":"cta","type":"string","label":"Outro call to action","default":"Link in the description"},
+  {"id":"scrim","type":"number","label":"Intro scrim darkness (0-1)","default":0.55}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      .w { display: inline-block; will-change: transform, opacity, filter; }
+      .w.kw { color: var(--accent-text); }
+
+      /* intro */
+      #scrim { position: absolute; inset: 0; opacity: 0; -webkit-backdrop-filter: blur(26px) saturate(150%); backdrop-filter: blur(26px) saturate(150%); }
+      #intro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 200px; }
+      #intro .ieb { font-size: calc(18px*var(--s)); font-weight: 600; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--accent-text); margin-bottom: calc(22px*var(--s)); opacity: 0; }
+      #intro .itt { font-size: calc(92px*var(--s)); font-weight: 700; line-height: 1.04; letter-spacing: -0.032em; max-width: 1400px; text-wrap: balance; }
+      #intro .isb { font-size: calc(30px*var(--s)); font-weight: 400; line-height: 1.3; letter-spacing: var(--track-title); color: var(--label-secondary); margin-top: calc(26px*var(--s)); max-width: 1100px; opacity: 0; text-wrap: balance; }
+
+      /* outro */
+      #out { padding: calc(30px*var(--s)) calc(30px*var(--s)) calc(26px*var(--s)); border-radius: 34px; display: flex; flex-direction: column; }
+      #out .oeb { font-size: calc(15px*var(--s)); font-weight: 600; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--accent-text); margin-bottom: calc(8px*var(--s)); }
+      #out .ott { font-size: calc(34px*var(--s)); font-weight: 700; line-height: 1.12; letter-spacing: var(--track-display); margin-bottom: calc(20px*var(--s)); text-wrap: balance; }
+      .th { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 20px; corner-shape: var(--corner); overflow: hidden;
+            background: radial-gradient(120% 90% at 78% 12%, rgba(41,151,255,.42) 0%, rgba(41,151,255,0) 55%), linear-gradient(150deg, #20283a 0%, #11141c 60%, #0b0d12 100%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 0.5px rgba(255,255,255,.14); }
+      .th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .th .ln { position: absolute; left: 7%; height: 10px; border-radius: 5px; background: rgba(255,255,255,.12); }
+      .play { position: absolute; left: 50%; top: 50%; width: calc(76px*var(--s)); height: calc(76px*var(--s)); margin: calc(-38px*var(--s)) 0 0 calc(-38px*var(--s));
+              border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;
+              background: rgba(255,255,255,.2); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+              box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 0.5px rgba(255,255,255,.3), 0 8px 24px rgba(0,0,0,.35); }
+      .play svg { margin-left: 4px; }
+      .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(255,255,255,.18); }
+      .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
+      .cta { display: flex; align-items: center; gap: 10px; margin-top: calc(18px*var(--s)); font-size: calc(18px*var(--s)); font-weight: 500; color: var(--label-secondary); }
+      .cta svg { color: var(--accent-text); flex: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="title-card" data-width="1920" data-height="1080" data-start="0" data-duration="600"></div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+        var V = T.vars({at:0,dur:3.5,mode:"intro",safe:false,side:"right",top:200,width:600,offsetX:0,offsetY:0,scale:1,eyebrow:"Acme CRM tutorial",title:"Add contacts the *easy* way",subtitle:"Three methods, under five minutes",src:"",cta:"Link in the description",scrim:0.55}, window.__hyperframes);
+        var root = document.getElementById("root");
+
+        // "*word*" -> accent words; every word is its own span so it can rise in on its own.
+        function words(text) {
+          return String(text || "").split(/(\*[^*]+\*)/).filter(Boolean).map(function (part) {
+            var punch = /^\*.*\*$/.test(part), txt = punch ? part.slice(1, -1) : part;
+            return txt.split(/\s+/).filter(Boolean).map(function (wd) { return '<span class="w' + (punch ? ' kw' : '') + '">' + esc(wd) + '</span>'; }).join(" ");
+          }).join(" ");
+        }
+
+        var tl = gsap.timeline({paused:true}); window.__timelines["title-card"] = tl;
+        var out = V.dur - 0.45;
+
+        if (V.mode !== "outro") {
+          root.innerHTML = '<div id="scrim"></div><div id="intro">' + (V.eyebrow ? '<div class="ieb">' + esc(V.eyebrow) + '</div>' : '') +
+            '<h1 class="itt">' + words(V.title) + '</h1>' + (V.subtitle ? '<div class="isb">' + esc(V.subtitle) + '</div>' : '') + '</div>';
+          var scrim = document.getElementById("scrim"), intro = document.getElementById("intro");
+          scrim.style.background = "rgba(8,8,12," + Math.max(0, Math.min(1, V.scrim)) + ")";
+          intro.style.setProperty("--s", V.scale);
+          intro.style.transform = "translate(" + V.offsetX + "px," + V.offsetY + "px)";
+          var eb = intro.querySelector(".ieb"), sb = intro.querySelector(".isb"), ws = intro.querySelectorAll(".itt .w");
+
+          tl.fromTo(scrim, {opacity:0}, {opacity:1, duration:0.6, ease:"power1.out"}, 0);
+          if (eb) tl.fromTo(eb, {opacity:0, y:14, filter:"blur(6px)"}, {opacity:1, y:0, filter:"blur(0px)", duration:0.7, ease:E.smooth}, 0.2);
+          tl.fromTo(ws, {opacity:0, y:46, filter:"blur(14px)"}, {opacity:1, y:0, filter:"blur(0px)", duration:0.9, ease:E.smooth, stagger:0.075}, 0.32);
+          if (sb) tl.fromTo(sb, {opacity:0, y:16, filter:"blur(8px)"}, {opacity:1, y:0, filter:"blur(0px)", duration:0.8, ease:E.smooth}, 0.5 + ws.length * 0.075);
+
+          tl.to(intro, {opacity:0, y:-18 + V.offsetY, filter:"blur(10px)", duration:0.4, ease:"power2.in"}, out);
+          tl.to(scrim, {opacity:0, duration:0.45, ease:"power1.in"}, out + 0.05);
+          return;
+        }
+
+        // ---- outro: "up next" card, face-safe ----
+        root.innerHTML = '<div id="out" class="hf-glass">' + (V.eyebrow ? '<div class="oeb">' + esc(V.eyebrow) + '</div>' : '') +
+          '<div class="ott">' + words(V.title) + '</div>' +
+          '<div class="th">' + (V.src ? '<img src="' + esc(V.src) + '" alt="">' : '<div class="ln" style="top:14%;width:34%"></div><div class="ln" style="top:22%;width:22%;opacity:.7"></div>') +
+          '<div class="play">' + P.icon("play", Math.round(30 * V.scale)) + '</div><div class="bar"><i></i></div></div>' +
+          (V.cta ? '<div class="cta">' + P.icon("arrow-right", Math.round(20 * V.scale)) + '<span>' + esc(V.cta) + '</span></div>' : '') + '</div>';
+        P.ensureSymbols();
+        var card = document.getElementById("out");
+        card.style.setProperty("--s", V.scale);
+        card.style.width = V.width + "px";
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:V.width,height:card.offsetHeight,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:420});
+        card.style.left = pl.left + "px"; card.style.top = pl.top + "px"; card.style.width = pl.width + "px";
+
+        var from = pl.side === "right" ? "right" : pl.side === "left" ? "left" : "down";
+        T.enter(tl, card, {from:from, distance:32, duration:0.7});
+        var oeb = card.querySelector(".oeb"), ows = card.querySelectorAll(".ott .w"), th = card.querySelector(".th"), play = card.querySelector(".play"),
+            fill = card.querySelector(".bar i"), cta = card.querySelector(".cta");
+        if (oeb) tl.fromTo(oeb, {opacity:0, y:8}, {opacity:1, y:0, duration:0.5, ease:E.smooth}, 0.18);
+        tl.fromTo(ows, {opacity:0, y:18, filter:"blur(8px)"}, {opacity:1, y:0, filter:"blur(0px)", duration:0.7, ease:E.smooth, stagger:0.05}, 0.24);
+        tl.fromTo(th, {opacity:0, scale:0.94, y:14}, {opacity:1, scale:1, y:0, duration:0.7, ease:E.snappy}, 0.36);
+        tl.fromTo(play, {opacity:0, scale:0.4}, {opacity:1, scale:1, duration:0.6, ease:E.bouncy}, 0.62);
+        tl.fromTo(fill, {scaleX:0}, {scaleX:1, duration:Math.max(0.6, out - 0.9), ease:"none"}, 0.8);
+        if (cta) tl.fromTo(cta, {opacity:0, x:-8}, {opacity:1, x:0, duration:0.5, ease:E.smooth}, 0.85);
+        T.exit(tl, card, {to:from, at:out, duration:0.35});
+      })();
+    </script>
+  </body>
+</html>

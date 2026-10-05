@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Apple Video Templates</title>
+<title>Apple Video Kit</title>
 <link rel="stylesheet" href="../components/tokens.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="../components/glass-components.js"></script>
@@ -63,13 +63,25 @@
   select.ex { background: rgba(0,0,0,.35); border: 1px solid var(--separator); color: var(--label); border-radius: 100px; padding: 6px 12px; font: inherit; font-size: 13px; }
   .modes { display: flex; gap: 8px; flex-wrap: wrap; }
   .modes .btn.on { background: var(--label); color: #111; }
+  .sb { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sb td { padding: 8px 6px; border-bottom: 1px solid var(--separator); color: var(--label-secondary); vertical-align: middle; }
+  .sb td:first-child { color: var(--label); font-weight: 600; }
+  .sb input { width: 72px; background: rgba(0,0,0,.35); border: 1px solid var(--separator); color: var(--label); border-radius: 8px; padding: 5px 7px; font: inherit; font-size: 13px; }
+  .sb input.note { width: 100%; }
+  .sb button { appearance: none; border: 0; background: none; color: var(--label-tertiary); font: inherit; cursor: pointer; font-size: 16px; }
   pre { background: rgba(0,0,0,.45); border: 1px solid var(--separator); border-radius: 10px; padding: 12px; font-size: 12px; color: var(--label-secondary); overflow: auto; font-family: var(--font-mono); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Apple Video Templates</h1>
-  <p class="sub">Parameterized HyperFrames compositions. Edit the props, watch the live preview, then copy the host tag into your composition. Cards place themselves clear of the speaker's face (dashed box).</p>
+  <h1>Apple Video Kit</h1>
+  <p class="sub">The menu of building blocks for your videos. <b>1.</b> Find a block for what you are saying (cue sheet below). <b>2.</b> Change its text in Props and watch the preview. <b>3.</b> Add it to the storyboard at a time, then copy the storyboard into your composition, or paste it to your AI editor as the plan. Cards keep clear of the speaker's face (dashed box).</p>
+  <section class="card" id="board" style="margin-top:28px">
+    <div><h2>Storyboard</h2><div class="id mono">your plan for this video, saved in this browser</div></div>
+    <p id="board-empty">Empty. Press <b>Add to storyboard</b> on any block below, set its start time, and it lands here in time order.</p>
+    <table class="sb" id="board-list"></table>
+    <div class="row"><button class="btn" id="board-tags">Copy host tags</button><button class="btn ghost" id="board-plan">Copy as plan text</button><button class="btn ghost" id="board-clear">Clear</button></div>
+  </section>
   <section class="card cuesheet" style="margin-top:28px"><details open><summary>Which template do I use? (spoken cue to template)</summary><table id="tplcues"></table></details>
     <details><summary>Which motion do I use? (animation cues)</summary><table id="motioncues"></table></details></section>
   <div class="tabs" id="tabs" role="tablist"></div>
@@ -104,6 +116,40 @@ const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const isJson = (d) => d.type === 'string' && typeof d.default === 'string' && /^[\[{]/.test(d.default.trim());
 const getSrc = async (file) => cache[file] || (cache[file] = await (await fetch(ROOT + file)).text());
+
+function hostTagFor(t, V, n) {
+  const changed = {};
+  t.variables.forEach((d) => { if (JSON.stringify(V[d.id]) !== JSON.stringify(d.default)) changed[d.id] = isJson(d) ? JSON.parse(V[d.id]) : V[d.id]; });
+  changed.at = V.at; changed.dur = V.dur;
+  const z = t.category === 'Transitions' ? 90 : 40;
+  return `<div id="${t.id}-${n}" class="clip subcomp-host" style="z-index: ${z};" data-composition-id="${t.id}-${n}" data-composition-src="${t.file}" data-start="${V.at}" data-duration="${V.dur}" data-variable-values='${JSON.stringify(changed).replace(/'/g, '&#39;')}'></div>`;
+}
+
+// Storyboard: picked blocks with times, kept in this browser only (localStorage, best effort).
+const Board = (() => {
+  let items = [];
+  try { items = JSON.parse(localStorage.getItem('avk-board') || '[]'); } catch (e) { items = []; }
+  const save = () => { try { localStorage.setItem('avk-board', JSON.stringify(items)); } catch (e) { /* private mode */ } };
+  const byId = (id) => MANIFEST.templates.find((t) => t.id === id);
+  function render() {
+    items.sort((a, b) => a.V.at - b.V.at);
+    $('#board-empty').style.display = items.length ? 'none' : '';
+    $('#board-list').innerHTML = items.map((it, i) => `<tr data-i="${i}"><td>${esc(byId(it.id) ? byId(it.id).title : it.id)}</td>
+      <td>start <input type="number" step="0.1" min="0" data-k="at" value="${it.V.at}"> s</td><td>for <input type="number" step="0.1" min="0.2" data-k="dur" value="${it.V.dur}"> s</td>
+      <td style="width:45%"><input class="note" data-k="note" placeholder="what is being said here" value="${esc(it.note || '')}"></td><td><button aria-label="Remove" data-rm="1">×</button></td></tr>`).join('');
+  }
+  $('#board-list').addEventListener('change', (e) => {
+    const tr = e.target.closest('tr'); if (!tr) return; const it = items[+tr.dataset.i], k = e.target.dataset.k;
+    if (k === 'note') it.note = e.target.value; else it.V[k] = parseFloat(e.target.value) || 0;
+    save(); render();
+  });
+  $('#board-list').addEventListener('click', (e) => { if (!e.target.dataset.rm) return; items.splice(+e.target.closest('tr').dataset.i, 1); save(); render(); });
+  const copy = async (text, btn, label) => { try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; } catch (e) { btn.textContent = 'Copy failed'; } setTimeout(() => (btn.textContent = label), 1200); };
+  $('#board-tags').onclick = (e) => copy(items.map((it, i) => hostTagFor(byId(it.id), it.V, i + 1)).join('\n'), e.target, 'Copy host tags');
+  $('#board-plan').onclick = (e) => copy('Storyboard plan:\n' + items.map((it) => `- ${it.V.at.toFixed(1)}s to ${(it.V.at + it.V.dur).toFixed(1)}s: ${it.id}${it.note ? ' ("' + it.note + '")' : ''} ${JSON.stringify(Object.fromEntries(Object.entries(it.V).filter(([k]) => k !== 'at' && k !== 'dur')))}`).join('\n'), e.target, 'Copy as plan text');
+  $('#board-clear').onclick = () => { items = []; save(); render(); };
+  return { add(t, V) { const at = items.length ? Math.max(...items.map((x) => x.V.at + x.V.dur)) : V.at; items.push({ id: t.id, V: { ...V, at: +at.toFixed(1) } }); save(); render(); }, render };
+})();
 
 const cats = ['All', ...new Set(MANIFEST.templates.map((t) => t.category))];
 let activeCat = 'All';
@@ -143,6 +189,7 @@ function mountCard(t, ex, replaceEl, exName) {
     <div class="stage"><div class="scale"><div class="bg"><div class="pan"></div></div><iframe title="${esc(t.title)}"></iframe><div class="face"></div></div></div>
     <div class="ctl"><button class="btn play">Play</button><input type="range" class="seek" min="0" max="${vals.dur}" step="0.01" value="${t.t}"><span class="tt mono"></span><label><input type="checkbox" class="showface" checked> face box</label>${exSel}</div>
     <details open><summary>Props</summary><div class="props">${fields}</div></details>
+    <div class="row"><button class="btn add">Add to storyboard</button></div>
     <details><summary>Host tag</summary><textarea class="tag" readonly></textarea><div class="row" style="margin-top:8px"><button class="btn copy">Copy host tag</button><button class="btn ghost reset">Reset</button></div></details>`;
   if (replaceEl) replaceEl.replaceWith(card); else $('#grid').appendChild(card);
 
@@ -185,17 +232,13 @@ function mountCard(t, ex, replaceEl, exName) {
     frame.onload = () => { try { tl = frame.contentWindow.__timelines[t.id]; } catch (e) { tl = null; } paint(); };
     frame.srcdoc = src;
   }
-  function hostTag(V) {
-    const changed = {};
-    t.variables.forEach((d) => { if (JSON.stringify(V[d.id]) !== JSON.stringify(d.default)) changed[d.id] = isJson(d) ? JSON.parse(V[d.id]) : V[d.id]; });
-    changed.at = V.at; changed.dur = V.dur;
-    return `<div id="${t.id}-1" class="clip subcomp-host" style="z-index: 40;" data-composition-id="${t.id}-1" data-composition-src="${t.file}" data-start="${V.at}" data-duration="${V.dur}" data-variable-values='${JSON.stringify(changed).replace(/'/g, '&#39;')}'></div>`;
-  }
+  const hostTag = (V) => hostTagFor(t, V, 1);
   let deb; card.addEventListener('input', (e) => { if (e.target.classList.contains('seek')) { tNow = parseFloat(seek.value); paint(); return; } if (e.target.classList.contains('showface')) { paint(); return; } clearTimeout(deb); deb = setTimeout(build, 250); });
   $('.play', card).onclick = (e) => { playing = !playing; e.target.textContent = playing ? 'Pause' : 'Play'; last = performance.now(); if (playing) tick(); };
   function tick() { if (!playing) return; const n = performance.now(); tNow += (n - last) / 1000; last = n; const mx = parseFloat(seek.max); if (tNow > mx) tNow = 0; paint(); requestAnimationFrame(tick); }
   $('.copy', card).onclick = async (e) => { await navigator.clipboard.writeText($('.tag', card).value); e.target.textContent = 'Copied'; setTimeout(() => (e.target.textContent = 'Copy host tag'), 1200); };
   $('.reset', card).onclick = () => mountCard(t, null, card);
+  $('.add', card).onclick = (e) => { Board.add(t, readVals()); e.target.textContent = 'Added'; setTimeout(() => (e.target.textContent = 'Add to storyboard'), 1200); };
   const exEl = $('.ex', card);
   if (exEl) exEl.onchange = () => { const e = t.examples.find((x) => x.name === exEl.value); mountCard(t, e ? e.vars : null, card, exEl.value); };
   build();
@@ -226,27 +269,44 @@ function mountCard(t, ex, replaceEl, exName) {
   };
 })();
 
-// ---- Screen Share demo (real __hfShareStage maths on stills) ----
+// ---- Screen Share demo: the real __hfShareStage timeline on stills, scrub or jump to a move ----
 (function () {
-  const S = window.__hfShareStage, G = window.__hfGlass;
+  const S = window.__hfShareStage;
   const stage = $('#ssstage'), sc = $('#ss-scale');
   new ResizeObserver(() => { sc.style.transform = `scale(${stage.clientWidth / 1920})`; }).observe(stage);
   $('#pan').style.backgroundImage = `url(${ROOT}assets/demo/dashboard.svg)`;
-  $('#cam').style.backgroundImage = `url(${ROOT}library/stage.jpg)`; $('#cam').style.backgroundPosition = '52% 40%';
-  const DATA = { aspect: 1.825, window: { r: 18 }, pip: { focus: { x: 0.52, y: 0.4 } } };
+  $('#cam').style.backgroundImage = `url(${ROOT}library/stage.jpg)`; $('#cam').style.backgroundSize = 'cover';
+  const DATA = {
+    duration: 24, aspect: 1.825, window: { r: 18 }, drift: true, pip: { focus: { x: 0.5, y: 0.4 } },
+    zooms: [{ t: 2.5, x: 0.33, y: 0.2, z: 1.6 }, { t: 7, z: 1 }, { t: 8.5, x: 0.92, y: 0.06, z: 2.0 }, { t: 12, z: 1 }],
+    cam: [{ t: 0, mode: 'full' }, { t: 1.2, mode: 'pip' }, { t: 13, mode: 'hide' }, { t: 16, mode: 'pip' }, { t: 21, mode: 'full' }],
+    callouts: [{ t: 9.2, end: 11.8, x: 0.905, y: 0.012, w: 0.083, h: 0.05, label: 'New deal', side: 'bottom' }],
+    focus: [{ t: 16.5, end: 20, x: 0.135, y: 0.24, w: 0.85, h: 0.76 }],
+    redact: [{ t: 3, end: 7, x: 0.15, y: 0.13, w: 0.19, h: 0.12 }]
+  };
   S.layout(DATA);
-  gsap.set('#pan', { transformOrigin: '0 0' }); gsap.set('#pip', { transformOrigin: '0% 100%' });
-  const rect = S.windowRect(DATA), pip = S.pip(DATA);
-  const SHOTS = { over: { label: 'Overview', k: { z: 1 } }, form: { label: 'Zoom 1.6x', k: { x: 0.35, y: 0.4, z: 1.6 } }, tight: { label: 'Zoom 2.2x (small text)', k: { x: 0.7, y: 0.6, z: 2.2 } } };
-  $('#sshots').innerHTML = Object.entries(SHOTS).map(([k, m], i) => `<button class="btn ${i ? 'ghost' : 'on'}" data-k="${k}">${m.label}</button>`).join('');
-  const show = (k) => { const z = SHOTS[k].k, tg = S.zoomTarget(rect, z);
-    gsap.to('#pan', { x: tg.x, y: tg.y, scale: tg.scale, duration: 0.7, ease: G.ease.smooth });
-    gsap.to('#pip', { scale: S.pipScale(z.z, pip), duration: 0.7, ease: G.ease.smooth });
-    $('#sscode').textContent = `{ t: 3.2, x: ${z.x ?? 0.5}, y: ${z.y ?? 0.5}, z: ${z.z} }   // PiP tucks to ${S.pipScale(z.z, pip).toFixed(2)}x`; };
-  $('#sshots').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; $('#sshots').querySelectorAll('button').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); }); show(b.dataset.k); };
-  show('over');
+  const tl = gsap.timeline({ paused: true }); S.build(tl, DATA); tl.time(0);
+  const SHOTS = [
+    ['Webcam full', 0.6, "cam: [{ t: 0, mode: 'full' }, { t: 1.2, mode: 'pip' }]"],
+    ['Zoom + drift', 5, "zooms: [{ t: 2.5, x: 0.33, y: 0.2, z: 1.6 }], drift: true"],
+    ['Redact', 5.5, "redact: [{ t: 3, end: 7, x: 0.15, y: 0.13, w: 0.19, h: 0.12 }]   // blur an email"],
+    ['Callout', 10.5, "callouts: [{ t: 9.2, end: 11.8, x: 0.905, y: 0.012, w: 0.083, h: 0.05, label: 'New deal' }]"],
+    ['Hide webcam', 14.5, "cam: [{ t: 13, mode: 'hide' }, { t: 16, mode: 'pip' }]"],
+    ['Focus dim', 18, "focus: [{ t: 16.5, end: 20, x: 0.135, y: 0.24, w: 0.85, h: 0.76 }]"],
+    ['Sign-off full', 22.5, "cam: [{ t: 21, mode: 'full' }]"]
+  ];
+  $('#sshots').innerHTML = SHOTS.map(([l], i) => `<button class="btn ${i ? 'ghost' : 'on'}" data-i="${i}">${l}</button>`).join('') +
+    `<button class="btn ghost" id="ssplay">Play all</button>`;
+  const go = (i) => { const [, t, code] = SHOTS[i]; gsap.to(tl, { time: t, duration: 0.9, ease: 'power2.inOut' }); $('#sscode').textContent = code + '\n// in projects/screen-share/share.js'; };
+  $('#sshots').onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    $('#sshots').querySelectorAll('button').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); });
+    if (b.id === 'ssplay') { tl.time(0); gsap.to(tl, { time: DATA.duration, duration: DATA.duration, ease: 'none' }); $('#sscode').textContent = 'The whole demo: every move is data in share.js'; return; }
+    go(+b.dataset.i);
+  };
+  go(0);
 })();
-renderCues(); renderTabs(); renderGrid();
+renderCues(); renderTabs(); renderGrid(); Board.render();
 </script>
 </body>
 </html>

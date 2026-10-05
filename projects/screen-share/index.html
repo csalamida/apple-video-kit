@@ -37,9 +37,13 @@
       <div id="win"><div id="pan" data-layout-allow-overflow="">
         <video id="screen" class="clip" src="inputs/_demo/screen.mp4" data-start="0" data-duration="21.92" muted playsinline></video>
       </div></div>
-      <div id="pip">
+      <div id="pip" data-layout-allow-overflow="">
         <video id="cam" class="clip" src="inputs/_demo/speaker.mp4" data-start="0" data-duration="21.92" data-media-start="0" data-has-audio="true" playsinline></video>
       </div>
+      <div id="keys-host" class="clip subcomp-host" style="z-index: 60;" data-composition-id="keys-0" data-composition-src="compositions/tpl/keys.html" data-start="4.2" data-duration="2.4" data-variable-values='{"at": 4.2, "dur": 2.4, "safe": false, "keys": ["⌘", "K"], "label": "Open quick search"}'></div>
+      <div id="chapter-host" class="clip subcomp-host" style="z-index: 90;" data-composition-id="transition-0" data-composition-src="compositions/tpl/transition.html" data-start="6.8" data-duration="1.6" data-variable-values='{"at": 6.8, "dur": 1.6, "kind": "chapter", "eyebrow": "Step 2", "title": "Submit the form"}'></div>
+      <div id="ff-host" class="clip subcomp-host" style="z-index: 60;" data-composition-id="fast-forward-0" data-composition-src="compositions/tpl/fast-forward.html" data-start="13.6" data-duration="1.5" data-variable-values='{"at": 13.6, "dur": 1.5, "safe": false, "label": "4×", "caption": "Syncing"}'></div>
+      <div id="link-host" class="clip subcomp-host" style="z-index: 60;" data-composition-id="link-chip-0" data-composition-src="compositions/tpl/link-chip.html" data-start="20.2" data-duration="1.7" data-variable-values='{"at": 20.2, "dur": 1.7, "safe": false, "side": "right"}'></div>
       <div id="subtitles" class="clip subcomp-host" style="z-index: 75;" data-composition-id="kinetic-subtitle-0" data-composition-src="compositions/tpl/kinetic-subtitle.html" data-start="0" data-duration="21.92" data-variable-values='{"at": 0, "dur": 21.92, "safe": false, "cues": [{"start": 3.0, "end": 5.8, "text": "First, fill out the *form*"}, {"start": 9.0, "end": 12.5, "text": "Then press *submit*"}, {"start": 15.5, "end": 19.0, "text": "And check the *details*"}]}'></div>
     </div>
     <script>

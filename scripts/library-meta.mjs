@@ -87,7 +87,80 @@ export const META = {
     title: 'iMessage Phone', category: 'Devices', t: 2.4, vars: { dur: 3.4 }, desc: 'iPhone 16 Pro iMessage thread with typing indicator.',
     use: { when: 'The story is a text conversation: an auto-reply, an SMS follow-up, a booking exchange.', cues: ['"text", "SMS"', '"message", "reply"', '"the automation responds"'], pairs: ['notification-stack (the trigger)', 'glass-card with aside (phone beside a card)'], avoid: 'Email or chat apps; use an app-window chat panel.' },
     examples: [{ name: 'Auto-reply', vars: {} }]
-  }
+  },
+  'keys': {
+    title: 'Keyboard Shortcut', category: 'Overlays', t: 1.6, vars: { dur: 2.5 },
+    desc: 'Keycaps that pop in and press as a chord, with an optional caption. Shows what was pressed when the viewer cannot see the keyboard.',
+    use: { when: 'The speaker presses or names a shortcut. Show it the moment it is pressed, hold 2-3 s.', cues: ['"press command K"', '"hit ..."', '"use the shortcut"', '"hold shift and ..."'], pairs: ['app-window / screen share (the result of the shortcut)', 'spotlight (where it opened)'], avoid: 'Long sequences of shortcuts back to back; one per beat.' },
+    examples: [
+      { name: 'Command bar', vars: { keys: ['⌘', 'K'], label: 'Open command bar' } },
+      { name: 'Save, three keys', vars: { keys: ['⌘', '⇧', 'S'], label: 'Save a copy' } }
+    ]
+  },
+  'title-card': {
+    title: 'Title Card', category: 'Titles', t: 1.8, vars: { dur: 3.5 },
+    desc: 'Intro: full-frame blurred scrim with a word-by-word title reveal. Outro: an "Up next" card with a thumbnail and call to action.',
+    use: { when: 'Intro on the opening line that names the topic; outro on the sign-off that points to the next video. Hold 3-4 s.', cues: ['"in this video"', '"today we\'re going to"', '"watch this one next"', '"see you in the next one"'], pairs: ['lower-third (after the intro clears)', 'kinetic-subtitle (off during the intro)'], avoid: 'Mid-video section breaks: use transition (chapter). More than one intro per video.' },
+    examples: [
+      { name: 'Intro', vars: { mode: 'intro', eyebrow: 'Acme CRM tutorial', title: 'Add contacts the *easy* way', subtitle: 'Three methods, under five minutes' } },
+      { name: 'Up next', vars: { mode: 'outro', safe: true, eyebrow: 'Up next', title: 'Build your first *workflow*', cta: 'Link in the description' } }
+    ]
+  },
+  'checklist': {
+    title: 'Checklist', category: 'Cards & Panels', t: 2.6, vars: { dur: 4.5 },
+    desc: 'Recap list that ticks off one item at a time, with a running "N of N" counter.',
+    use: { when: 'The speaker sums up the steps just covered, or lists what to have ready. Set stagger to the speaking pace.', cues: ['"to recap"', '"quick recap"', '"make sure you\'ve"', '"before you move on"'], pairs: ['glass-card (the steps earlier)', 'title-card outro (right after)'], avoid: 'More than 5 items, or new information: it is a recap, not a teaching card.' },
+    examples: [
+      { name: 'Recap', vars: {} },
+      { name: 'Prep list, left', vars: { side: 'left', eyebrow: 'Before you start', title: 'Have these ready', items: ['A list of contacts', 'Your booking link', 'A form template', 'Ten minutes'], stagger: 0.55 } }
+    ]
+  },
+  'quote': {
+    title: 'Pull Quote', category: 'Text', t: 2.6, vars: { dur: 4 },
+    desc: 'One key line on glass: accent quotation mark, word-by-word reveal, punch words in blue, attribution last.',
+    use: { when: 'The speaker says the line worth remembering (the thesis), or quotes a customer.', cues: ['"the one thing to remember"', '"as one client put it"', '"here\'s the rule"', 'the thesis sentence'], pairs: ['camera punch-in (same beat)', 'kinetic-subtitle (cut that cue)'], avoid: 'More than ~20 words, or more than one quote per minute.' },
+    examples: [
+      { name: 'Thesis', vars: {} },
+      { name: 'Customer quote, right', vars: { side: 'right', text: 'We stopped losing leads *overnight*.', attribution: 'Jane Doe', role: 'Owner, Acme Dental' } }
+    ]
+  },
+  'transition': {
+    title: 'Transition', category: 'Transitions', t: 0.4, vars: { at: 0, dur: 0.8 },
+    desc: 'Full-frame transition library over a cut: dip, flash, blur, glass-wipe, iris, light-sweep, chapter. The cut sits at at + dur/2; clear at both ends.',
+    use: {
+      when: 'Cover a cut in the footage: put the cut at the midpoint (at + dur/2). dip = calm scene or time change; flash = energetic reveal (sparingly); blur = soft jump cut in the same setup; glass-wipe = moving to a new screen or app, direction = travel; iris = focusing in on a detail or closing a topic; light-sweep = upbeat "next up" or a win; chapter = named section break (set dur 1.4-2 s).',
+      cues: ['"next"', '"now let\'s open / switch to ..."', '"moving on"', '"later that day"', '"and here\'s the result"', '"part two"'],
+      pairs: ['chapter-pill (advance on the chapter kind)', 'camera reframe right after the cut', 'glass-card on the new section'],
+      avoid: 'Stacking transitions on every cut (most cuts need none), and more than one flash per video. Never on a mid-sentence jump cut.'
+    },
+    examples: [
+      { name: 'Dip to black', vars: { kind: 'dip', dur: 1.0 } },
+      { name: 'Flash', vars: { kind: 'flash', dur: 0.5 } },
+      { name: 'Blur-through', vars: { kind: 'blur', dur: 0.8 } },
+      { name: 'Glass wipe', vars: { kind: 'glass-wipe', dur: 1.0, direction: 'right' } },
+      { name: 'Iris', vars: { kind: 'iris', dur: 1.0 } },
+      { name: 'Light sweep', vars: { kind: 'light-sweep', dur: 1.0 } },
+      { name: 'Chapter break', vars: { kind: 'chapter', dur: 1.6, eyebrow: 'Chapter 2', title: 'Import your contacts' } }
+    ]
+  },
+  'before-after': {
+    title: 'Before / After', category: 'Cards & Panels', t: 2.2, vars: { dur: 5 },
+    desc: 'Glass-framed comparison: a divider with a glass handle sweeps across, revealing the after image over the before.',
+    use: { when: 'The speaker contrasts the old way with the new result: a cleanup, a redesign, a messy sheet turned into a pipeline. Hold 4-6 s. On full-frame talking head use side left/right with width 800-900.', cues: ['"before / after"', '"this is what it looked like"', '"compare that to"', '"from this... to this"', '"the old way"'], pairs: ['camera: speaker PiP while it plays', 'metric-counter (the improvement in numbers)'], avoid: 'Images with different aspect ratios (set aspect), or results with no visual difference.' },
+    examples: [{ name: 'Spreadsheet to CRM', vars: {} }, { name: 'Side, custom labels', vars: { side: 'left', width: 900, top: 260, beforeLabel: 'Old sheet', afterLabel: 'Acme CRM' } }]
+  },
+  'link-chip': {
+    title: 'Link Chip', category: 'Overlays', t: 1.6, vars: { dur: 4 },
+    desc: 'Glass pill with an accent icon, a call to action and a URL. Bouncy entrance, small icon nudge.',
+    use: { when: 'The speaker points the viewer to a resource: description link, download, booking page. 3-5 s.', cues: ['"link in the description"', '"grab the template"', '"I\'ll put it below"', '"go to acme.com"'], pairs: ['kinetic-subtitle (captions bottom-centre, chip bottom-right)'], avoid: 'Long URLs (use a short path) or more than one chip on screen.' },
+    examples: [{ name: 'Description link', vars: {} }, { name: 'Booking', vars: { text: 'Book a free call', url: 'acme.com/book', icon: 'calendar', side: 'left' } }]
+  },
+  'fast-forward': {
+    title: 'Fast-Forward Badge', category: 'Overlays', t: 1.4, vars: { dur: 3 },
+    desc: 'Glass pill with a pulsing fast-forward glyph and a speed label in tabular figures, shown while footage is sped up.',
+    use: { when: 'Mount for exactly the span where footage is sped up or a long wait is compressed (installs, imports, loading).', cues: ['"let me speed this up"', '"this takes a minute"', '"skipping ahead"', '"while it loads"'], pairs: ['transition blur (out of the sped-up span)'], avoid: 'Real-time footage, or spans under ~1.5 s.' },
+    examples: [{ name: '2x', vars: {} }, { name: 'Skip ahead', vars: { label: '8×', caption: 'Skipping the import', side: 'left' } }]
+  },
 };
 
 // The animation library: when to reach for which MOTION (camera, spring, preset). Rows render as a cheat-sheet.
@@ -106,5 +179,13 @@ export const MOTION = [
   { cue: 'SCREEN SHARE: reading small text or a modal', motion: 'Zoom 2.0-2.5x, hold 2-4 s', how: 'Only for text too small at 1080p; never hold a tight zoom without cursor activity' },
   { cue: 'SCREEN SHARE: switching apps or tabs', motion: 'Back to overview (z:1) first, then the next zoom', how: 'Avoid chained zoom-to-zoom jumps; a reset in between reads as a cut' },
   { cue: 'SCREEN SHARE: speaker talks without touching the screen', motion: 'Overview, PiP at rest size (1.0x)', how: 'PiP stays bottom-left on the margin; never move it to another corner' },
+  { cue: 'SCREEN SHARE: a zoom holds longer than ~2 s', motion: 'Slow drift: +3.5% push-in on the same point until the next keyframe', how: 'share.js drift: true (or { amount, minHold }); a static zoom looks frozen' },
+  { cue: 'SCREEN SHARE: "click this", "this button", "right here"', motion: 'Callout: accent ring + label pill, locked to the spot through zooms', how: 'share.js callouts: [{ t, end, x, y, w, h, label, side }] in screen 0-1 coords; usually inside a zoom' },
+  { cue: 'SCREEN SHARE: "look at this section", "notice"', motion: 'Focus dim: everything except the region darkens to 55%', how: 'share.js focus: [{ t, end, x, y, w, h, dim }]; softer than a callout, for areas not buttons' },
+  { cue: 'SCREEN SHARE: an email, API key, phone number or client name is visible', motion: 'Redact: frosted blur (or solid) box that follows every zoom', how: 'share.js redact: [{ x, y, w, h }] (whole video) or with t/end; run cue-plan to catch spoken ones' },
+  { cue: 'SCREEN SHARE: talking straight to the viewer (intro, opinion, sign-off)', motion: 'Webcam swap: the card grows to full screen, then back', how: "share.js cam: [{ t, mode: 'full' }, { t, mode: 'pip' }]; no re-crop, face stays centred" },
+  { cue: 'SCREEN SHARE: dense screen, the card covers content', motion: 'Hide webcam: card slides down and out, returns on the next topic', how: "share.js cam: [{ t, mode: 'hide' }, { t, mode: 'pip' }]" },
+  { cue: 'A pause or filler was cut (jump cut)', motion: 'Jump-cut punch: framing alternates 1.0 / 1.06 at each cut', how: 'node scripts/auto-trim.mjs <voice file>, then paste its cuts into share.js cuts or camera.js cuts' },
+  { cue: 'Section change, new app or screen, a cut that should feel intended', motion: 'Transition over the cut (cut at the midpoint): blur 0.8 s by default, glass-wipe for a new screen, chapter 1.6 s for a named section', how: 'transition template, kind = dip | flash | blur | glass-wipe | iris | light-sweep | chapter; z-index 90; most cuts need none' },
   { cue: 'Breath, filler, mid-sentence pause', motion: 'No motion', how: 'Never zoom or move graphics mid-breath; trim dead air > 0.4 s instead' }
 ];

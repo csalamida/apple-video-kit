@@ -34,7 +34,7 @@ export function templateHosts(htmlFile) {
     const attr = (n) => { const a = tag.match(new RegExp(n + `="([^"]*)"`)); return a ? a[1] : null; };
     const vv = tag.match(/data-variable-values='([^']*)'/);
     hosts.push({
-      template: m[1], id: attr('id'), start: parseFloat(attr('data-start')), dur: parseFloat(attr('data-duration')),
+      template: m[1], id: attr('id'), hostId: (tag.match(/\sid="([^"]*)"/) || [])[1], start: parseFloat(attr('data-start')), dur: parseFloat(attr('data-duration')),
       vars: vv ? JSON.parse(unescapeAttr(vv[1])) : {}
     });
   }

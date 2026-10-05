@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":5},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"center"},
+  {"id":"top","type":"number","label":"Top (px)","default":230},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Label and handle scale","default":1},
+  {"id":"width","type":"number","label":"Frame width (px)","default":1100},
+  {"id":"before","type":"string","label":"Before image","default":"assets/demo/dashboard-before.svg"},
+  {"id":"after","type":"string","label":"After image","default":"assets/demo/dashboard.svg"},
+  {"id":"beforeLabel","type":"string","label":"Before label","default":"Before"},
+  {"id":"afterLabel","type":"string","label":"After label","default":"After"},
+  {"id":"aspect","type":"number","label":"Image aspect (width / height)","default":1.8251}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #ba { padding: 10px; border-radius: 30px; }
+      .view { --p: 0%; position: relative; width: 100%; height: 100%; border-radius: 21px; corner-shape: var(--corner); overflow: hidden; background: var(--ink); }
+      .layer { position: absolute; inset: 0; }
+      .layer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+      .after { clip-path: inset(0 calc(100% - var(--p)) 0 0); }
+      .tag { position: absolute; top: calc(16px*var(--s)); padding: calc(6px*var(--s)) calc(14px*var(--s)); border-radius: 100px;
+        font-size: calc(15px*var(--s)); font-weight: 600; letter-spacing: 0.005em; color: var(--label);
+        background: var(--glass-base-strong); -webkit-backdrop-filter: var(--glass-filter-thin); backdrop-filter: var(--glass-filter-thin);
+        border: var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 4px 14px rgba(0,0,0,0.25); }
+      .tag.l { left: calc(16px*var(--s)); }
+      .tag.r { right: calc(16px*var(--s)); }
+      .tag.l .dot { display: inline-block; width: calc(7px*var(--s)); height: calc(7px*var(--s)); border-radius: 50%; background: var(--accent); margin-right: calc(7px*var(--s)); vertical-align: 0.08em; }
+      /* divider sits in the view's coordinate space but outside its clip, so the handle can overhang the edge */
+      .wipe { position: absolute; left: 10px; top: 10px; right: 10px; bottom: 10px; pointer-events: none; }
+      .line { position: absolute; top: 0; bottom: 0; left: var(--p); width: 3px; margin-left: -1.5px; background: rgba(255,255,255,0.96);
+        box-shadow: 0 0 0 0.5px rgba(0,0,0,0.25), 0 0 14px rgba(0,0,0,0.45); }
+      .knob { position: absolute; top: 50%; left: var(--p); width: calc(58px*var(--s)); height: calc(58px*var(--s)); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; gap: 0; color: var(--label);
+        background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);
+        border: var(--glass-border); box-shadow: var(--glass-shadow); }
+      .knob svg { margin: 0 -3px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="before-after" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="ba" class="hf-glass"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:5,safe:true,side:"center",top:230,offsetX:0,offsetY:0,scale:1,width:1100,before:"assets/demo/dashboard-before.svg",after:"assets/demo/dashboard.svg",beforeLabel:"Before",afterLabel:"After",aspect:1.8251}, window.__hyperframes);
+        var ba = document.getElementById("ba");
+        var PAD = 10, w = V.width, h = Math.round((w - PAD*2) / (V.aspect || 1.8251) + PAD*2);
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:w,height:h,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:520});
+        // place() may narrow the frame to keep clear of the face: keep the image aspect
+        w = pl.width; h = Math.round((w - PAD*2) / (V.aspect || 1.8251) + PAD*2);
+        ba.style.left = pl.left + "px"; ba.style.top = pl.top + "px"; ba.style.width = w + "px"; ba.style.height = h + "px";
+        ba.style.setProperty("--s", V.scale);
+        ba.innerHTML =
+          '<div class="view">' +
+            '<div class="layer before"><img alt="" src="' + esc(V.before) + '">' +
+              (V.beforeLabel ? '<div class="tag r" data-layout-allow-occlusion="">' + esc(V.beforeLabel) + '</div>' : '') + '</div>' +
+            '<div class="layer after"><img alt="" src="' + esc(V.after) + '">' +
+              (V.afterLabel ? '<div class="tag l" data-layout-allow-occlusion=""><span class="dot"></span>' + esc(V.afterLabel) + '</div>' : '') + '</div>' +
+          '</div>' +
+          '<div class="wipe"><div class="line"></div><div class="knob">' + P.icon("chevron-left", 18) + P.icon("chevron-right", 18) + '</div></div>';
+        P.ensureSymbols();
+        var view = ba.querySelector(".view"), wipe = ba.querySelector(".wipe"), knob = ba.querySelector(".knob");
+        gsap.set(knob, {xPercent:-50, yPercent:-50});
+
+        var D = V.dur, tl = gsap.timeline({paused:true}); window.__timelines["before-after"] = tl;
+        var from = pl.side === "right" ? "right" : pl.side === "left" ? "left" : "down";
+        T.enter(tl, ba, {from:from, distance:28, duration:0.6});
+        // one deliberate drag across: starts once the "before" has registered, ends with room to read the "after"
+        var t0 = Math.min(1.0, D*0.2), sweep = Math.max(1.0, Math.min(2.2, D*0.38));
+        gsap.set([wipe, view], {"--p":"0%"});
+        tl.fromTo(knob, {opacity:0, scale:0.6}, {opacity:1, scale:1, duration:0.45, ease:E.bouncy}, t0 - 0.3);
+        tl.fromTo([view, wipe], {"--p":"0%"}, {"--p":"100%", duration:sweep, ease:"power2.inOut"}, t0 + 0.1);
+        tl.to(wipe, {opacity:0, duration:0.3, ease:"power2.out"}, t0 + 0.1 + sweep);
+        // each label belongs to its layer: hand over as the divider crosses it (never left hidden under the other image)
+        var ez = gsap.parseEase("power2.inOut"), vw = w - PAD*2;
+        function tAt(px) { var f = Math.max(0, Math.min(1, px / vw)), lo = 0, hi = 1; for (var k = 0; k < 30; k++) { var m = (lo+hi)/2; if (ez(m) < f) lo = m; else hi = m; } return t0 + 0.1 + lo*sweep; }
+        var tagL = ba.querySelector(".tag.l"), tagR = ba.querySelector(".tag.r");
+        if (tagL) { gsap.set(tagL, {opacity:0}); tl.to(tagL, {opacity:1, duration:0.25, ease:"power2.out"}, tAt(16*V.scale + tagL.offsetWidth + 8)); }
+        if (tagR) tl.to(tagR, {opacity:0, duration:0.18, ease:"power2.in"}, tAt(vw - 16*V.scale - tagR.offsetWidth - 6) - 0.18);
+        T.exit(tl, ba, {to:from, at:D - 0.45, duration:0.38});
+      })();
+    </script>
+  </body>
+</html>

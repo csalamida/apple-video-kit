@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Fails when a mounted template's footprint overlaps the speaker's head (camera applied) while it is on screen.
 //   node scripts/check-face-clear.mjs [index.html]
+import fs from 'node:fs';
 import path from 'node:path';
 import { loadRuntime, templateDefaults, templateHosts } from './lib/load-runtime.mjs';
 
@@ -17,7 +18,14 @@ const FOOT = {
   'notification-stack': (v) => ({ w: v.width * v.scale, h: 110 * v.scale }),
   'metric-counter': (v) => ({ w: v.width, h: 230 * v.scale }),
   'imessage-phone': (v) => ({ w: 280 * v.scale, h: 520 * v.scale }),
-  'lower-third': (v) => ({ w: 560, h: 76 * v.scale })
+  'lower-third': (v) => ({ w: 560, h: 76 * v.scale }),
+  'keys': (v) => ({ w: 640 * v.scale, h: 130 * v.scale }),
+  'checklist': (v) => ({ w: v.width, h: (118 + 60 * (typeof v.items === 'string' ? JSON.parse(v.items || '[]') : v.items || []).length) * v.scale }),
+  'quote': (v) => ({ w: v.width, h: 340 * v.scale }),
+  'before-after': (v) => ({ w: v.width, h: Math.round((v.width - 20) / v.aspect + 20) }),
+  'link-chip': (v) => ({ w: 420 * v.scale, h: 70 * v.scale }),
+  'fast-forward': (v) => ({ w: 300 * v.scale, h: 60 * v.scale }),
+  'title-card': (v) => v.mode === 'outro' ? ({ w: v.width, h: 475 * v.scale }) : null   // intro is a full-frame scrim on purpose
 };
 // Chrome that is allowed to sit near the head but is reported (warn only)
 const CHROME = {
@@ -32,6 +40,9 @@ for (const h of templateHosts(file)) {
   const v = { ...defs, ...h.vars };
   if (v.at !== undefined && Math.abs(v.at - h.start) > 1e-6) { console.error(`✗ ${h.id}: variable at=${v.at} but data-start=${h.start}`); fail++; }
   if (v.dur !== undefined && Math.abs(v.dur - h.dur) > 1e-6) { console.error(`✗ ${h.id}: variable dur=${v.dur} but data-duration=${h.dur}`); fail++; }
+  // A host id that equals an id inside its template hijacks the template's getElementById (it renders into the host).
+  const inner = new Set([...fs.readFileSync(path.join('compositions/tpl', h.template + '.html'), 'utf8').matchAll(/\sid="([\w-]+)"/g)].map((m) => m[1]));
+  if (h.hostId && inner.has(h.hostId)) { console.error(`✗ host id="${h.hostId}" collides with an id inside ${h.template}.html; rename the host (e.g. "${h.hostId}-host")`); fail++; }
   const t0 = h.start + SETTLE, t1 = Math.max(t0, h.start + h.dur - TAIL);
 
   if (CHROME[h.template]) {
@@ -47,7 +58,8 @@ for (const h of templateHosts(file)) {
     continue;
   }
   const foot = FOOT[h.template]; if (!foot) continue;
-  const { w, h: hh } = foot(v);
+  const fp = foot(v); if (!fp) continue;
+  const { w, h: hh } = fp;
   const pl = T.place({ start: h.start, dur: h.dur, side: v.side, width: w, height: hh, top: v.top, safe: v.safe, offsetX: v.offsetX, offsetY: v.offsetY, minWidth: 200 });
   const rect = { x0: pl.left - MARGIN, y0: pl.top - MARGIN, x1: pl.left + pl.width + MARGIN, y1: pl.top + hh + MARGIN };
   let worst = 0, at = 0;

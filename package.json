@@ -11,9 +11,11 @@
     "build:library": "node scripts/build-library.mjs",
     "library": "python3 -m http.server 4173",
     "share:dev": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 preview projects/screen-share",
-    "share:check": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 check projects/screen-share",
+    "share:check": "node scripts/sync-share.mjs && node scripts/check-face-clear.mjs projects/screen-share/index.html && npx --yes hyperframes@0.8.120 check projects/screen-share",
     "share:render": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 render projects/screen-share",
-    "share:sync": "node scripts/sync-share.mjs"
+    "share:sync": "node scripts/sync-share.mjs",
+    "trim": "node scripts/auto-trim.mjs",
+    "plan": "node scripts/cue-plan.mjs"
   },
   "devDependencies": {
     "hyperframes": "^0.8.120"

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":4},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},
+  {"id":"top","type":"number","label":"Top (px)","default":900},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Scale","default":1},
+  {"id":"text","type":"string","label":"Text","default":"Link in the description"},
+  {"id":"url","type":"string","label":"URL","default":"acme.com/guide"},
+  {"id":"icon","type":"string","label":"Icon","default":"link"}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #lc { display: flex; align-items: center; gap: calc(14px*var(--s)); padding: calc(9px*var(--s)) calc(28px*var(--s)) calc(9px*var(--s)) calc(9px*var(--s));
+        border-radius: 100px; white-space: nowrap; }
+      .ic { position: relative; flex: none; width: calc(52px*var(--s)); height: calc(52px*var(--s)); border-radius: 50%;
+        background: linear-gradient(145deg, var(--accent) 0%, var(--accent-deep) 100%); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 4px 14px rgba(10,96,208,0.45); }
+      .ping { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; }
+      .tx { min-width: 0; }
+      .t1 { font-size: calc(20px*var(--s)); font-weight: 600; letter-spacing: var(--track-title); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+      .t2 { font-size: calc(16px*var(--s)); color: var(--label-secondary); line-height: 1.25; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="link-chip" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="lc" class="hf-glass"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:4,safe:true,side:"right",top:900,offsetX:0,offsetY:0,scale:1,text:"Link in the description",url:"acme.com/guide",icon:"link"}, window.__hyperframes);
+        var lc = document.getElementById("lc");
+        lc.style.setProperty("--s", V.scale);
+        lc.innerHTML = '<div class="ic"><span class="ping"></span><span class="gl">' + P.icon(V.icon, Math.round(24*V.scale)) + '</span></div>' +
+          '<div class="tx"><div class="t1">' + esc(V.text) + '</div>' + (V.url ? '<div class="t2">' + esc(V.url) + '</div>' : '') + '</div>';
+        P.ensureSymbols();
+        // footprint used for face-safe placement (mirrored by check-face-clear: w 420*scale, h 70*scale)
+        var fw = 420*V.scale, fh = 70*V.scale;
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:fw,height:fh,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:260});
+        lc.style.maxWidth = pl.width + "px";
+        var cw = Math.min(lc.offsetWidth || pl.width, pl.width);
+        var left = pl.side === "right" ? pl.left + pl.width - cw : pl.side === "center" ? pl.left + (pl.width - cw)/2 : pl.left;
+        lc.style.left = left + "px"; lc.style.top = (pl.top + (fh - (lc.offsetHeight || fh))/2) + "px";
+
+        var D = V.dur, tl = gsap.timeline({paused:true}); window.__timelines["link-chip"] = tl;
+        var from = pl.side === "right" ? "right" : pl.side === "left" ? "left" : "down";
+        var gl = lc.querySelector(".gl"), ping = lc.querySelector(".ping");
+        gsap.set(gl, {display:"flex", transformOrigin:"50% 50%"});
+        T.enter(tl, lc, {from:from, distance:36, duration:0.8, ease:"bouncy"});
+        tl.fromTo(gl, {rotation:-35, scale:0.6}, {rotation:0, scale:1, duration:0.7, ease:E.bouncy}, 0.12);
+        tl.fromTo(ping, {opacity:0.7, scale:1}, {opacity:0, scale:1.7, duration:0.8, ease:"power2.out"}, 0.55);
+        // subtle "tap here" nudge once the text has been read
+        var n = Math.min(D - 1.0, Math.max(1.3, D*0.5));
+        tl.to(gl, {rotation:-14, duration:0.16, ease:"sine.out"}, n);
+        tl.to(gl, {rotation:0, duration:0.5, ease:E.bouncy}, n + 0.16);
+        tl.fromTo(ping, {opacity:0.55, scale:1}, {opacity:0, scale:1.6, duration:0.75, ease:"power2.out", immediateRender:false}, n + 0.1);
+        T.exit(tl, lc, {to:from, at:D - 0.4, duration:0.35});
+      })();
+    </script>
+  </body>
+</html>

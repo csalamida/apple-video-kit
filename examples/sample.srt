@@ -1,0 +1,94 @@
+1
+00:00:00,400 --> 00:00:03,200
+Hey, welcome back! In this video I'll show you
+how to set up Acme in under five minutes.
+
+2
+00:00:03,400 --> 00:00:06,800
+There are three steps: connect your account,
+build a form, and turn on alerts.
+
+3
+00:00:07,200 --> 00:00:10,400
+Step one, connect your account.
+Open the Acme dashboard and click Settings.
+
+4
+00:00:10,600 --> 00:00:13,900
+Now paste your API key into this field.
+Don't share it with anyone.
+
+5
+00:00:14,100 --> 00:00:16,800
+Then press Command K to open quick search.
+
+6
+00:00:17,000 --> 00:00:20,200
+Type "integrations" and select the first result.
+
+7
+00:00:20,500 --> 00:00:23,600
+Hit Connect, and wait for it to sync.
+This takes a minute.
+
+8
+00:00:24,000 --> 00:00:27,300
+Okay, it's done. Notice the green status badge
+in the top right corner.
+
+9
+00:00:27,800 --> 00:00:30,600
+Moving on. Step two, build your first form.
+
+10
+00:00:30,900 --> 00:00:34,200
+Click the plus button, then choose Form from the menu.
+
+11
+00:00:34,500 --> 00:00:37,800
+Add an email field and a phone number field,
+then press Enter to save.
+
+12
+00:00:38,200 --> 00:00:41,500
+Here's the thing: shorter forms convert better.
+Always ask for less!
+
+13
+00:00:41,800 --> 00:00:45,200
+Before, our test form had nine fields.
+After we cut it to three, sign-ups went up 42%.
+
+14
+00:00:45,600 --> 00:00:48,900
+That's an extra $1,200 a month from the same traffic.
+
+15
+00:00:49,300 --> 00:00:52,400
+Now let's do step three, turn on alerts.
+
+16
+00:00:52,800 --> 00:00:56,100
+Open the Alerts tab and toggle on New Submission.
+
+17
+00:00:56,400 --> 00:00:59,700
+Every time someone fills out the form,
+you'll get a notification on your phone.
+
+18
+00:01:00,000 --> 00:01:03,200
+You can even send them a text message reply automatically.
+
+19
+00:01:03,600 --> 00:01:06,800
+So to recap: connect your account, build a short form,
+and turn on alerts.
+
+20
+00:01:07,200 --> 00:01:10,400
+The template I used is linked in the description below.
+
+21
+00:01:10,800 --> 00:01:13,600
+Thanks for watching, and I'll see you in the next video!
