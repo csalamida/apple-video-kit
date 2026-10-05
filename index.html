@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Apple Video Kit - talking-head demo</title>
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background-color: var(--theme-ink);
+        font-family: var(--font-apple-display);
+        -webkit-font-smoothing: antialiased;
+        color: #ffffff;
+      }
+      #root-composition {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--theme-ink);
+      }
+      /* WINDOW: animated to a PiP card; ring + shadow are box-shadow so radius/ring stay in true screen pixels */
+      #camera-rig {
+        position: absolute;
+        left: 0; top: 0; width: 1920px; height: 1080px;
+        z-index: 10;
+        overflow: hidden;
+        corner-shape: var(--corner);
+        will-change: left, top, width, height, box-shadow;
+      }
+      /* PAN: fixed-size, only translated/scaled, so footage never re-crops while the window morphs */
+      #camera-pan {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+        transform-origin: 50% 50%;
+        will-change: transform, filter;
+      }
+      #footage {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      #lens-vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle 1100px at 50% 45%, transparent 55%, rgba(6, 2, 14, 0.55) 100%);
+        pointer-events: none;
+        z-index: 15;
+      }
+      #top-spotlight {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 380px;
+        background: radial-gradient(ellipse 900px 320px at 50% -10%, rgba(41, 151, 255, 0.18), transparent 75%);
+        pointer-events: none;
+        z-index: 16;
+      }
+      #edge-defocus {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 20;
+        opacity: 0;
+        box-shadow: inset 0 0 100px 40px rgba(41, 151, 255, 0.25);
+      }
+      .subcomp-host {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-jqlq" id="root-composition" class="clip" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="21.92">
+      <!-- Video Footage & Camera Rig Layer -->
+      <div data-hf-id="hf-jtq0" id="camera-rig" data-layout-allow-overflow="">
+        <div id="camera-pan" class="hf-pan"><video data-hf-id="hf-o9gz" id="footage" class="clip" src="inputs/_demo/speaker.mp4" data-start="0" data-duration="21.92" data-media-start="0" data-has-audio="true" data-layout-allow-overflow="" playsinline></video></div>
+      </div>
+
+      <!-- Studio Stage Backdrop Layer -->
+      <div data-hf-id="hf-3du9" id="stage-backdrop" class="clip" data-start="0" data-duration="21.92" style="position: absolute; inset: 0; z-index: 12; background: radial-gradient(circle 900px at 50% 45%, rgba(41, 151, 255, 0.35) 0%, rgba(28, 28, 32, 0.95) 65%, #080d18 100%); pointer-events: none; opacity: 0;"></div>
+      <div data-hf-id="hf-mhph" id="edge-defocus" class="clip" data-start="0" data-duration="21.92"></div>
+      <div data-hf-id="hf-8nrl" id="lens-vignette" class="clip" data-start="0" data-duration="21.92"></div>
+      <div data-hf-id="hf-w4f4" id="top-spotlight" class="clip" data-start="0" data-duration="21.92"></div>
+
+      <!-- Modular Sub-Compositions -->
+      <div data-hf-id="hf-bbqd" id="global-chapter-pill" class="clip subcomp-host" style="z-index: 60;" data-composition-id="chapter-pill-0" data-composition-src="compositions/tpl/chapter-pill.html" data-start="0" data-duration="21.92" data-variable-values='{"at": 0, "dur": 21.92}'></div>
+      <div data-hf-id="hf-sy59" id="speaker-lower-third" class="clip subcomp-host" style="z-index: 55;" data-composition-id="lower-third-0" data-composition-src="compositions/tpl/lower-third.html" data-start="0.4" data-duration="4.6" data-variable-values='{"at": 0.4, "dur": 4.6}'></div>
+      <div data-hf-id="hf-r2ys" id="card-overview" class="clip subcomp-host" style="z-index: 40;" data-composition-id="glass-card-0" data-composition-src="compositions/tpl/glass-card.html" data-start="2.5" data-duration="3.3" data-variable-values='{"width": 560, "height": 500, "eyebrow": "Pipeline Architecture", "badge": "Overview", "titlePre": "Add Contacts to", "titleAccent": "Acme CRM", "kind": "steps", "stagger": 0.9, "scale": 1.1, "items": [{"icon": "person-plus", "title": "1. Add Manually", "desc": "Direct single contact creation", "tag": "Step 01", "active": true}, {"icon": "table", "title": "2. CSV Spreadsheet", "desc": "Bulk import database lists", "tag": "Step 02"}, {"icon": "doc", "title": "3. Web Lead Form", "desc": "Automated visitor opt-ins", "tag": "Step 03"}], "at": 2.5, "dur": 3.3}'></div>
+      <div data-hf-id="hf-rwa1" id="card-method-1" class="clip subcomp-host" style="z-index: 40;" data-composition-id="glass-card-1" data-composition-src="compositions/tpl/glass-card.html" data-start="5.8" data-duration="3.0" data-variable-values='{"at": 5.8, "dur": 3.0, "side": "left", "width": 560, "eyebrow": "Method 01", "badge": "Manual Entry", "titlePre": "Add Someone", "titleAccent": "Manually", "kind": "fields", "items": [{"label": "Contact Name", "value": "John Smith", "cursor": true}, {"label": "Email Address", "value": "john@example.com"}, {"label": "Phone", "value": "+1 (555) 019-4820"}], "footer": {"text": "✓ Quick Single Record Save", "tag": "< 30s"}}'></div>
+      <div data-hf-id="hf-50mc" id="card-method-2" class="clip subcomp-host" style="z-index: 40;" data-composition-id="glass-card-2" data-composition-src="compositions/tpl/glass-card.html" data-start="8.8" data-duration="2.8" data-variable-values='{"width": 560, "height": 440, "eyebrow": "Method 02", "badge": "Bulk Ingestion", "titlePre": "Import a", "titleAccent": "Spreadsheet", "kind": "rows", "stagger": 0.6, "items": [{"left": "contacts_q4_leads.csv", "right": "1,240 Rows"}, {"left": "Column Mapping", "right": "Auto-Matched (100%)", "tone": "good"}], "footer": {"label": "Bulk Operations", "text": "Automated tag assignment & smart list sync"}, "at": 8.8, "dur": 2.8}'></div>
+      <div data-hf-id="hf-rrxs" id="card-method-3" class="clip subcomp-host" style="z-index: 40;" data-composition-id="glass-card-3" data-composition-src="compositions/tpl/glass-card.html" data-start="11.6" data-duration="2.9" data-variable-values='{"width": 820, "height": 520, "scale": 1.0, "eyebrow": "Method 03", "badge": "Auto Inbound", "titlePre": "Collect via", "titleAccent": "Lead Form", "kind": "rows", "stagger": 0.5, "items": [{"left": "Landing page opt-in form", "right": "→ Acme CRM"}, {"left": "Hands-free lead nurture", "right": "24/7 Active", "tone": "good"}], "footer": {"label": "Instant SMS", "text": "Notification dispatched"}, "aside": {"contact": "John Smith", "initials": "JS", "thread": [{"from": "them", "text": "New Lead: Jane Doe (Opt-in Form)", "at": 0.98}, {"from": "me", "text": "AI qualified & booked for 2 PM!", "at": 1.55}]}, "at": 11.6, "dur": 2.9}'></div>
+      <div data-hf-id="hf-qogp" id="card-climax" class="clip subcomp-host" style="z-index: 40;" data-layout-allow-occlusion="" data-composition-id="app-window-0" data-composition-src="compositions/tpl/app-window.html" data-start="14.5" data-duration="3.7" data-variable-values='{"at": 14.5, "dur": 3.7, "layout": "rail", "railNote": "Open the record and confirm every field synced."}'></div>
+
+      <!-- Kinetic Subtitles (template: cues are data) -->
+      <div data-hf-id="hf-iqoi" id="subtitles" class="clip subcomp-host" style="z-index: 75;" data-composition-id="kinetic-subtitle-0" data-composition-src="compositions/tpl/kinetic-subtitle.html" data-start="0" data-duration="21.92" data-variable-values='{"at": 0, "dur": 21.92}'></div>
+    </div>
+
+    <!-- GSAP Master Timeline: camera is data (components/camera.js); everything else is a mounted template -->
+    <script>
+      window.__timelines = window.__timelines || {};
+      const mainTl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = mainTl;
+
+      // 1. Speaker window + pan - built from window.__hfCamera (data), same math templates use for face safety
+      const cam = window.__hfCamera, R = window.__hfTpl, G = window.__hfGlass.stage;
+      R.resolveMoves();
+      cam.moves.forEach((m) => {
+        const win = m.win && m.win !== "full" ? m.win : G.FULL;
+        const end = R.cameraAt(m.t + m.dur);
+        G.to(mainTl, cam.rig, win, end, { start: m.t, duration: m.dur, boxShadow: m.chrome && m.chrome.boxShadow, front: m.front });
+      });
+
+      // Edge-defocus pulses on the two big reframes
+      mainTl.fromTo("#edge-defocus", { opacity: 0 }, { opacity: 0.8, duration: 0.25, yoyo: true, repeat: 1, ease: "sine.inOut" }, 5.8);
+      mainTl.fromTo("#edge-defocus", { opacity: 0 }, { opacity: 0.85, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 14.5);
+
+      // Stage backdrop behind the PiP + app window
+      mainTl.fromTo("#stage-backdrop", { opacity: 0 }, { opacity: 0.25, duration: 0.8 }, 14.5);
+      mainTl.to("#stage-backdrop", { opacity: 0.0, duration: 0.8 }, 18.2);
+    </script>
+  </body>
+</html>

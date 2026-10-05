@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},
+  {"id":"top","type":"number","label":"Top (px)","default":140},
+  {"id":"width","type":"number","label":"Width (px)","default":560},
+  {"id":"height","type":"number","label":"Min height (px)","default":520},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Text scale","default":1.15},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"eyebrow","type":"string","label":"Eyebrow","default":"Method 01"},
+  {"id":"badge","type":"string","label":"Badge","default":"Manual Entry"},
+  {"id":"titlePre","type":"string","label":"Title","default":"Add Someone"},
+  {"id":"titleAccent","type":"string","label":"Title accent word","default":"Manually"},
+  {"id":"kind","type":"string","label":"Body kind (steps | fields | rows | none)","default":"fields"},
+  {"id":"items","type":"string","label":"Body items (JSON)","default":"[{\"label\":\"Contact Name\",\"value\":\"John Smith\",\"cursor\":true},{\"label\":\"Email Address\",\"value\":\"john@example.com\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-4820\"}]"},
+  {"id":"footer","type":"string","label":"Footer {label,text,tag} (JSON)","default":"{\"text\":\"✓ Quick Single Record Save\",\"tag\":\"< 30s\"}"},
+  {"id":"aside","type":"string","label":"Embedded phone (iMessage) or null (JSON)","default":"null"},
+  {"id":"stagger","type":"number","label":"Item stagger (s)","default":0.6}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: transparent; font-family: var(--font-ui); color: var(--label); overflow: hidden; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; pointer-events: none; }
+
+      #card {
+        position: absolute; padding: 36px 36px 32px;
+        background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);
+        border: var(--glass-border); box-shadow: var(--glass-shadow); border-radius: 32px;
+        opacity: 0; will-change: transform, opacity; display: flex; flex-direction: column;
+      }
+      .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: calc(12px * var(--s)); }
+      .eyebrow { font-size: calc(13px * var(--s)); font-weight: 600; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--off-white); }
+      .badge { padding: 4px 12px; border-radius: 100px; background: rgba(10, 96, 208, 0.85); border: 1px solid rgba(41, 151, 255, 0.6);
+               font-size: calc(11px * var(--s)); font-weight: 600; letter-spacing: var(--track-label); text-transform: uppercase; color: #fff; }
+      .title { font-size: calc(32px * var(--s)); font-weight: 700; line-height: 1.12; letter-spacing: var(--track-display); margin-bottom: calc(24px * var(--s)); }
+      .title span { color: var(--accent-text); }
+      .body { display: flex; flex-direction: column; gap: calc(12px * var(--s)); flex: 1; }
+      .cols { display: flex; gap: 24px; align-items: center; flex: 1; }
+      .cols .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(12px * var(--s)); }
+      .cols .phone { flex: none; width: calc(280px * var(--ps)); height: calc(520px * var(--ps)); position: relative; }
+      .cols .phone > div { position: absolute; left: 0; top: 0; transform: scale(var(--ps)); transform-origin: top left; }
+
+      /* steps */
+      .step { display: flex; align-items: center; gap: 16px; padding: 14px 18px; background: rgba(28, 28, 32, 0.55); border: 1px solid rgba(255,255,255,.16);
+              border-radius: 20px; corner-shape: var(--corner); box-shadow: inset 0 1px 1px rgba(255,255,255,.2); }
+      .step .ico { width: 44px; height: 44px; border-radius: 14px; background: radial-gradient(circle at 35% 35%, #5B92FF 0%, #0a60d0 70%, #064a9e 100%);
+                   display: flex; align-items: center; justify-content: center; color: #fff; border: 1px solid rgba(255,255,255,.3); flex: none; }
+      .step .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+      .step .t { font-size: calc(16px * var(--s)); font-weight: 600; }
+      .step .d { font-size: calc(12px * var(--s)); color: var(--label-secondary); }
+      .step .tag { font-size: calc(11px * var(--s)); font-weight: 600; text-transform: uppercase; letter-spacing: var(--track-label); padding: 4px 10px; border-radius: 8px;
+                   background: var(--fill-1); border: 1px solid rgba(255,255,255,.15); }
+      .step.active .tag { background: var(--yellow); color: #111; border-color: transparent; }
+      /* fields */
+      .fields { display: flex; flex-direction: column; gap: 12px; background: rgba(28,28,32,.6); border: 1px solid rgba(255,255,255,.18);
+                border-radius: 20px; corner-shape: var(--corner); padding: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+      .field { display: flex; flex-direction: column; gap: 4px; }
+      .field .l { font-size: calc(11px * var(--s)); font-weight: 600; text-transform: uppercase; letter-spacing: var(--track-label); color: var(--label-secondary); }
+      .field .v { font-size: calc(16px * var(--s)); font-weight: 500; display: flex; align-items: center; }
+      .cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--accent); margin-left: 4px; }
+      /* rows */
+      .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 18px; background: rgba(28,28,32,.6);
+             border: 1px solid rgba(255,255,255,.18); border-radius: 14px; corner-shape: var(--corner); font-size: calc(14px * var(--s)); font-weight: 600;
+             box-shadow: inset 0 1px 1px rgba(255,255,255,.1); }
+      .row .r { background: rgba(10,96,208,.85); padding: 4px 10px; border-radius: 8px; font-size: calc(13px * var(--s)); }
+      .row .r.good { background: rgba(48,209,88,.22); color: #6ee08c; }
+      /* footer */
+      .foot { margin-top: calc(18px * var(--s)); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px;
+              background: rgba(10,96,208,.85); border: 1px solid rgba(41,151,255,.5); border-radius: 16px; corner-shape: var(--corner); }
+      .foot .fl { font-size: calc(11px * var(--s)); font-weight: 600; text-transform: uppercase; letter-spacing: var(--track-label); color: var(--off-white); margin-bottom: 3px; }
+      .foot .ft { font-size: calc(14px * var(--s)); font-weight: 600; }
+      .foot .tg { font-size: calc(12px * var(--s)); font-weight: 600; background: rgba(0,0,0,.28); padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="glass-card" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="card" class="stage-card"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var V = __hfTpl.vars({ at: 0, dur: 3, side: 'left', top: 140, width: 560, height: 520, offsetX: 0, offsetY: 0, scale: 1.15, safe: true,
+          eyebrow: '', badge: '', titlePre: '', titleAccent: '', kind: 'none', items: [], footer: null, aside: null, stagger: 0.6 }, window.__hyperframes);
+        V.items = __hfTpl.json(V.items, []); V.footer = __hfTpl.json(V.footer, null); V.aside = __hfTpl.json(V.aside, null);
+        var P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+        P.ensureSymbols();
+
+        var pos = __hfTpl.place({ start: V.at, dur: V.dur, side: V.side, width: V.width, height: V.height, top: V.top, safe: V.safe, offsetX: V.offsetX, offsetY: V.offsetY });
+        var card = document.getElementById('card');
+        card.style.cssText += ';left:' + pos.left + 'px;top:' + pos.top + 'px;width:' + pos.width + 'px;min-height:' + V.height + 'px;--s:' + V.scale +
+          ';--ps:' + (V.aside ? Math.min(0.78, (pos.width * 0.4) / 280) : 1);
+
+        var items = Array.isArray(V.items) ? V.items : [];
+        var html = '<div class="head"><div class="eyebrow">' + esc(V.eyebrow) + '</div>' + (V.badge ? '<div class="badge">' + esc(V.badge) + '</div>' : '') + '</div>' +
+          '<h2 class="title">' + esc(V.titlePre) + (V.titleAccent ? ' <span>' + esc(V.titleAccent) + '</span>' : '') + '</h2>';
+
+        var main = '';
+        if (V.kind === 'steps') {
+          main = items.map(function (it, i) {
+            return '<div class="step it' + (it.active ? ' active' : '') + '"><div class="ico">' + P.icon(it.icon || 'check', 22) + '</div><div class="txt"><div class="t">' +
+              esc(it.title) + '</div><div class="d">' + esc(it.desc) + '</div></div>' + (it.tag ? '<div class="tag">' + esc(it.tag) + '</div>' : '') + '</div>';
+          }).join('');
+        } else if (V.kind === 'fields') {
+          main = '<div class="fields">' + items.map(function (it) {
+            return '<div class="field it"><span class="l">' + esc(it.label) + '</span><span class="v">' + esc(it.value) + (it.cursor ? '<span class="cursor"></span>' : '') + '</span></div>';
+          }).join('') + '</div>';
+        } else if (V.kind === 'rows') {
+          main = items.map(function (it) {
+            return '<div class="row it"><span>' + esc(it.left) + '</span><span class="r' + (it.tone === 'good' ? ' good' : '') + '">' + esc(it.right) + '</span></div>';
+          }).join('');
+        }
+        var foot = V.footer ? '<div class="foot" id="foot"><div>' + (V.footer.label ? '<div class="fl">' + esc(V.footer.label) + '</div>' : '') +
+          '<div class="ft">' + esc(V.footer.text) + '</div></div>' + (V.footer.tag ? '<div class="tg">' + esc(V.footer.tag) + '</div>' : '') + '</div>' : '';
+
+        if (V.aside) html += '<div class="cols"><div class="main">' + main + foot + '</div><div class="phone"><div id="ph">' + P.phone(V.aside, 'ph') + '</div></div></div>';
+        else html += '<div class="body">' + main + '</div>' + foot;
+        card.innerHTML = html;
+
+        var tl = gsap.timeline({ paused: true });
+        window.__timelines['glass-card'] = tl;
+        var from = pos.side === 'right' ? 'right' : pos.side === 'center' ? 'up' : 'left';
+        __hfTpl.enter(tl, card, { from: from, at: 0, duration: 0.7 });
+        var els = card.querySelectorAll('.it');
+        for (var i = 0; i < els.length; i++) {
+          tl.fromTo(els[i], { opacity: 0, x: 28, scale: 0.95 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: E.snappy }, 0.3 + i * V.stagger);
+        }
+        var ft = card.querySelector('#foot');
+        if (ft) tl.fromTo(ft, { opacity: 0, y: 12, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: E.snappy }, 0.3 + els.length * V.stagger);
+        if (V.aside) {
+          tl.fromTo('#ph', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.65, ease: E.snappy }, 0.3);
+          P.phoneTimeline(tl, V.aside, 'ph', 0);
+        }
+        __hfTpl.exit(tl, card, { to: from, at: V.dur - 0.35, duration: 0.3 });
+      })();
+    </script>
+  </body>
+</html>

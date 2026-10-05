@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},
+  {"id":"top","type":"number","label":"Top (px)","default":80},
+  {"id":"width","type":"number","label":"Width (px)","default":460},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"app","type":"string","label":"App name","default":"Acme CRM"},
+  {"id":"context","type":"string","label":"Context","default":"#inbound-leads"},
+  {"id":"lead","type":"string","label":"Bold lead-in","default":"New Lead:"},
+  {"id":"message","type":"string","label":"Message","default":"Jane Doe booked a call."},
+  {"id":"time","type":"string","label":"Time","default":"now"},
+  {"id":"icon","type":"string","label":"Badge icon (bolt, bell, money, chat, mail, calendar, sparkle, star, check)","default":"bolt"},
+  {"id":"count","type":"number","label":"Stack depth (1-3)","default":3},
+  {"id":"scale","type":"number","label":"Scale","default":1}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #ns { width: 460px; padding: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="notification-stack" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="ns" class="hf-glass"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:3,safe:true,side:"right",top:80,width:460,offsetX:0,offsetY:0,app:"",context:"",lead:"",message:"",time:"now",icon:"bolt",count:3,scale:1}, window.__hyperframes);
+        var ns = document.getElementById("ns");
+        var layers = ""; for (var i = Math.min(V.count,3)-1; i >= 1; i--) layers += '<div class="apple-notif-stack-layer apple-notif-stack-layer-'+i+'"></div>';
+        ns.innerHTML = '<div class="apple-notification-stack">'+layers+'<div class="apple-notification-card"><div class="apple-notif-dismiss">✕</div><div class="apple-notif-icon-wrap"><div class="apple-notif-app-icon" style="font-weight:700;font-size:22px">'+esc((V.app||"A").charAt(0))+'</div>'+
+          '<div class="apple-notif-badge" style="color:var(--yellow,#ffd60a)">'+P.icon(V.icon,11)+'</div></div><div class="apple-notif-content"><div class="apple-notif-header"><div class="apple-notif-header-left"><span class="apple-notif-title">'+esc(V.app)+'</span><span class="apple-notif-context">'+esc(V.context)+'</span></div><span class="apple-notif-time">'+esc(V.time)+'</span></div>'+
+          '<div class="apple-notif-msg"><strong>'+esc(V.lead)+'</strong> '+esc(V.message)+'</div></div></div></div>';
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:V.width,height:110*V.scale,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:300});
+        ns.style.left = pl.left+"px"; ns.style.top = pl.top+"px"; ns.style.width = pl.width+"px"; ns.style.transform = "scale("+V.scale+")"; ns.style.transformOrigin = "top "+(pl.side==="right"?"right":"left");
+        var tl = gsap.timeline({paused:true}); window.__timelines["notification-stack"] = tl;
+        tl.fromTo(ns,{opacity:0,y:-40,scale:V.scale*0.92},{opacity:1,y:0,scale:V.scale,duration:0.6,ease:E.bouncy},0);
+        tl.to(ns,{opacity:0,y:-30,duration:0.35,ease:"power2.in"},V.dur-0.4);
+      })();
+    </script>
+  </body>
+</html>

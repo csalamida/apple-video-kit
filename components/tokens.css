@@ -1,0 +1,125 @@
+/* ==========================================================================
+   tokens.css - single source of truth for the Apple design layer.
+   Load this BEFORE apple-glass.css / glass-components.css.
+   Everything else (--theme-*, --apple-*, --ref-*) is an alias of these.
+
+   Rules baked in here:
+   - Colour: Apple system dark palette. One accent (blue). Semantic green/yellow only.
+   - Type: system SF Pro (-apple-system) so optical sizing (Display/Text) is automatic,
+     no network font fetch. Weights 400-700, never 800/900. No text-shadow.
+   - Shape: continuous-curvature corners (corner-shape: superellipse) on rectangles;
+     capsules and circles stay true circular arcs, like Apple.
+   - Glass: translucent base over live footage, blur + saturate + dim, specular rim.
+   ========================================================================== */
+
+:root {
+  /* ---- Colour: Apple system (dark) ---- */
+  --accent: #2997ff;              /* Electric Blue - the only highlight colour */
+  --accent-deep: #0a60d0;         /* pressed / gradient low stop */
+  --accent-text: #78bdff;          /* accent for TEXT over footage (passes contrast on light walls) */
+  --accent-glow: rgba(41, 151, 255, 0.35);
+  --accent-subtle: rgba(41, 151, 255, 0.16);
+  --green: #30d158;               /* completion / live-positive */
+  --yellow: #ffd60a;              /* caution / attention */
+  --orange: #ff9f0a;
+  --red: #ff453a;
+
+  --label: #ffffff;
+  --label-secondary: rgba(235, 235, 245, 0.78);
+  --label-tertiary: rgba(235, 235, 245, 0.55);
+  --label-quaternary: rgba(235, 235, 245, 0.30);
+  --off-white: #f5f5f7;
+
+  --ink: #0b0b0f;                 /* stage / page background */
+  --fill-1: rgba(255, 255, 255, 0.10);
+  --fill-2: rgba(255, 255, 255, 0.06);
+  --separator: rgba(255, 255, 255, 0.14);
+
+  /* ---- Type ---- */
+  --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
+  --track-display: -0.022em;      /* >= 28px */
+  --track-title: -0.014em;        /* 17-27px */
+  --track-label: 0.06em;          /* uppercase micro labels */
+
+  /* ---- Shape ---- */
+  --corner: superellipse(2.2);    /* ~ Apple continuous curvature (n ~ 4.6) */
+
+  /* ---- Materials (translucent: the footage must show through) ---- */
+  --glass-base: rgba(18, 18, 22, 0.50);
+  --glass-base-strong: rgba(24, 24, 28, 0.72);
+  --glass-filter: blur(44px) saturate(170%) brightness(0.74);
+  --glass-filter-thin: blur(28px) saturate(170%) brightness(0.8);
+  --glass-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 38%, rgba(255, 255, 255, 0) 100%),
+    var(--glass-base);
+  --glass-border: 0.5px solid rgba(255, 255, 255, 0.18);
+  /* Key light at 12 o'clock: bright top edge, faint all-round rim, soft ground shadow */
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
+    0 2px 6px rgba(0, 0, 0, 0.22),
+    0 28px 64px -14px rgba(0, 0, 0, 0.60);
+
+  /* ---- Legacy aliases (do not add new uses) ---- */
+  --theme-accent: var(--accent);
+  --theme-cobalt: var(--accent-deep);
+  --theme-cream: var(--off-white);
+  --theme-ink: var(--ink);
+  --theme-yellow: var(--yellow);
+  --theme-accent-bright: var(--off-white);
+  --theme-accent-dark: #064a9e;
+  --theme-accent-glow: var(--accent-glow);
+  --theme-accent-subtle: var(--accent-subtle);
+  --font-apple-display: var(--font-ui);
+  --font-apple-text: var(--font-ui);
+  --font-apple-mono: var(--font-mono);
+  --font-apple-rounded: var(--font-ui);
+  --apple-font-display: var(--font-ui);
+  --apple-font-text: var(--font-ui);
+  --apple-font-mono: var(--font-mono);
+}
+
+/* Optical sizing: let the system pick SF Display vs SF Text by size. */
+html { font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-ui); }
+
+/* Numbers never jitter. */
+.tnum, [data-tnum], .apple-statusbar-time { font-variant-numeric: tabular-nums; }
+
+/* ---- Continuous curvature on rectangular surfaces (circles and capsules excluded) ---- */
+.stage-card, .split-app-stage, .step-item, .input-sim-box, .contact-profile-card,
+.contact-field-tile, .pipeline-broll-card, .pipeline-broll-caption, .apple-iphone-frame,
+.apple-liquid-glass, .apple-glass-card, .apple-glass-thick, .apple-phone-card, .apple-app-icon,
+.apple-lower-third, .apple-pipeline-card, .apple-chat-card, .apple-speech-bubble,
+.ref-crystal-card, .sq {
+  corner-shape: var(--corner);
+}
+
+/* ---- Specular rim: 1px gradient ring, brightest at the top edge ---- */
+.stage-card::after, .split-app-stage::after, .contact-profile-card::after,
+.apple-liquid-glass::after, .glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  corner-shape: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.10) 28%, rgba(255, 255, 255, 0.04) 70%, rgba(255, 255, 255, 0.22) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* Reusable material for new surfaces */
+.glass {
+  position: relative;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  corner-shape: var(--corner);
+}

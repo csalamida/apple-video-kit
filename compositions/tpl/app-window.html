@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},
+  {"id":"top","type":"number","label":"Top (px)","default":110},
+  {"id":"width","type":"number","label":"Width (px)","default":1250},
+  {"id":"height","type":"number","label":"Height (px)","default":840},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Text scale","default":1.1},
+  {"id":"title","type":"string","label":"Window title","default":"Acme CRM Live Data Verification"},
+  {"id":"badge","type":"string","label":"Status badge","default":"LIVE CRM"},
+  {"id":"eyebrow","type":"string","label":"Eyebrow","default":"Climax Verification"},
+  {"id":"titlePre","type":"string","label":"Headline","default":"Make Sure Details"},
+  {"id":"titleAccent","type":"string","label":"Headline accent","default":"Are There"},
+  {"id":"layout","type":"string","label":"Headline placement (inside | rail)","default":"inside"},
+  {"id":"railNote","type":"string","label":"Rail note (layout=rail)","default":""},
+  {"id":"panels","type":"string","label":"Panels [{kind: pipeline|contact|table|list|stats|chat|text|terminal|image, span?, ...cfg}] (JSON)","default":"[{\"title\":\"Active Deals\",\"subtitle\":\"Last updated: 5m ago\",\"columns\":[{\"name\":\"Qualified\",\"count\":16,\"cards\":[{\"title\":\"Tech Solutions\",\"tag\":\"Qualified\"},{\"title\":\"Globex Inc\",\"tag\":\"Qualified\"}]},{\"name\":\"Proposal\",\"count\":8,\"cards\":[{\"title\":\"Globex Enterprise Deal\",\"value\":\"$45k\",\"tag\":\"Proposal Sent\"}]},{\"name\":\"Negotiation\",\"count\":5,\"cards\":[]}],\"kind\":\"pipeline\"},{\"name\":\"John Smith\",\"initials\":\"JS\",\"verifiedText\":\"Verified Contact\",\"fields\":[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}],\"kind\":\"contact\"}]"},
+  {"id":"cols","type":"string","label":"Grid columns (CSS, e.g. 1.4fr 1fr; blank = equal)","default":""},
+  {"id":"stagger","type":"number","label":"Panel stagger (s)","default":0.4}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #aw { padding: 24px 32px 28px; border-radius: 36px; display:flex; flex-direction:column; }
+      .bar { display:flex; align-items:center; justify-content:space-between; padding-bottom:16px; border-bottom:1px solid var(--separator); margin-bottom:18px; }
+      .tl { display:flex; gap:8px; } .tl i { width:12px; height:12px; border-radius:50%; display:block; box-shadow: inset 0 1px 1px rgba(255,255,255,.4); }
+      .wt { font-size:14px; font-weight:600; color: var(--label-secondary); }
+      .bg { font-size:11px; font-weight:600; letter-spacing: var(--track-label); color: var(--green); background: rgba(48,209,88,.14); border:1px solid rgba(48,209,88,.4); padding:3px 10px; border-radius:100px; display:flex; gap:6px; align-items:center; }
+      .bg b { width:6px; height:6px; border-radius:50%; background: var(--green); display:block; }
+      .eb { font-size: calc(12px*var(--s)); font-weight:600; letter-spacing: var(--track-label); text-transform:uppercase; color: var(--label-secondary); }
+      .hd { font-size: calc(30px*var(--s)); font-weight:700; letter-spacing: var(--track-display); margin: 4px 0 20px; } .hd span { color: var(--accent-text); }
+      .pn-grid { display:grid; gap:24px; flex:1; min-height:0; }
+      .pn { background: rgba(28,28,32,.55); border:1px solid rgba(255,255,255,.16); border-radius:24px; corner-shape: var(--corner); padding:20px; min-height:0; overflow:hidden; }
+      #rail { position:absolute; opacity:0; }
+      #rail .re { font-size: calc(15px*var(--s)); font-weight:600; letter-spacing: var(--track-label); text-transform:uppercase; color: var(--label-secondary); margin-bottom:14px; }
+      #rail .rt { font-size: calc(56px*var(--s)); font-weight:700; letter-spacing: -0.03em; line-height:1.04; } #rail .rt span { color: var(--accent-text); display:block; }
+      #rail .rn { font-size: calc(20px*var(--s)); line-height:1.4; color: var(--label-secondary); margin-top:22px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="app-window" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="rail"></div><div id="aw" class="hf-glass"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:3,safe:true,side:"right",top:110,width:1250,height:840,offsetX:0,offsetY:0,scale:1.1,title:"",badge:"",eyebrow:"",titlePre:"",titleAccent:"",layout:"inside",railNote:"",panels:"[]",cols:"",stagger:0.4}, window.__hyperframes);
+        V.panels = T.json(V.panels, []); P.ensureSymbols();
+        var aw = document.getElementById("aw"); aw.style.setProperty("--s", V.scale);
+        var css = document.createElement("style"); css.textContent = P.panelsCss; document.head.appendChild(css);
+        var rail = V.layout === "rail";
+        var pn = V.panels.map(function(p,i){ return '<div class="pn" id="pn'+i+'"'+(p.span?' style="grid-column:span '+p.span+'"':'')+'>'+P.panel(p)+'</div>'; }).join("");
+        var head = rail ? '' : '<div class="eb">'+esc(V.eyebrow)+'</div><div class="hd">'+esc(V.titlePre)+' <span>'+esc(V.titleAccent)+'</span></div>';
+        aw.innerHTML = '<div class="bar"><div class="tl"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i></div><div class="wt">'+esc(V.title)+'</div>'+(V.badge?'<div class="bg"><b></b>'+esc(V.badge)+'</div>':'<div></div>')+'</div>'+
+          head+'<div class="pn-grid" style="grid-template-columns:'+(V.cols || 'repeat('+Math.max(V.panels.length,1)+',1fr)')+'">'+pn+'</div>';
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:V.width,height:V.height,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:600});
+        aw.style.cssText += ";left:"+pl.left+"px;top:"+pl.top+"px;width:"+pl.width+"px;height:"+V.height+"px";
+        var rl = document.getElementById("rail");
+        var railW = pl.side === "right" ? pl.left - 72 - 48 : 1920 - 72 - (pl.left + pl.width) - 48;
+        if (rail && railW < 240) {   // not enough free column: put the headline inside the window instead
+          rail = false;
+          aw.querySelector(".pn-grid").insertAdjacentHTML("beforebegin", '<div class="eb">'+esc(V.eyebrow)+'</div><div class="hd">'+esc(V.titlePre)+' <span>'+esc(V.titleAccent)+'</span></div>');
+        }
+        if (rail) {
+          // Headline lives in the free column beside the window (landscape-friendly), speaker PiP sits under it
+          var rw = pl.side === "right" ? pl.left - 72 - 48 : 1920 - 72 - (pl.left + pl.width) - 48;
+          rl.style.setProperty("--s", V.scale);
+          rl.style.cssText += ";top:"+(pl.top+8)+"px;width:"+rw+"px;left:"+(pl.side === "right" ? 72 : pl.left + pl.width + 48)+"px";
+          rl.innerHTML = '<div class="re">'+esc(V.eyebrow)+'</div><div class="rt">'+esc(V.titlePre)+'<span>'+esc(V.titleAccent)+'</span></div>'+(V.railNote?'<div class="rn">'+esc(V.railNote)+'</div>':'');
+        }
+        var tl = gsap.timeline({paused:true}); window.__timelines["app-window"] = tl;
+        var from = pl.side==="left"?"left":"right";
+        T.enter(tl, aw, {from:from, duration:0.7});
+        if (rail) {
+          tl.fromTo(rl.children,{opacity:0,y:14},{opacity:1,y:0,duration:0.55,stagger:0.12,ease:E.snappy},0.15);
+          tl.set(rl,{opacity:1},0.15); tl.to(rl,{opacity:0,duration:0.35,ease:"power2.in"},V.dur-0.45);
+        }
+        aw.querySelectorAll(".pn").forEach(function(el,i){
+          tl.fromTo(el,{opacity:0,y:16,scale:0.97},{opacity:1,y:0,scale:1,duration:0.55,ease:E.snappy},0.25+i*V.stagger);
+          var its = el.querySelectorAll(".it");
+          if (its.length) tl.fromTo(its,{opacity:0,y:10,scale:0.94},{opacity:1,y:0,scale:1,duration:0.4,stagger:0.28,ease:E.snappy},0.5+i*V.stagger);
+        });
+        T.exit(tl, aw, {to:from, at:V.dur-0.45, duration:0.4});
+      })();
+    </script>
+  </body>
+</html>

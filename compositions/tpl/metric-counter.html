@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},
+  {"id":"top","type":"number","label":"Top (px)","default":140},
+  {"id":"width","type":"number","label":"Width (px)","default":420},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Text scale","default":1.1},
+  {"id":"label","type":"string","label":"Label","default":"Faster follow-up"},
+  {"id":"sub","type":"string","label":"Sub-label","default":"vs. manual entry"},
+  {"id":"from","type":"number","label":"From","default":0},
+  {"id":"to","type":"number","label":"To","default":318},
+  {"id":"prefix","type":"string","label":"Prefix","default":""},
+  {"id":"suffix","type":"string","label":"Suffix","default":"%"},
+  {"id":"decimals","type":"number","label":"Decimals","default":0},
+  {"id":"countDur","type":"number","label":"Count time (s)","default":1.4}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #mc { padding: calc(28px*var(--s)) calc(32px*var(--s)); border-radius: 30px; display:flex; flex-direction:column; gap: 6px; }
+      .ml { font-size: calc(14px*var(--s)); font-weight:600; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--label-secondary); }
+      .mn { font-size: calc(88px*var(--s)); font-weight:700; letter-spacing: -0.04em; line-height:1; font-variant-numeric: tabular-nums; color: var(--accent); }
+      .ms { font-size: calc(16px*var(--s)); color: var(--label-secondary); }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="metric-counter" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="mc" class="hf-glass"><div class="ml" id="ml"></div><div class="mn" id="mn"></div><div class="ms" id="ms"></div></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:1.1,width:420,label:"",sub:"",from:0,to:100,prefix:"",suffix:"",decimals:0,countDur:1.4}, window.__hyperframes);
+        var mc = document.getElementById("mc"); mc.style.setProperty("--s", V.scale);
+        document.getElementById("ml").textContent = V.label; document.getElementById("ms").textContent = V.sub;
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:V.width,height:230*V.scale,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:300});
+        mc.style.left = pl.left+"px"; mc.style.top = pl.top+"px"; mc.style.width = pl.width+"px";
+        var o = {v:V.from}, mn = document.getElementById("mn"), fmt = function(){ mn.textContent = V.prefix + o.v.toFixed(V.decimals) + V.suffix; }; fmt();
+        var tl = gsap.timeline({paused:true}); window.__timelines["metric-counter"] = tl;
+        var from = pl.side==="right"?"right":"left";
+        T.enter(tl, mc, {from:from, duration:0.6});
+        tl.to(o,{v:V.to,duration:V.countDur,ease:E.smooth,onUpdate:fmt},0.35);
+        T.exit(tl, mc, {to:from, at:V.dur-0.4, duration:0.35});
+      })();
+    </script>
+  </body>
+</html>

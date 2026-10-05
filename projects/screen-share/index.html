@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Screen Share</title>
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+    <link rel="stylesheet" href="components/tokens.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/screen-stage.js"></script>
+    <script src="share.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { width: 1920px; height: 1080px; overflow: hidden; background: #0b3a8a; font-family: var(--font-ui); color: #fff; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      /* macOS-style wallpaper behind the floating window (swap via share.js `wallpaper`) */
+      #wall { position: absolute; inset: 0;
+        background:
+          linear-gradient(115deg, transparent 52%, rgba(255,255,255,0.35) 52.6%, transparent 55%),
+          radial-gradient(120% 90% at 88% 8%, #8fdcff 0%, transparent 55%),
+          radial-gradient(100% 85% at 8% 95%, #1c55d2 0%, transparent 62%),
+          radial-gradient(80% 60% at 60% 72%, #10a8bd 0%, transparent 60%),
+          linear-gradient(135deg, #0b3a8a, #2e86de 48%, #5ec8e5); }
+      /* floating screen window: shadow, true radius, squircle */
+      #win { position: absolute; overflow: hidden; background: #fff; corner-shape: var(--corner);
+        box-shadow: 0 40px 90px rgba(5, 20, 60, 0.42), 0 8px 24px rgba(5, 20, 60, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.35); }
+      #pan { position: absolute; left: 0; top: 0; width: 100%; height: 100%; will-change: transform; }
+      #screen { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      /* tall webcam card, bottom-left; scaled from its bottom-left corner while the screen zooms */
+      #pip { position: absolute; overflow: hidden; corner-shape: var(--corner); will-change: transform; background: #111; }
+      #cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="21.92">
+      <div id="wall"></div>
+      <div id="win"><div id="pan" data-layout-allow-overflow="">
+        <video id="screen" class="clip" src="inputs/_demo/screen.mp4" data-start="0" data-duration="21.92" muted playsinline></video>
+      </div></div>
+      <div id="pip">
+        <video id="cam" class="clip" src="inputs/_demo/speaker.mp4" data-start="0" data-duration="21.92" data-media-start="0" data-has-audio="true" playsinline></video>
+      </div>
+      <div id="subtitles" class="clip subcomp-host" style="z-index: 75;" data-composition-id="kinetic-subtitle-0" data-composition-src="compositions/tpl/kinetic-subtitle.html" data-start="0" data-duration="21.92" data-variable-values='{"at": 0, "dur": 21.92, "safe": false, "cues": [{"start": 3.0, "end": 5.8, "text": "First, fill out the *form*"}, {"start": 9.0, "end": 12.5, "text": "Then press *submit*"}, {"start": 15.5, "end": 19.0, "text": "And check the *details*"}]}'></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      __hfShareStage.layout(window.__hfShare);
+      __hfShareStage.build(tl, window.__hfShare);
+    </script>
+  </body>
+</html>

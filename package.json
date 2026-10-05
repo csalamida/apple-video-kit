@@ -1,0 +1,25 @@
+{
+  "name": "apple-video-kit",
+  "type": "module",
+  "scripts": {
+    "media": "node scripts/demo-media.mjs index.html",
+    "dev": "npm run -s media && npx --yes hyperframes@0.8.120 preview",
+    "check": "npm run -s media && npx --yes hyperframes@0.8.120 check",
+    "render": "npm run -s media && npx --yes hyperframes@0.8.120 render",
+    "check:face": "node scripts/check-face-clear.mjs",
+    "check:privacy": "node scripts/check-privacy.mjs",
+    "build:library": "node scripts/build-library.mjs",
+    "library": "python3 -m http.server 4173",
+    "share:dev": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 preview projects/screen-share",
+    "share:check": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 check projects/screen-share",
+    "share:render": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 render projects/screen-share",
+    "share:sync": "node scripts/sync-share.mjs"
+  },
+  "devDependencies": {
+    "hyperframes": "^0.8.120"
+  },
+  "version": "0.1.0",
+  "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
+  "license": "MIT",
+  "private": true
+}

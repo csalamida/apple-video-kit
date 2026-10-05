@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3},
+  {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
+  {"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},
+  {"id":"top","type":"number","label":"Top (px)","default":140},
+  {"id":"offsetX","type":"number","label":"Offset X","default":0},
+  {"id":"offsetY","type":"number","label":"Offset Y","default":0},
+  {"id":"scale","type":"number","label":"Text scale","default":1.1},
+  {"id":"contact","type":"string","label":"Contact name","default":"John Smith"},
+  {"id":"initials","type":"string","label":"Initials","default":"JS"},
+  {"id":"thread","type":"string","label":"Thread (JSON)","default":"[{\"from\":\"them\",\"text\":\"New lead: Jane Doe (Opt-in Form)\",\"at\":0.8},{\"from\":\"me\",\"text\":\"AI qualified &amp; booked for 2 PM!\",\"at\":1.6}]"}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #pw { position:absolute; width: 280px; height: 520px; opacity: 0; transform-origin: top left; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="imessage-phone" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="pw"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:0.9,contact:"Contact",initials:"C",thread:"[]"}, window.__hyperframes);
+        P.ensureSymbols(); V.thread = T.json(V.thread, []);
+        var pw = document.getElementById("pw");
+        pw.innerHTML = P.phone({contact:V.contact, initials:V.initials, thread:V.thread}, "ph");
+        var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:280*V.scale,height:520*V.scale,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:200});
+        pw.style.left = pl.left+"px"; pw.style.top = pl.top+"px";
+        var tl = gsap.timeline({paused:true}); window.__timelines["imessage-phone"] = tl;
+        tl.fromTo(pw,{opacity:0,y:36,scale:V.scale*0.9},{opacity:1,y:0,scale:V.scale,duration:0.65,ease:E.snappy},0);
+        P.phoneTimeline(tl, {thread:V.thread}, "ph", 0.2);
+        tl.to(pw,{opacity:0,y:20,duration:0.35,ease:"power2.in"},V.dur-0.4);
+      })();
+    </script>
+  </body>
+</html>

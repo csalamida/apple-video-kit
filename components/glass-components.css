@@ -1,0 +1,1704 @@
+
+/* ==========================================================================
+   Apple HIG Liquid Glass & System Materials Library
+   components/glass-components.css
+   Authentic Apple Developer Human Interface Guidelines & WWDC Keynote Spec
+   Palette: Neutral Optical Glass + Brand Accent (Cobalt #0a60d0, Cream #f5f5f7)
+   ========================================================================== */
+
+:root {
+  /* Apple System Typography */
+  --apple-font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --apple-font-text: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --apple-font-mono: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+
+  /* Brand Accent Tokens */
+  --apple-accent-blue: #0071e3;
+  --apple-accent-electric: #2997ff;
+  --apple-brand-cobalt: #0a60d0;
+  --apple-brand-cream: #f5f5f7;
+  --apple-brand-ink: #111722;
+  --apple-brand-yellow: #ffd60a;
+  --apple-text-primary: #ffffff;
+  --apple-text-secondary: rgba(255, 255, 255, 0.65);
+  --apple-text-tertiary: rgba(255, 255, 255, 0.42);
+
+  /* Apple System Materials (HIG 4-Tier Optical Transparency) */
+  --apple-material-regular: rgba(28, 28, 30, 0.68);
+  --apple-material-thick: rgba(22, 22, 24, 0.82);
+  --apple-material-thin: rgba(36, 36, 40, 0.50);
+  --apple-material-ultra-thin: rgba(255, 255, 255, 0.05);
+
+  /* Optical Blur Specs */
+  --apple-blur-thick: blur(60px) saturate(210%);
+  --apple-blur-regular: blur(48px) saturate(190%);
+  --apple-blur-thin: blur(24px) saturate(160%);
+
+  /* Directional 12 o'clock Key-Light & Diffuse Fresnel Rim */
+  --apple-rim-border: 1px solid rgba(255, 255, 255, 0.12);
+  --apple-rim-keylight: 1px solid rgba(255, 255, 255, 0.32);
+  --apple-rim-pip: 2.5px solid rgba(255, 255, 255, 0.72);
+
+  /* Realistic Ambient Occlusion & Ground Shadows */
+  --apple-shadow-card: 0 24px 60px -12px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  --apple-shadow-pip: 0 32px 80px rgba(0, 0, 0, 0.88), 0 0 40px rgba(41, 151, 255, 0.30);
+  --apple-shadow-pill: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ==========================================================================
+   1. AUTHENTIC APPLE SYSTEM MATERIAL PANELS (G² Continuous Curvature)
+   ========================================================================== */
+
+/* Regular Keynote Glass Card */
+.apple-glass-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--apple-material-regular);
+  backdrop-filter: var(--apple-blur-regular);
+  -webkit-backdrop-filter: var(--apple-blur-regular);
+  border-radius: 24px;
+  border: var(--apple-rim-border);
+  border-top: var(--apple-rim-keylight);
+  box-shadow: var(--apple-shadow-card);
+  color: var(--apple-text-primary);
+  font-family: var(--apple-font-display);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Thick Side Panel / Modal Drawer */
+.apple-glass-thick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--apple-material-thick);
+  backdrop-filter: var(--apple-blur-thick);
+  -webkit-backdrop-filter: var(--apple-blur-thick);
+  border-radius: 28px;
+  border: var(--apple-rim-border);
+  border-top: var(--apple-rim-keylight);
+  box-shadow: 0 32px 75px rgba(0, 0, 0, 0.82), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-sizing: border-box;
+}
+
+/* Thin HUD Card / Sub-Card */
+.apple-glass-thin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--apple-material-thin);
+  backdrop-filter: var(--apple-blur-thin);
+  -webkit-backdrop-filter: var(--apple-blur-thin);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   2. SCREEN STUDIO SQUIRCLE PIP CARD (Top Layer, z-index: 100)
+   ========================================================================== */
+.apple-pip-squircle {
+  position: absolute;
+  border-radius: 44px;
+  border: var(--apple-rim-pip);
+  background: #000000;
+  box-shadow: var(--apple-shadow-pip);
+  overflow: hidden;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   3. APPLE HIG BUTTONS & SYSTEM CONTROLS
+   ========================================================================== */
+.apple-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 18px;
+  font-family: var(--apple-font-text);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-radius: 100px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* Apple Translucent System Glass Button */
+.apple-btn-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20), 0 4px 12px rgba(0, 0, 0, 0.30);
+}
+
+.apple-btn-glass:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: scale(1.02);
+}
+
+/* Apple Keynote Cobalt Accent Button */
+.apple-btn-accent {
+  background: linear-gradient(180deg, #1b53e8 0%, var(--apple-brand-cobalt) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.40);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(41, 151, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.apple-btn-accent:hover {
+  background: linear-gradient(180deg, #2997ff 0%, #164bdd 100%);
+  transform: scale(1.02);
+  box-shadow: 0 12px 30px rgba(41, 151, 255, 0.60), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* ==========================================================================
+   4. APPLE HIG HUD CAPSULES & CHAPTER PROGRESS
+   ========================================================================== */
+.apple-hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(28, 28, 30, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 100px;
+  font-family: var(--apple-font-text);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  box-shadow: var(--apple-shadow-pill);
+}
+
+.apple-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--apple-brand-yellow);
+  box-shadow: 0 0 10px var(--apple-brand-yellow);
+}
+
+/* ==========================================================================
+   5. APPLE SF SYMBOLS 6 GLYPH BADGES
+   ========================================================================== */
+.apple-sf-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.apple-sf-badge.accent {
+  background: linear-gradient(135deg, var(--apple-accent-electric) 0%, var(--apple-brand-cobalt) 100%);
+  box-shadow: 0 0 14px rgba(41, 151, 255, 0.5);
+  border: none;
+}
+
+.apple-sf-icon {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   6. STAGGERED CHECKLIST & WORKFLOW ITEMS
+   ========================================================================== */
+.apple-list-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.apple-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 100px;
+}
+
+.apple-list-row.active {
+  background: rgba(41, 151, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 6px 20px rgba(41, 151, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.apple-list-title {
+  font-family: var(--apple-font-text);
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.apple-list-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--apple-text-secondary);
+}
+
+.apple-list-row.active .apple-list-tag {
+  background: var(--apple-brand-yellow);
+  color: #111722;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   7. STAT METRIC CARD (Apple Keynote Tabular Numbers)
+   ========================================================================== */
+.apple-stat-card {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apple-stat-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--apple-text-secondary);
+}
+
+.apple-stat-num {
+  font-size: 54px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: #ffffff;
+  font-feature-settings: "tnum" 1; /* Tabular numbers prevent jitter */
+}
+
+.apple-stat-desc {
+  font-size: 13px;
+  color: var(--apple-text-secondary);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   8. MACOS WINDOW FRAME (Safari / App Preview)
+   ========================================================================== */
+.apple-macos-frame {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(20, 20, 22, 0.85);
+  backdrop-filter: var(--apple-blur-thick);
+  -webkit-backdrop-filter: var(--apple-blur-thick);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  width: 100%;
+}
+
+.apple-macos-header {
+  height: 38px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 14px;
+}
+
+.apple-traffic-lights {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.apple-traffic-red { width: 11px; height: 11px; border-radius: 50%; background: #FF5F56; }
+.apple-traffic-yellow { width: 11px; height: 11px; border-radius: 50%; background: #FFBD2E; }
+.apple-traffic-green { width: 11px; height: 11px; border-radius: 50%; background: #27C93F; }
+
+.apple-macos-address {
+  flex: 1;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--apple-text-tertiary);
+  font-family: var(--apple-font-mono);
+}
+
+/* ==========================================================================
+   9. IPHONE 16 PRO DEVICE FRAME (Authentic iOS 18 System Supplement)
+   ========================================================================== */
+.apple-iphone-frame {
+  width: 290px;
+  height: 590px;
+  border-radius: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.32);
+  background: #000000;
+  box-shadow: 
+    0 32px 80px rgba(0, 0, 0, 0.95),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.12),
+    inset 0 0 16px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Authentic Dynamic Island with Dual Optical Lens Reflex */
+.apple-dynamic-island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 27px;
+  border-radius: 20px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 25;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 9px;
+  box-sizing: border-box;
+}
+
+.apple-dynamic-island-lens {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #0d1522;
+  border: 1px solid #1c2b42;
+  box-shadow: inset 0 0 3px #003366, 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+.apple-iphone-screen {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* iOS 18 Authentic Status Bar */
+.apple-ios-statusbar {
+  height: 44px;
+  padding: 10px 20px 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  z-index: 20;
+  box-sizing: border-box;
+}
+
+.apple-statusbar-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.apple-statusbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apple-statusbar-icons svg {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
+}
+
+/* iMessage Conversation Header */
+.apple-imessage-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px 10px 14px;
+  background: rgba(18, 18, 20, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 15;
+}
+
+.apple-imessage-nav-back {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #007aff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.apple-imessage-nav-back svg {
+  width: 16px;
+  height: 16px;
+  fill: #007aff;
+}
+
+.apple-imessage-nav-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.apple-imessage-nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.apple-imessage-nav-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.apple-imessage-nav-name svg {
+  width: 8px;
+  height: 8px;
+  fill: rgba(255, 255, 255, 0.4);
+}
+
+.apple-imessage-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-imessage-nav-actions svg {
+  width: 18px;
+  height: 18px;
+  fill: #007aff;
+  cursor: pointer;
+}
+
+/* Chat Thread Canvas */
+.apple-chat-thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.apple-chat-timestamp {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  margin: 6px 0 10px 0;
+}
+
+/* The Authentic Apple iMessage Speech Bubble */
+.apple-chat-bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  max-width: 82%;
+}
+
+.apple-chat-bubble-wrap.incoming {
+  align-self: flex-start;
+}
+
+.apple-chat-bubble-wrap.outgoing {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.apple-chat-bubble {
+  position: relative;
+  padding: 9px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.35;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  letter-spacing: -0.01em;
+  word-break: break-word;
+}
+
+/* Incoming iMessage (Apple Dark Gray) */
+.apple-chat-incoming {
+  background: #26252a;
+  color: #ffffff;
+  border-bottom-left-radius: 4px;
+}
+
+/* Outgoing iMessage (Apple Vibrant iMessage Blue) */
+.apple-chat-user {
+  background: #007aff;
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 122, 255, 0.25);
+}
+
+/* Authentic iMessage Bubble Tails */
+.apple-bubble-tail {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.apple-bubble-tail.outgoing {
+  right: -6px;
+  color: #007aff;
+}
+
+.apple-bubble-tail.incoming {
+  left: -6px;
+  color: #26252a;
+  transform: scaleX(-1);
+}
+
+.apple-chat-status {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  margin-top: 3px;
+  margin-right: 4px;
+}
+
+/* Typing Indicator (Three Pulsing Apple Dots) */
+.apple-typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: #26252a;
+  border-bottom-left-radius: 4px;
+  position: relative;
+  width: fit-content;
+}
+
+.apple-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  animation: appleTypingPulse 1.4s infinite ease-in-out;
+}
+
+.apple-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.apple-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes appleTypingPulse {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* iMessage Composer Input Bar */
+.apple-imessage-composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 6px 12px;
+  background: rgba(18, 18, 20, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: auto;
+}
+
+.apple-composer-plus {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.apple-composer-plus svg {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
+}
+
+.apple-composer-input {
+  flex: 1;
+  height: 32px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0 10px 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.apple-composer-input svg {
+  width: 14px;
+  height: 14px;
+  fill: rgba(255, 255, 255, 0.45);
+}
+
+.apple-composer-send {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #007aff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.apple-composer-send svg {
+  width: 15px;
+  height: 15px;
+  fill: #ffffff;
+}
+
+/* Apple Home Indicator */
+.apple-home-indicator {
+  width: 110px;
+  height: 4px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.75);
+  margin: 6px auto 6px auto;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   10. AUTHENTIC APPLE MACOS & IPHONE NOTIFICATION STACK & TOAST BANNERS
+   (Modeled accurately after macOS Sequoia / iOS 18 Notification Center)
+   ========================================================================== */
+.apple-notification-stack {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", -apple-system, sans-serif;
+}
+
+/* Background stacked tiers simulating grouped notifications */
+.apple-notif-stack-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.apple-notif-stack-layer-1 {
+  bottom: -6px;
+  left: 10px;
+  right: 10px;
+  height: 24px;
+  background: rgba(38, 38, 40, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+.apple-notif-stack-layer-2 {
+  bottom: -11px;
+  left: 20px;
+  right: 20px;
+  height: 20px;
+  background: rgba(30, 30, 32, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+
+/* Expanded stack interaction */
+.apple-notification-stack.is-expanded .apple-notif-stack-layer-1 {
+  transform: translateY(74px);
+  height: auto;
+  opacity: 0.95;
+}
+.apple-notification-stack.is-expanded .apple-notif-stack-layer-2 {
+  transform: translateY(148px);
+  height: auto;
+  opacity: 0.9;
+}
+
+/* The Foreground Apple Notification Card (and alias .apple-toast-bubble, .apple-notification-toast) */
+.apple-notification-card,
+.apple-notification-toast,
+.apple-toast-bubble {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px 14px;
+  background: rgba(44, 44, 46, 0.82);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 
+    0 16px 38px rgba(0, 0, 0, 0.65), 
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 380px;
+}
+
+.apple-notification-card:hover,
+.apple-notification-toast:hover,
+.apple-toast-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 20px 46px rgba(0, 0, 0, 0.75), 
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Circular Dismiss '✕' Button on Left/Top */
+.apple-notif-dismiss {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(120, 120, 128, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  z-index: 10;
+}
+
+.apple-notification-card:hover .apple-notif-dismiss,
+.apple-notification-toast:hover .apple-notif-dismiss,
+.apple-notif-dismiss.show {
+  opacity: 1;
+}
+
+.apple-notif-dismiss:hover {
+  transform: scale(1.15);
+  background: rgba(142, 142, 147, 0.75);
+  color: #ffffff;
+}
+
+/* App Icon Container & Squircle */
+.apple-notif-icon-wrap,
+.apple-toast-icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+}
+
+.apple-notif-app-icon,
+.apple-toast-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.apple-notif-app-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* Overlapping Corner Badge with Apple Color Emoji */
+.apple-notif-badge {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(28, 28, 30, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  z-index: 3;
+}
+
+.apple-notif-badge img.apple-emoji {
+  width: 12px;
+  height: 12px;
+}
+
+/* Notification Main Content Column */
+.apple-notif-content,
+.apple-toast-content,
+.apple-toast-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Top Meta Row (Sender, Channel/Context, Timestamp) */
+.apple-notif-header,
+.apple-toast-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+
+.apple-notif-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apple-notif-title,
+.apple-toast-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-notif-context {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.apple-notif-time,
+.apple-toast-time {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(235, 235, 245, 0.55);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Message Body */
+.apple-notif-msg,
+.apple-toast-msg,
+.apple-toast-desc {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+.apple-notif-msg strong,
+.apple-toast-msg strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Right-hand side Avatar / Thumbnail (Matching 3rd card in reference photo) */
+.apple-notif-right-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+  margin-left: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.apple-notif-right-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================================================
+   11. (Deprecated alias for backward compatibility)
+   ========================================================================== */
+.apple-chat-user-raw {
+  align-self: flex-end;
+  background: #007aff;
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.apple-chat-incoming-raw {
+  align-self: flex-start;
+  background: #26252a;
+  color: #ffffff;
+  border-bottom-left-radius: 4px;
+}
+
+/* ==========================================================================
+   12. COMPARISON CARD (Before vs After / Old vs New)
+   ========================================================================== */
+.apple-compare-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.apple-compare-col {
+  padding: 22px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.apple-compare-old {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0.7;
+}
+
+.apple-compare-new {
+  background: rgba(41, 151, 255, 0.22);
+  border: 1px solid rgba(41, 151, 255, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 40px rgba(41, 151, 255, 0.3);
+}
+
+.apple-compare-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ==========================================================================
+   13. KEY TAKEAWAY / PROVERB CARD
+   ========================================================================== */
+.apple-takeaway-card {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-left: 4px solid var(--apple-accent-electric);
+}
+
+.apple-takeaway-headline {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.apple-takeaway-headline span {
+  color: var(--apple-brand-cream);
+  }
+
+/* ==========================================================================
+   14. AUTOMATION WORKFLOW PIPELINE (Node-to-Node Visualizer)
+   ========================================================================== */
+.apple-pipeline-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  box-sizing: border-box;
+}
+
+.apple-pipeline-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.apple-pipeline-node {
+  position: relative;
+  z-index: 2;
+  width: 100px;
+  padding: 14px 10px;
+  border-radius: 18px;
+  background: rgba(28, 28, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.apple-node-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.apple-node-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.apple-node-pill {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.apple-pipeline-node.active {
+  border-color: rgba(41, 151, 255, 0.6);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 16px 40px rgba(41, 151, 255, 0.45);
+  transform: translateY(-2px);
+}
+
+.apple-pipeline-node.completed {
+  border-color: rgba(48, 209, 88, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 30px rgba(48, 209, 88, 0.25);
+}
+
+/* ==========================================================================
+   15. THE INSPECTOR LOUPE (Precision Focus Lens & Bezier Tether)
+   ========================================================================== */
+.apple-loupe-viewport {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 18px;
+  background: #0d1117;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-loupe-ring {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 16px 40px rgba(0, 0, 0, 0.8),
+    inset 0 1.5px 3px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(41, 151, 255, 0.4);
+  backdrop-filter: blur(14px) brightness(1.2) contrast(1.1);
+  -webkit-backdrop-filter: blur(14px) brightness(1.2) contrast(1.1);
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-loupe-crosshair {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2997ff;
+  box-shadow: 0 0 10px #2997ff;
+}
+
+.apple-loupe-callout {
+  position: absolute;
+  z-index: 11;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(28, 28, 30, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd60a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   16. macOS INTERACTIVE POINTER & SETTINGS TOGGLE
+   ========================================================================== */
+.macos-toggle-stage {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.macos-settings-row {
+  width: 320px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(28, 28, 30, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.macos-switch {
+  width: 46px;
+  height: 28px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.macos-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.macos-switch.active {
+  background: #34C759 !important;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 16px rgba(52, 199, 89, 0.55);
+}
+
+.macos-switch.active .macos-switch-thumb {
+  transform: translateX(18px);
+}
+
+.macos-cursor-arrow {
+  position: absolute;
+  width: 19px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 10;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+  transform-origin: 2px 2px;
+}
+
+/* ==========================================================================
+   17. APPLE KEYNOTE BROADCAST LOWER-THIRD
+   ========================================================================== */
+.keynote-lower-third {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 22px;
+  border-radius: 100px;
+  background: rgba(28, 28, 30, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow: 
+    0 18px 48px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.lower-third-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a60d0 0%, #2997ff 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(41, 151, 255, 0.5);
+}
+
+.lower-third-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lower-third-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lower-third-role {
+  font-size: 12px;
+  color: var(--apple-brand-cream);
+  font-weight: 500;
+}
+
+.specular-sweep-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  pointer-events: none;
+  transform: skewX(-20deg);
+}
+
+/* ==========================================================================
+   18. CENTER-STAGE KEYNOTE THESIS & CORNER PiP DOCK
+   ========================================================================== */
+.emphasis-stage-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, #151d30 0%, #07090f 100%);
+  border-radius: 14px;
+}
+
+.emphasis-center-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 480px;
+  padding: 0 20px;
+  pointer-events: none;
+}
+
+.emphasis-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(41, 151, 255, 0.15);
+  border: 1px solid rgba(41, 151, 255, 0.4);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffd60a;
+  margin-bottom: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.emphasis-headline {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.emphasis-headline .punch-blue {
+  color: #2997ff;
+  }
+
+.emphasis-headline .punch-yellow {
+  color: #ffd60a;
+  }
+
+.emphasis-sub-desc {
+  font-size: 12px;
+  color: var(--apple-brand-cream, #f5f5f7);
+  opacity: 0.75;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.emphasis-speaker-card,
+.emphasis-corner-pip {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 20;
+  background: radial-gradient(circle at 50% 30%, #1e2638 0%, #0d121d 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+}
+
+/* Full-bleed stage presenter state */
+.emphasis-stage-wrapper .emphasis-speaker-card {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+}
+
+/* Full-Stage Speaker View */
+.emphasis-speaker-card .speaker-full-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+/* Compact PiP View */
+.emphasis-speaker-card .speaker-pip-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Standalone docked helper */
+.emphasis-corner-pip {
+  width: 140px;
+  height: 84px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+}
+
+.emphasis-corner-pip.bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+
+.emphasis-corner-pip.bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+/* ==========================================================================
+   19. SPLIT-STAGE (ANCHOR SPEAKER 40% + LIVE APP CANVAS 60%)
+   ========================================================================== */
+.split-stage-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #151d30 0%, #07090f 100%);
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+/* Speaker Card in Split-Stage (starts full bleed or docks to left rail) */
+.split-speaker-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 20;
+  background: radial-gradient(circle at 50% 30%, #1a233a 0%, #0e1422 70%, #090c14 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+}
+
+.split-speaker-card .speaker-full-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.split-speaker-card .speaker-split-rail-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Right-Hand Live App Canvas */
+.split-app-canvas {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 15;
+  background: linear-gradient(135deg, rgba(255, 235, 220, 0.08) 0%, rgba(41, 151, 255, 0.08) 40%, rgba(28, 28, 32, 0.92) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transform: translateX(30px);
+  pointer-events: none;
+}
+
+.split-app-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.split-app-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   20. APPLE COLOR EMOJI ASSETS & UTILITY CLASSES
+   ========================================================================== */
+.apple-emoji {
+  display: inline-block;
+  vertical-align: -0.18em;
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.apple-emoji-sm {
+  width: 1em;
+  height: 1em;
+}
+
+.apple-emoji-md {
+  width: 1.5em;
+  height: 1.5em;
+  vertical-align: -0.25em;
+}
+
+.apple-emoji-lg {
+  width: 2.2em;
+  height: 2.2em;
+  vertical-align: -0.35em;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+.apple-emoji-xl {
+  width: 3.5em;
+  height: 3.5em;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
+}
+
+.apple-emoji-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.apple-emoji-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+

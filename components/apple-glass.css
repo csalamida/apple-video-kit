@@ -1,0 +1,1002 @@
+
+/* ==========================================================================
+   Apple Liquid Glass Design System (apple-glass.css)
+   Grounded in Apple HIG, Liquid Glass Specular, and G² Squircles
+   Reverse-Engineered from Production Video Reference
+   ========================================================================== */
+
+:root {
+  /* ========================================================================
+     THEME PALETTE: Apple HIG Liquid Glass (dark stage)
+     - Accent: #2997ff (system blue, glowing UI)
+     - Cream:  #f5f5f7 (high-contrast light foreground)
+     - Ink:    #111722 (dark stage backing)
+     - Yellow: #ffd60a (attention badge)
+     ======================================================================== */
+  --theme-accent: #2997ff;            /* Electric Cobalt for glowing UI elements */
+  --theme-cobalt: #0a60d0;            /* Authoritative brand cobalt */
+  --theme-cream: #f5f5f7;             /* Warm editorial cream for typography */
+  --theme-ink: #111722;               /* Structural dark ink */
+  --theme-yellow: #ffd60a;            /* Proof yellow accent */
+  --theme-accent-bright: #f5f5f7;     /* Editorial Cream for ultra-clear text contrast */
+  --theme-accent-dark: #064a9e;       /* Deep gradient cobalt stop */
+  --theme-accent-glow: rgba(41, 151, 255, 0.45);   /* Cobalt ambient backglow */
+  --theme-accent-subtle: rgba(41, 151, 255, 0.16);
+
+  /* GLASS MATERIALS (Apple HIG 4-Tier Material Hierarchy with Brand Ink Backing) */
+  --glass-bg-primary: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(28, 28, 32, 0.5) 100%
+  ), rgba(28, 28, 32, 0.82);
+  --glass-blur: blur(36px) saturate(190%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+  --glass-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    0 24px 64px -12px rgba(0, 0, 0, 0.65);
+
+  /* TYPOGRAPHY (Apple SF Pro Display / Text) */
+  --font-apple-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --font-apple-text: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --font-apple-mono: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+  --font-apple-rounded: "SF Pro Rounded", "SF Pro Display", -apple-system, sans-serif;
+}
+
+/* ==========================================================================
+   1. MASTER LIQUID GLASS CONTAINER (G² Squircle)
+   ========================================================================== */
+.apple-liquid-glass {
+  position: relative;
+  background: var(--glass-bg-primary);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 28px;
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+
+/* Ambient Radial Backglow */
+.apple-ambient-backglow {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(circle 320px at 50% 50%, var(--theme-accent-glow), transparent 70%);
+  filter: blur(45px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. CHAPTER PROGRESS PILL (Top Right 01 / 05)
+   ========================================================================== */
+.apple-chapter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  background: rgba(10, 10, 15, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 100px;
+  font-family: var(--font-apple-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.apple-chapter-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apple-chapter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.apple-chapter-dot.active {
+  background: var(--theme-accent);
+  box-shadow: 0 0 10px var(--theme-accent);
+  transform: scale(1.15);
+}
+
+/* ==========================================================================
+   3. PIPELINE CHECKLIST CARD (e.g. Outreach / Automation Pipeline)
+   ========================================================================== */
+.apple-pipeline-card {
+  width: 440px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.apple-pipeline-eyebrow {
+  font-family: var(--font-apple-text);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--theme-accent-bright);
+}
+
+.apple-pipeline-title {
+  font-family: var(--font-apple-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.apple-pipeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apple-pipeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  font-family: var(--font-apple-text);
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+.apple-pipeline-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-check-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px var(--theme-accent-glow);
+  flex-shrink: 0;
+}
+
+.apple-badge-pill {
+  padding: 4px 10px;
+  background: var(--theme-accent-subtle);
+  border: 1px solid var(--theme-accent-glow);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--theme-accent-bright);
+}
+
+/* ==========================================================================
+   4. SEGMENTED CONTROL & CHAT CARD
+   ========================================================================== */
+.apple-chat-card {
+  width: 440px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.apple-segmented-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.apple-segment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-family: var(--font-apple-text);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.apple-segment.active {
+  background: linear-gradient(135deg, var(--theme-accent-dark) 0%, rgba(41, 151, 255, 0.45) 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 10px var(--theme-accent-glow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.apple-sphere-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--theme-accent) 60%, var(--theme-accent-dark) 100%);
+  box-shadow: 0 0 8px var(--theme-accent);
+}
+
+.apple-speech-bubble {
+  background: linear-gradient(135deg, rgba(41, 151, 255, 0.6) 0%, rgba(11, 50, 158, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 18px 22px;
+  font-family: var(--font-apple-text);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.apple-audio-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+}
+
+.apple-mic-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px var(--theme-accent-glow);
+}
+
+.apple-waveform-bars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apple-wave-bar {
+  width: 3px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   5. SMARTPHONE REFERENCES MASONRY CARD
+   ========================================================================== */
+.apple-phone-card {
+  width: 300px;
+  height: 520px;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 36px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+}
+
+.apple-speaker-slit {
+  width: 64px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  margin: 0 auto 4px auto;
+}
+
+.apple-phone-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-apple-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--theme-accent-bright);
+}
+
+.apple-masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  flex: 1;
+}
+
+.apple-masonry-tile {
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, var(--theme-accent-subtle) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   6. LOWER-THIRD BADGE & CALLOUT PILL
+   ========================================================================== */
+.apple-lower-third {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, rgba(41, 151, 255, 0.4) 0%, rgba(28, 28, 32, 0.85) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 18px;
+  font-family: var(--font-apple-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--theme-accent-glow);
+}
+
+.apple-callout-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-dark) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 100px;
+  font-family: var(--font-apple-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 8px 32px var(--theme-accent-glow), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+/* ==========================================================================
+   6.1 APPLE HIG LIQUID GLASS BUTTON SUITE
+   ========================================================================== */
+.apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  font-family: var(--font-apple-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: 14px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.apple-btn-pill {
+  border-radius: 100px;
+}
+
+.apple-btn-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.6),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.apple-btn-cobalt {
+  background: linear-gradient(135deg, var(--theme-cobalt) 0%, var(--theme-accent) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.65),
+    0 8px 24px var(--theme-accent-glow);
+}
+
+/* ==========================================================================
+   6.2 CSS.GLASS ULTRA-THIN FROSTED MATERIAL
+   ========================================================================== */
+.glass-ultra-thin {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+/* ==========================================================================
+   6.3 APPLE SF SYMBOLS 6 GLYPH SPECIFICATIONS
+   ========================================================================== */
+.sf-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   7. FULLSCREEN CHAPTER TITLE INTERSTITIAL
+   ========================================================================== */
+.apple-chapter-interstitial {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle 800px at 30% 40%, var(--theme-accent-glow) 0%, #0a0c14 80%);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.apple-perspective-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.apple-interstitial-eyebrow {
+  font-family: var(--font-apple-text);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--theme-accent-bright);
+  margin-bottom: 8px;
+}
+
+.apple-interstitial-num {
+  font-family: var(--font-apple-display);
+  font-size: 140px;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  display: flex;
+  background: linear-gradient(180deg, #ffffff 10%, var(--theme-accent) 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #ffffff;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 10px 30px var(--theme-accent-glow));
+}
+
+.apple-interstitial-title {
+  font-family: var(--font-apple-display);
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-align: center;
+  max-width: 800px;
+  margin-top: 16px;
+}
+
+.apple-specular-divider {
+  width: 320px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.8), 0 0 32px var(--theme-accent);
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   8. APPLE SF SYMBOLS 6 SPECIFICATIONS & RENDERING MODES
+   Grounded in https://developer.apple.com/sf-symbols/
+   ========================================================================== */
+.sf-symbol {
+  width: 1em;
+  height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.125em;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.sf-symbol svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Rendering Mode: Hierarchical (opacity layering of single tint) */
+.sf-hierarchical .sf-primary { opacity: 1.0; }
+.sf-hierarchical .sf-secondary { opacity: 0.55; }
+.sf-hierarchical .sf-tertiary { opacity: 0.28; }
+
+/* Rendering Mode: Palette (multi-color semantic token assignment) */
+.sf-palette .sf-primary { color: var(--theme-accent-bright); }
+.sf-palette .sf-secondary { color: var(--theme-accent); }
+.sf-palette .sf-tertiary { color: var(--theme-yellow); }
+
+/* SF Symbols Spring Animation Classes */
+.sf-bounce {
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+.sf-pulse {
+  will-change: opacity, transform;
+}
+
+/* ==========================================================================
+   9. APPLE ICON COMPOSER APPARATUS
+   Grounded in https://developer.apple.com/icon-composer/
+   Continuous curvature G² squircle (border-radius: 22.37%), layered depth,
+   specular gloss rim, and ambient drop shadow
+   ========================================================================== */
+.apple-app-icon {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 22.37%; /* Exact HIG App Icon Squircle ratio */
+  background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-dark) 100%);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 12px 32px -4px rgba(0, 0, 0, 0.65),
+    0 4px 12px rgba(41, 151, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.apple-app-icon-gloss {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.0) 100%);
+  border-radius: 22.37% 22.37% 0 0;
+  pointer-events: none;
+}
+
+.apple-app-icon-glyph {
+  position: relative;
+  z-index: 2;
+  font-size: 42px;
+  color: #ffffff;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+
+/* ==========================================================================
+   10. ORIGINAL 1:1 REVERSE-ENGINEERED COMPONENT SUITE
+   Exact 1:1 replica of AQNaXaeVzfzgqML7yfJqL9xULyoFgRuHYLhyIz_gdFCTpg9VJZUQTo0qQZOoJV8.mp4
+   ========================================================================== */
+
+:root {
+  --ref-violet: #C4B5FD;
+  --ref-lavender: #E9D5FF;
+  --ref-purple-deep: #0A0314;
+  --ref-purple-dark: #1A0C30;
+  --ref-btn-start: #9333EA;
+  --ref-btn-mid: #7C3AED;
+  --ref-btn-end: #6366F1;
+  --ref-glow-violet: rgba(196, 181, 253, 0.55);
+}
+
+/* 10.1 Crystal Liquid Glass Card (Unified Single Surface) */
+.ref-crystal-card {
+  position: absolute;
+  width: 520px;
+  padding: 32px 34px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(160, 130, 220, 0.12) 35%,
+    rgba(26, 12, 48, 0.78) 100%
+  );
+  backdrop-filter: blur(40px) saturate(190%) brightness(1.04);
+  -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(1.04);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.65),
+    inset 1px 0 1.5px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 24px 0 rgba(168, 85, 247, 0.16),
+    0 24px 50px -10px rgba(0, 0, 0, 0.65),
+    0 0 60px 10px rgba(124, 58, 237, 0.25);
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 40;
+}
+
+/* 10.2 Eyebrow Header */
+.ref-card-eyebrow {
+  font-family: var(--font-apple-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ref-violet);
+    margin-bottom: 12px;
+}
+
+/* 10.3 Card Headline */
+.ref-card-headline {
+  font-family: var(--font-apple-display);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 18px;
+}
+
+.ref-highlight-word {
+  color: var(--ref-violet);
+  }
+
+/* 10.4 Input Pill Slot */
+.ref-input-pill {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  background: rgba(14, 7, 24, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.ref-sparkle-icon {
+  width: 16px;
+  height: 16px;
+  fill: var(--ref-violet);
+  filter: drop-shadow(0 0 6px rgba(157, 114, 255, 0.6));
+  flex-shrink: 0;
+}
+
+.ref-input-text {
+  font-family: var(--font-apple-text);
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.ref-input-placeholder {
+  color: #D8B4FE;
+  font-weight: 500;
+}
+
+.ref-blinking-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 20px;
+  background: #ffffff;
+  vertical-align: middle;
+  margin-left: 2px;
+  animation: ref-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ref-blink {
+  to { visibility: hidden; }
+}
+
+/* 10.5 Bottom Action Row */
+.ref-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.ref-subtext {
+  font-family: var(--font-apple-text);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(196, 181, 253, 0.6);
+}
+
+.ref-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 24px;
+  background: linear-gradient(135deg, var(--ref-btn-start) 0%, var(--ref-btn-mid) 50%, var(--ref-btn-end) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 100px;
+  font-family: var(--font-apple-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow:
+    0 6px 20px rgba(124, 58, 237, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+/* 10.6 Fullscreen Climax 1: "YOU'RE THINKING TOO SMALL." */
+.ref-climax-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle 900px at 32% 40%,
+    rgba(109, 40, 217, 0.7) 0%,
+    rgba(46, 16, 101, 0.45) 50%,
+    #080310 80%
+  );
+  overflow: hidden;
+  z-index: 50;
+}
+
+.ref-perspective-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none;
+}
+
+.ref-climax-subhead {
+  font-family: var(--font-apple-display);
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ref-lavender);
+  margin-bottom: 2px;
+}
+
+.ref-climax-title-box {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.ref-climax-title {
+  font-family: var(--font-apple-display);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.ref-word-too {
+  font-size: 132px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: #ffffff;
+}
+
+.ref-word-small {
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-left: 12px;
+  background: linear-gradient(90deg, #E9D5FF 0%, #A855F7 60%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #ffffff;
+  -webkit-text-fill-color: transparent;
+}
+
+.ref-gradient-small {
+  background: linear-gradient(90deg, #E9D5FF 0%, #A855F7 60%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #ffffff;
+  -webkit-text-fill-color: transparent;
+}
+
+.ref-dot-purple {
+  font-size: 46px;
+  font-weight: 700;
+  color: var(--ref-violet);
+    -webkit-text-fill-color: var(--ref-violet);
+}
+
+.ref-floating-badge {
+  position: absolute;
+  padding: 8px 24px;
+  border-radius: 16px;
+  background: rgba(139, 92, 246, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  font-family: var(--font-apple-display);
+  font-size: 26px;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow:
+    0 8px 24px rgba(124, 58, 237, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+/* 10.7 Glowing Dollar Badge */
+.ref-dollar-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #C4B5FD 0%, #8B5CF6 60%, #5B21B6 100%);
+  box-shadow: 0 0 22px rgba(139, 92, 246, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-apple-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* 10.8 Fullscreen Title Card: "5 WAYS I'D USE AI" */
+.ref-climax-five-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-five-num {
+  font-family: var(--font-apple-display);
+  font-size: 210px;
+  font-weight: 700;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  background: linear-gradient(180deg, #FFFFFF 10%, #A78BFA 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #ffffff;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 12px 36px rgba(139, 92, 246, 0.55));
+}
+
+.ref-five-orbit-pill {
+  position: absolute;
+  width: 44px;
+  height: 20px;
+  border-radius: 100px;
+  background: rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.65);
+}
+
+.ref-five-title {
+  font-family: var(--font-apple-display);
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 14px;
+}
+
+.ref-five-title span {
+  color: var(--ref-lavender);
+  }
+
+.ref-five-sub {
+  font-family: var(--font-apple-text);
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(220, 210, 240, 0.7);
+  margin-top: 6px;
+}
+
+.ref-five-sub span {
+  color: var(--ref-lavender);
+}
+
+/* 10.9 Benefits Stacked List Card */
+.ref-benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ref-benefit-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  background: rgba(20, 10, 36, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 100px;
+  font-family: var(--font-apple-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.ref-plus-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #C4B5FD 0%, #8B5CF6 60%, #5B21B6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #110524;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.7);
+  flex-shrink: 0;
+}
+
+/* 10.10 Chapter 01 Interstitial */
+.ref-chapter-num {
+  font-family: var(--font-apple-display);
+  font-size: 150px;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  background: linear-gradient(180deg, #FFFFFF 15%, #A78BFA 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #ffffff;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 10px 30px rgba(139, 92, 246, 0.6));
+}
+
+.ref-chapter-title {
+  font-family: var(--font-apple-display);
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-top: 14px;
+}
+
+.ref-chapter-title span {
+  color: var(--ref-lavender);
+  }
+
+.ref-specular-beam {
+  width: 480px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.9) 50%, transparent 100%);
+  box-shadow:
+    0 0 16px rgba(255, 255, 255, 0.8),
+    0 0 32px var(--ref-violet);
+  margin-top: 20px;
+}
