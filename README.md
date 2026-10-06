@@ -13,7 +13,7 @@ Everything is data. You describe a video as times and settings ("at 3.2 s zoom t
 
 ## Quick start
 
-Needs Node 22+ and ffmpeg. Python 3 with OpenCV only if you run face detection on your own talking-head footage.
+Needs Node 22+ and ffmpeg. Python 3.9+ only for face detection on your own talking-head footage (its OpenCV dependency installs itself on first use).
 
 ```bash
 npm install
@@ -28,7 +28,7 @@ The demos ship with no real footage. On first run the kit generates a faceless p
 
 1. Put your files in `inputs/` (git-ignored, so they never end up in the repo).
 2. Screen share: point `#screen` (silent screen recording) and `#cam` (webcam with your voice) in `projects/screen-share/index.html` at them. Talking head: point `#footage` in `index.html` at your video.
-3. Talking head only: run `scripts/detect-face.py` once so cards know where your face is (see the comment at the top of the file). It writes `inputs/face-track.js`, which stays out of git.
+3. Talking head only: `npm run face -- inputs/your-video.mp4` once so cards know where your face is. The first run sets up a private Python environment in `.cache/` and installs OpenCV (about 40 MB); it writes `inputs/face-track.js`, which stays out of git.
 4. Describe the video:
    - screen share: `projects/screen-share/share.js` (zooms, webcam moments, callouts, focus, redaction, jump cuts)
    - talking head: `components/camera.js` (camera moves) and template host tags in `index.html`

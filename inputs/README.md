@@ -10,4 +10,4 @@ Your source media goes here. Everything in this folder except this README is git
 
 The demo files in `inputs/_demo/` are generated on first run (a faceless silhouette and a test pattern). Point the `<video>` `src` at your own file to replace them.
 
-The face track is generated too: when `inputs/face-track.js` is missing, `npm run media` (and `check:face`, `check:all`) writes a demo track that matches the silhouette. For your own footage run `scripts/detect-face.py`, which overwrites it with the real track. It stays on your machine; a track of your face is never committed.
+The face track is generated too: when `inputs/face-track.js` is missing, `npm run media` (and `check:face`, `check:all`) writes a demo track that matches the silhouette. For your own footage run `npm run face -- inputs/<your video>.mp4`, which overwrites it with the real track. It stays on your machine; a track of your face is never committed.

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Detect the speaker's face once and write inputs/face-track.json (+ inputs/face-track.js).
 
-Usage (opencv lives in a throwaway venv, not in the project):
-  python3 -m venv /tmp/hf-venv && /tmp/hf-venv/bin/pip install opencv-python-headless numpy
-  /tmp/hf-venv/bin/python scripts/detect-face.py inputs/speaker.mp4 inputs/face-track.json
+Usage: npm run face -- inputs/speaker.mp4 [out.json]
+  (scripts/face-track.mjs creates .cache/face-venv and installs opencv-python-headless<5 + numpy on first run,
+  then runs this file with that interpreter. Running it directly needs those packages installed.)
 
 Output boxes are in the SOURCE frame coordinates (the real size from ffprobe, written as "frame") and cover
 the HEAD (hair to chin), sampled at 10 fps, median-smoothed so the box does not jitter.

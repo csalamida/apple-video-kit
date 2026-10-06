@@ -92,10 +92,10 @@ components/
   tpl-parts.js           icon set, iPhone, panel registry (pipeline|contact|table|list|stats|chat|text|terminal|image)
   screen-stage.js        screen-share engine (window, zooms + drift, webcam modes, annotations, jump-cut punch)
   camera.js              talking-head camera + speaker window moves as DATA
-inputs/face-track.js     face boxes, git-ignored: generated for the placeholder, scripts/detect-face.py (opencv in a temp venv) writes yours
+inputs/face-track.js     face boxes, git-ignored: generated for the placeholder; `npm run face -- <video>` writes yours (installs OpenCV into .cache/face-venv on first run)
 inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated catalog (live previews, props editor, cue sheets)
-scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library-page, sync-share, demo-media, serve, detect-face.py
+scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library-page, sync-share, demo-media, serve, face-track (+ detect-face.py)
 ```
 
 **Templates (`compositions/tpl/*.html`)** - cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`; overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`; text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`; titles: `title-card` (intro | outro); devices: `imessage-phone`; transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint, z-index 90+). Mount:

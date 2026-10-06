@@ -34,7 +34,7 @@ The cursor is baked into the screen recording: never synthesise or restyle one.
 - Camera moves are data in `components/camera.js` (`moves`, `cuts`, `punch`); `index.html` builds the tweens from it. Never hard-code camera tweens.
 - Speaker PiP and split rail are WINDOW moves (`win`, `fit: 'frame' | 'cover'`, `front`, `chrome`) driven by `__hfGlass.stage`: the window morphs, the footage is only panned/scaled inside `#camera-pan` > `#punch`, so it never re-crops. Never animate width/height on a `<video>`.
 - Speaker PiP docks bottom-left on the page margin; `app-window` with `layout:"rail"` fills the column above it.
-- Face boxes: `inputs/face-track.js` (git-ignored). The demo track is generated; for your footage run `scripts/detect-face.py` (see its header).
+- Face boxes: `inputs/face-track.js` (git-ignored). The demo track is generated; for your footage run `npm run face -- inputs/<video>.mp4` (installs OpenCV into `.cache/face-venv` on first run).
 
 ## Templates (compositions/tpl): use these, never copy-paste scenes
 
@@ -81,6 +81,7 @@ npm run share:dev      # screen-share preview
 npm run library        # template library + storyboard at http://localhost:4173/library/
 npm run trim -- inputs/webcam.mp4 --also inputs/screen.mp4   # cut pauses; prints synced clips + jump-cut times
 npm run plan -- transcript.srt --mode screen                  # draft cue plan from a transcript (.srt / .vtt)
+npm run face -- inputs/speaker.mp4                            # face track for your talking-head footage (self-installing)
 npm run render         # talking head to MP4
 npm run share:render   # screen share to MP4
 npm run check:all      # every gate below
@@ -115,7 +116,7 @@ projects/screen-share/    screen-share demo: index.html + share.js
 compositions/tpl/         the 18 templates
 components/               tokens.css, glass CSS, glass-components.js (__hfGlass), screen-stage.js,
                           tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js
-scripts/                  auto-trim, cue-plan + cue-rules, checks, library generator, demo media, serve, detect-face.py
+scripts/                  auto-trim, cue-plan + cue-rules, checks, library generator, demo media, serve, face-track + detect-face.py
 library/                  generated template library (npm run build:library)
 assets/demo/              placeholder screens for demos
 inputs/                   your footage (git-ignored except README); demo media generated into inputs/_demo/

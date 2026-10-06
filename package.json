@@ -14,6 +14,7 @@
     "check": "npm run -s media && hyperframes check",
     "render": "npm run -s media && hyperframes render",
     "check:face": "node scripts/demo-media.mjs index.html && node scripts/check-face-clear.mjs",
+    "face": "node scripts/face-track.mjs",
     "check:privacy": "node scripts/check-privacy.mjs",
     "check:all": "npm run -s media && npm run -s check && npm run -s check:face && npm run -s share:check && npm run -s check:privacy",
     "build:library": "node scripts/build-library.mjs",
