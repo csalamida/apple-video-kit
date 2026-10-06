@@ -1,48 +1,97 @@
 #!/usr/bin/env python3
-"""Detect the speaker's face once and write inputs/face-track.json.
+"""Detect the speaker's face once and write inputs/face-track.json (+ inputs/face-track.js).
 
 Usage (opencv lives in a throwaway venv, not in the project):
   python3 -m venv /tmp/hf-venv && /tmp/hf-venv/bin/pip install opencv-python-headless numpy
   /tmp/hf-venv/bin/python scripts/detect-face.py inputs/speaker.mp4 inputs/face-track.json
 
-Output boxes are in raw 1920x1080 frame coordinates and cover the HEAD (hair to chin),
-sampled at 10 fps, median-smoothed so the box does not jitter.
+Output boxes are in the SOURCE frame coordinates (the real size from ffprobe, written as "frame") and cover
+the HEAD (hair to chin), sampled at 10 fps, median-smoothed so the box does not jitter.
+Short detection gaps are interpolated; across gaps longer than MAX_GAP the last box is held and a warning
+lists them (the runtime needs a box at every sample). The output is git-ignored: it maps your face.
 """
 import json, subprocess, sys, tempfile, os, glob
 import cv2, numpy as np
 
 src = sys.argv[1] if len(sys.argv) > 1 else "inputs/speaker.mp4"
 dst = sys.argv[2] if len(sys.argv) > 2 else "inputs/face-track.json"
-FPS, SCALE = 10, 0.5
-W, H = 1920, 1080
+FPS = 10
+DETECT_W = 960        # frames are scaled to this width for detection (height keeps the aspect ratio)
+MAX_GAP = 1.0         # s; longer gaps without a face are held, not interpolated
 
-tmp = tempfile.mkdtemp()
-subprocess.run(["ffmpeg", "-loglevel", "error", "-i", src, "-vf", f"fps={FPS},scale={int(W*SCALE)}:{int(H*SCALE)}",
-                os.path.join(tmp, "f_%04d.png")], check=True)
-frames = sorted(glob.glob(os.path.join(tmp, "f_*.png")))
-casc = [cv2.CascadeClassifier(cv2.data.haarcascades + n) for n in
-        ("haarcascade_frontalface_alt2.xml", "haarcascade_frontalface_default.xml")]
 
-raw = []
-for p in frames:
-    g = cv2.equalizeHist(cv2.cvtColor(cv2.imread(p), cv2.COLOR_BGR2GRAY))
-    best = None
-    for c in casc:
-        for f in c.detectMultiScale(g, 1.08, 5, minSize=(90, 90)):
-            if best is None or f[2] * f[3] > best[2] * best[3]:
-                best = f
-        if best is not None:
-            break
-    raw.append(None if best is None else [v / SCALE for v in best])
+def ffmpeg_missing():
+    sys.exit("detect-face: ffmpeg not found on PATH - install it (macOS: brew install ffmpeg, Windows: winget install ffmpeg)")
 
-if not any(raw):
+
+# real source size (first video stream)
+try:
+    probe = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+                            "-of", "json", src], capture_output=True, text=True)
+except FileNotFoundError:
+    ffmpeg_missing()
+if probe.returncode != 0:
+    sys.exit("detect-face: ffprobe could not read " + src + "\n" + probe.stderr.strip())
+stream = (json.loads(probe.stdout or "{}").get("streams") or [{}])[0]
+W, H = int(stream.get("width") or 0), int(stream.get("height") or 0)
+if not W or not H:
+    sys.exit("detect-face: no video stream in " + src)
+
+with tempfile.TemporaryDirectory(prefix="hf-face-") as tmp:
+    try:
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-i", src, "-vf", f"fps={FPS},scale={DETECT_W}:-2",
+                        os.path.join(tmp, "f_%05d.png")], check=True)
+    except FileNotFoundError:
+        ffmpeg_missing()
+    frames = sorted(glob.glob(os.path.join(tmp, "f_*.png")))
+    casc = [cv2.CascadeClassifier(cv2.data.haarcascades + n) for n in
+            ("haarcascade_frontalface_alt2.xml", "haarcascade_frontalface_default.xml")]
+
+    raw = []
+    for p in frames:
+        img = cv2.imread(p)
+        sx, sy = W / img.shape[1], H / img.shape[0]   # detection pixels -> source pixels
+        g = cv2.equalizeHist(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+        best = None
+        for c in casc:
+            for f in c.detectMultiScale(g, 1.08, 5, minSize=(90, 90)):
+                if best is None or f[2] * f[3] > best[2] * best[3]:
+                    best = f
+            if best is not None:
+                break
+        raw.append(None if best is None else [best[0] * sx, best[1] * sy, best[2] * sx, best[3] * sy])
+
+if not any(r is not None for r in raw):
     sys.exit('detect-face: no frontal face found in ' + src + ' (check framing/lighting); nothing written')
 
-# fill gaps, then median-smooth
-arr = np.array([r if r else [np.nan] * 4 for r in raw], dtype=float)
-for i in range(4):
-    idx = np.arange(len(arr)); ok = ~np.isnan(arr[:, i])
-    arr[:, i] = np.interp(idx, idx[ok], arr[ok, i])
+# gaps (runs of frames without a face)
+gaps, i = [], 0
+while i < len(raw):
+    if raw[i] is None:
+        j = i
+        while j < len(raw) and raw[j] is None:
+            j += 1
+        gaps.append((i, j))   # frames i .. j-1 missing
+        i = j
+    else:
+        i += 1
+
+# fill gaps: interpolate short interior ones, hold the nearest box across long ones and at the edges
+arr = np.array([r if r is not None else [np.nan] * 4 for r in raw], dtype=float)
+long_gaps = []
+for a, b in gaps:
+    before = arr[a - 1] if a > 0 else None
+    after = arr[b] if b < len(arr) else None
+    secs = (b - a) / FPS
+    if before is not None and after is not None and secs <= MAX_GAP:
+        for k in range(a, b):
+            w = (k - a + 1) / (b - a + 1)
+            arr[k] = before + (after - before) * w
+    else:
+        if secs > MAX_GAP:
+            long_gaps.append((a / FPS, b / FPS))
+        arr[a:b] = before if before is not None else after
+
 k = 7
 pad = np.pad(arr, ((k // 2, k // 2), (0, 0)), mode="edge")
 sm = np.array([np.median(pad[i:i + k], axis=0) for i in range(len(arr))])
@@ -54,8 +103,17 @@ for i, (x, y, w, h) in enumerate(sm):
     hx1, hy1 = x + 1.05 * w, y + 1.0 * h
     track.append({"t": round(i / FPS, 2), "x0": round(hx0), "y0": round(hy0), "x1": round(hx1), "y1": round(hy1)})
 
-json.dump({"source": os.path.basename(src), "fps": FPS, "frame": [W, H], "detected": sum(1 for r in raw if r), "total": len(raw), "track": track},
-          open(dst, "w"), indent=1)
-js = dst.rsplit(".", 1)[0] + ".js"
-open(js, "w").write("/* generated by scripts/detect-face.py - do not edit */\nwindow.__hfFace = " + json.dumps(json.load(open(dst))) + ";\n")
-print(f"detected {sum(1 for r in raw if r)}/{len(raw)} frames -> {dst}")
+detected = sum(1 for r in raw if r is not None)
+data = {"source": os.path.basename(src), "fps": FPS, "frame": [W, H], "detected": detected, "total": len(raw), "track": track}
+with open(dst, "w") as fh:
+    json.dump(data, fh, indent=1)
+js = os.path.splitext(dst)[0] + ".js"
+with open(js, "w") as fh:
+    fh.write("/* generated by scripts/detect-face.py - do not edit (git-ignored: it maps your face) */\nwindow.__hfFace = "
+             + json.dumps(data) + ";\n")
+print(f"detected {detected}/{len(raw)} frames ({W}x{H}) -> {dst} + {js}")
+if long_gaps:
+    print("warning: no face for more than %.1f s at %s; the last box is held there (cards keep clear of where the face was)"
+          % (MAX_GAP, ", ".join("%.1f-%.1fs" % g for g in long_gaps)))
+if (W, H) != (1920, 1080):
+    print(f"note: source is {W}x{H}; boxes are in source pixels, the 1920x1080 stage assumes the footage is scaled to fill it")

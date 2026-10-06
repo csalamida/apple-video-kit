@@ -80,23 +80,23 @@ var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebro
         // Shared blur-through ramp: up to peak by `rise`, hold, back to 0 at D.
         function blurThrough(node, peak, br, sa, rise) {
           tl.fromTo(node, {"--b":"0px","--br":1,"--sa":1}, {"--b":peak+"px","--br":br,"--sa":sa,duration:rise,ease:"sine.inOut"}, 0);
-          tl.to(node, {"--b":"0px","--br":1,"--sa":1,duration:rise,ease:"sine.inOut"}, D - rise);
+          tl.fromTo(node, {"--b":peak+"px","--br":br,"--sa":sa}, {"--b":"0px","--br":1,"--sa":1,duration:rise,ease:"sine.inOut",immediateRender:false}, D - rise);
         }
 
         var kind = V.kind;
         if (kind === "dip") {
           var dip = el("fx"); dip.style.background = V.color;
           tl.fromTo(dip, {opacity:0}, {opacity:1,duration:D*0.42,ease:"power2.inOut"}, 0);
-          tl.to(dip, {opacity:0,duration:D*0.42,ease:"power2.inOut"}, D*0.58);
+          tl.fromTo(dip, {opacity:1}, {opacity:0,duration:D*0.42,ease:"power2.inOut",immediateRender:false}, D*0.58);
 
         } else if (kind === "flash") {
           // Overexposure lift first, then the white peak exactly on the cut, long soft decay.
           var lift = el("fx fx-lift"), fl = el("fx fx-flash");
           var atk = Math.min(0.16, M*0.7), hold = Math.min(0.05, D*0.08);
           tl.fromTo(lift, {opacity:0}, {opacity:1,duration:M,ease:"power2.in"}, 0);
-          tl.to(lift, {opacity:0,duration:M*0.9,ease:"power2.out"}, M + hold/2);
+          tl.fromTo(lift, {opacity:1}, {opacity:0,duration:M*0.9,ease:"power2.out",immediateRender:false}, M + hold/2);
           tl.fromTo(fl, {opacity:0}, {opacity:1,duration:atk,ease:"power2.in"}, M - hold/2 - atk);
-          tl.to(fl, {opacity:0,duration:D - (M + hold/2),ease:"power3.out"}, M + hold/2);
+          tl.fromTo(fl, {opacity:1}, {opacity:0,duration:D - (M + hold/2),ease:"power3.out",immediateRender:false}, M + hold/2);
 
         } else if (kind === "blur") {
           var bl = el("fx fx-blur");
@@ -130,9 +130,10 @@ var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebro
           var s0 = pos ? -PL : L, c0 = pos ? cover : L - PL - cover, e0 = pos ? L : -PL;
           var prop = horiz ? "x" : "y";
           var a = {}, b = {}, c = {}; a[prop] = s0; b[prop] = c0; c[prop] = e0;
-          b.duration = D*0.47; b.ease = E.smooth; c.duration = D*0.47; c.ease = "power2.in";
+          b.duration = D*0.47; b.ease = E.smooth; c.duration = D*0.47; c.ease = "power2.in"; c.immediateRender = false;
+          var bFrom = {}; bFrom[prop] = c0;
           tl.fromTo(pane, a, b, 0);
-          tl.to(pane, c, D*0.53);
+          tl.fromTo(pane, bFrom, c, D*0.53);
 
         } else if (kind === "iris") {
           var ir = el("iris"); ir.setAttribute("data-layout-allow-overflow", "");
@@ -141,7 +142,7 @@ var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebro
           function rr(w, h) { return Math.min(w, h) * 0.34 + "px"; }
           tl.fromTo(ir, {width:big.w, height:big.h, borderRadius:rr(big.w, big.h)},
                         {width:0, height:0, borderRadius:"0px", duration:D*0.45, ease:"power2.in"}, 0);
-          tl.to(ir, {width:big.w, height:big.h, borderRadius:rr(big.w, big.h), duration:D*0.45, ease:"power2.out"}, D*0.55);
+          tl.fromTo(ir, {width:0, height:0, borderRadius:"0px"}, {width:big.w, height:big.h, borderRadius:rr(big.w, big.h), duration:D*0.45, ease:"power2.out", immediateRender:false}, D*0.55);
 
         } else if (kind === "light-sweep") {
           var horiz2 = dir === "left" || dir === "right", pos2 = dir === "right" || dir === "down";
@@ -161,7 +162,7 @@ var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebro
           to[k] = pos2 ? span : -span; to.rotation = tilt; to.duration = D; to.ease = "sine.inOut";
           tl.fromTo([halo, core], from, to, 0);
           tl.fromTo(bloom, {opacity:0}, {opacity:1,duration:M*0.8,ease:"power2.in"}, M*0.2);
-          tl.to(bloom, {opacity:0,duration:M*0.8,ease:"power2.out"}, M);
+          tl.fromTo(bloom, {opacity:1}, {opacity:0,duration:M*0.8,ease:"power2.out",immediateRender:false}, M);
 
         } else if (kind === "chapter") {
           var cb = el("fx fx-blur");
@@ -171,7 +172,7 @@ var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebro
           pill.innerHTML = (V.eyebrow ? '<div class="eb">' + esc(V.eyebrow) + '</div>' : '') + '<div class="tt">' + esc(V.title) + '</div>';
           gsap.set(pill, {xPercent:-50, yPercent:-50});
           tl.fromTo(pill, {opacity:0, scale:0.9, y:16}, {opacity:1, scale:1, y:0, duration:Math.min(0.6, D*0.36), ease:E.snappy}, D*0.18);
-          tl.to(pill, {opacity:0, scale:0.97, y:-8, duration:Math.min(0.3, D*0.18), ease:"power2.in"}, D*0.66);
+          tl.fromTo(pill, {opacity:1, scale:1, y:0}, {opacity:0, scale:0.97, y:-8, duration:Math.min(0.3, D*0.18), ease:"power2.in", immediateRender:false}, D*0.66);
         }
       })();
     </script>

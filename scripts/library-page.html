@@ -117,11 +117,18 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const isJson = (d) => d.type === 'string' && typeof d.default === 'string' && /^[\[{]/.test(d.default.trim());
 const getSrc = async (file) => cache[file] || (cache[file] = await (await fetch(ROOT + file)).text());
 
+// Stacking order of a mounted host (same scale as cue-plan.mjs): by template id first, then by category.
+const Z_ID = { 'kinetic-subtitle': 75, 'title-card': 70, 'chapter-pill': 60, 'lower-third': 55 };
+const Z_CAT = { Transitions: 90, Overlays: 60, Titles: 70, 'Cards & Panels': 40 };
+const zFor = (t) => Z_ID[t.id] ?? Z_CAT[t.category] ?? 40;
+// JSON-typed variables are strings; compare them by parsed value so re-formatted but unchanged lists are not emitted.
+const norm = (d, v) => { if (!isJson(d) || typeof v !== 'string') return JSON.stringify(v); try { return JSON.stringify(JSON.parse(v)); } catch (e) { return v; } };
+
 function hostTagFor(t, V, n) {
   const changed = {};
-  t.variables.forEach((d) => { if (JSON.stringify(V[d.id]) !== JSON.stringify(d.default)) changed[d.id] = isJson(d) ? JSON.parse(V[d.id]) : V[d.id]; });
+  t.variables.forEach((d) => { if (norm(d, V[d.id]) !== norm(d, d.default)) changed[d.id] = isJson(d) ? JSON.parse(V[d.id]) : V[d.id]; });
   changed.at = V.at; changed.dur = V.dur;
-  const z = t.category === 'Transitions' ? 90 : 40;
+  const z = zFor(t);
   return `<div id="${t.id}-${n}" class="clip subcomp-host" style="z-index: ${z};" data-composition-id="${t.id}-${n}" data-composition-src="${t.file}" data-start="${V.at}" data-duration="${V.dur}" data-variable-values='${JSON.stringify(changed).replace(/'/g, '&#39;')}'></div>`;
 }
 
@@ -131,6 +138,11 @@ const Board = (() => {
   try { items = JSON.parse(localStorage.getItem('avk-board') || '[]'); } catch (e) { items = []; }
   const save = () => { try { localStorage.setItem('avk-board', JSON.stringify(items)); } catch (e) { /* private mode */ } };
   const byId = (id) => MANIFEST.templates.find((t) => t.id === id);
+  // drop stored blocks whose template was renamed or removed since they were saved
+  if (!Array.isArray(items)) items = [];
+  const before = items.length;
+  items = items.filter((it) => it && it.V && byId(it.id));
+  if (items.length !== before) save();
   function render() {
     items.sort((a, b) => a.V.at - b.V.at);
     $('#board-empty').style.display = items.length ? 'none' : '';
@@ -235,7 +247,8 @@ function mountCard(t, ex, replaceEl, exName) {
   const hostTag = (V) => hostTagFor(t, V, 1);
   let deb; card.addEventListener('input', (e) => { if (e.target.classList.contains('seek')) { tNow = parseFloat(seek.value); paint(); return; } if (e.target.classList.contains('showface')) { paint(); return; } clearTimeout(deb); deb = setTimeout(build, 250); });
   $('.play', card).onclick = (e) => { playing = !playing; e.target.textContent = playing ? 'Pause' : 'Play'; last = performance.now(); if (playing) tick(); };
-  function tick() { if (!playing) return; const n = performance.now(); tNow += (n - last) / 1000; last = n; const mx = parseFloat(seek.max); if (tNow > mx) tNow = 0; paint(); requestAnimationFrame(tick); }
+  // stops by itself once this card is replaced (Reset, example swap, tab change)
+  function tick() { if (!playing || !card.isConnected) return; const n = performance.now(); tNow += (n - last) / 1000; last = n; const mx = parseFloat(seek.max); if (tNow > mx) tNow = 0; paint(); requestAnimationFrame(tick); }
   $('.copy', card).onclick = async (e) => { await navigator.clipboard.writeText($('.tag', card).value); e.target.textContent = 'Copied'; setTimeout(() => (e.target.textContent = 'Copy host tag'), 1200); };
   $('.reset', card).onclick = () => mountCard(t, null, card);
   $('.add', card).onclick = (e) => { Board.add(t, readVals()); e.target.textContent = 'Added'; setTimeout(() => (e.target.textContent = 'Add to storyboard'), 1200); };
@@ -249,7 +262,9 @@ function mountCard(t, ex, replaceEl, exName) {
   const rig = '#st-rig', app = '#st-app', G = window.__hfGlass;
   const stage = $('#st'), sc = $('#st-scale');
   new ResizeObserver(() => { sc.style.transform = `scale(${stage.clientWidth / 1920})`; }).observe(stage);
-  const tr = window.__hfFace.track; const focus = { x: tr.reduce((a, b) => a + (b.x0 + b.x1) / 2, 0) / tr.length, y: tr.reduce((a, b) => a + (b.y0 + b.y1) / 2, 0) / tr.length };
+  // inputs/face-track.js is generated (npm run media); fall back to the frame centre if it is missing
+  const tr = (window.__hfFace && window.__hfFace.track) || [];
+  const focus = tr.length ? { x: tr.reduce((a, b) => a + (b.x0 + b.x1) / 2, 0) / tr.length, y: tr.reduce((a, b) => a + (b.y0 + b.y1) / 2, 0) / tr.length } : { x: 960, y: 430 };
   G.stage.pan(rig);
   const MODES = {
     full: { label: 'Full', code: "__hfGlass.undockPiP(tl, '#rig', { start: 0 });", run: (tl) => G.undockPiP(tl, rig, { start: 0 }) },

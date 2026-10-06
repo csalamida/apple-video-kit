@@ -95,7 +95,7 @@
           if (sb) tl.fromTo(sb, {opacity:0, y:16, filter:"blur(8px)"}, {opacity:1, y:0, filter:"blur(0px)", duration:0.8, ease:E.smooth}, 0.5 + ws.length * 0.075);
 
           tl.to(intro, {opacity:0, y:-18 + V.offsetY, filter:"blur(10px)", duration:0.4, ease:"power2.in"}, out);
-          tl.to(scrim, {opacity:0, duration:0.45, ease:"power1.in"}, out + 0.05);
+          tl.fromTo(scrim, {opacity:1}, {opacity:0, duration:0.45, ease:"power1.in", immediateRender:false}, Math.max(0.6, out + 0.05));
           return;
         }
 

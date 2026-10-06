@@ -41,7 +41,7 @@
       window.__timelines = window.__timelines || {};
       (function () {
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
-var V = T.vars({at:0,dur:3,safe:true,side:"right",top:80,width:460,offsetX:0,offsetY:0,app:"",context:"",lead:"",message:"",time:"now",icon:"bolt",count:3,scale:1}, window.__hyperframes);
+var V = T.vars({at:0,dur:3,safe:true,side:"right",top:80,width:460,offsetX:0,offsetY:0,app:"Acme CRM",context:"#inbound-leads",lead:"New Lead:",message:"Jane Doe booked a call.",time:"now",icon:"bolt",count:3,scale:1}, window.__hyperframes);
         var ns = document.getElementById("ns");
         var layers = ""; for (var i = Math.min(V.count,3)-1; i >= 1; i--) layers += '<div class="apple-notif-stack-layer apple-notif-stack-layer-'+i+'"></div>';
         ns.innerHTML = '<div class="apple-notification-stack">'+layers+'<div class="apple-notification-card"><div class="apple-notif-dismiss">✕</div><div class="apple-notif-icon-wrap"><div class="apple-notif-app-icon" style="font-weight:700;font-size:22px">'+esc((V.app||"A").charAt(0))+'</div>'+
@@ -51,7 +51,7 @@ var V = T.vars({at:0,dur:3,safe:true,side:"right",top:80,width:460,offsetX:0,off
         ns.style.left = pl.left+"px"; ns.style.top = pl.top+"px"; ns.style.width = pl.width+"px"; ns.style.transform = "scale("+V.scale+")"; ns.style.transformOrigin = "top "+(pl.side==="right"?"right":"left");
         var tl = gsap.timeline({paused:true}); window.__timelines["notification-stack"] = tl;
         tl.fromTo(ns,{opacity:0,y:-40,scale:V.scale*0.92},{opacity:1,y:0,scale:V.scale,duration:0.6,ease:E.bouncy},0);
-        tl.to(ns,{opacity:0,y:-30,duration:0.35,ease:"power2.in"},V.dur-0.4);
+        tl.fromTo(ns,{opacity:1,y:0},{opacity:0,y:-30,duration:0.35,ease:"power2.in",immediateRender:false},Math.max(0.6,V.dur-0.4));
       })();
     </script>
   </body>

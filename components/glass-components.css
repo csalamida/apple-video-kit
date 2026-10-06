@@ -208,36 +208,6 @@
 }
 
 /* ==========================================================================
-   5. APPLE SF SYMBOLS 6 GLYPH BADGES
-   ========================================================================== */
-.apple-sf-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.32);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  flex-shrink: 0;
-}
-
-.apple-sf-badge.accent {
-  background: linear-gradient(135deg, var(--apple-accent-electric) 0%, var(--apple-brand-cobalt) 100%);
-  box-shadow: 0 0 14px rgba(41, 151, 255, 0.5);
-  border: none;
-}
-
-.apple-sf-icon {
-  width: 17px;
-  height: 17px;
-  fill: currentColor;
-}
-
-/* ==========================================================================
    6. STAGGERED CHECKLIST & WORKFLOW ITEMS
    ========================================================================== */
 .apple-list-group {
@@ -913,7 +883,7 @@
   object-fit: cover;
 }
 
-/* Overlapping Corner Badge with Apple Color Emoji */
+/* Overlapping Corner Badge */
 .apple-notif-badge {
   position: absolute;
   bottom: -3px;
@@ -928,11 +898,6 @@
   justify-content: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   z-index: 3;
-}
-
-.apple-notif-badge img.apple-emoji {
-  width: 12px;
-  height: 12px;
 }
 
 /* Notification Main Content Column */
@@ -1633,72 +1598,3 @@
   flex-direction: column;
   gap: 10px;
 }
-
-/* ==========================================================================
-   20. APPLE COLOR EMOJI ASSETS & UTILITY CLASSES
-   ========================================================================== */
-.apple-emoji {
-  display: inline-block;
-  vertical-align: -0.18em;
-  width: 1.2em;
-  height: 1.2em;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
-}
-
-.apple-emoji-sm {
-  width: 1em;
-  height: 1em;
-}
-
-.apple-emoji-md {
-  width: 1.5em;
-  height: 1.5em;
-  vertical-align: -0.25em;
-}
-
-.apple-emoji-lg {
-  width: 2.2em;
-  height: 2.2em;
-  vertical-align: -0.35em;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
-}
-
-.apple-emoji-xl {
-  width: 3.5em;
-  height: 3.5em;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
-}
-
-.apple-emoji-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 12px;
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.apple-emoji-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-
-

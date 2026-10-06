@@ -1,27 +1,31 @@
 {
   "name": "apple-video-kit",
   "type": "module",
+  "version": "0.1.0",
+  "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "media": "node scripts/demo-media.mjs index.html",
-    "dev": "npm run -s media && npx --yes hyperframes@0.8.120 preview",
-    "check": "npm run -s media && npx --yes hyperframes@0.8.120 check",
-    "render": "npm run -s media && npx --yes hyperframes@0.8.120 render",
-    "check:face": "node scripts/check-face-clear.mjs",
+    "dev": "npm run -s media && hyperframes preview",
+    "check": "npm run -s media && hyperframes check",
+    "render": "npm run -s media && hyperframes render",
+    "check:face": "node scripts/demo-media.mjs index.html && node scripts/check-face-clear.mjs",
     "check:privacy": "node scripts/check-privacy.mjs",
+    "check:all": "npm run -s media && npm run -s check && npm run -s check:face && npm run -s share:check && npm run -s check:privacy",
     "build:library": "node scripts/build-library.mjs",
-    "library": "python3 -m http.server 4173",
-    "share:dev": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 preview projects/screen-share",
-    "share:check": "node scripts/sync-share.mjs && node scripts/check-face-clear.mjs projects/screen-share/index.html && npx --yes hyperframes@0.8.120 check projects/screen-share",
-    "share:render": "node scripts/sync-share.mjs && npx --yes hyperframes@0.8.120 render projects/screen-share",
+    "library": "npm run -s media && npm run -s build:library && node scripts/serve.mjs 4173",
+    "share:dev": "node scripts/sync-share.mjs && hyperframes preview projects/screen-share",
+    "share:check": "node scripts/sync-share.mjs && node scripts/check-face-clear.mjs projects/screen-share/index.html && hyperframes check projects/screen-share",
+    "share:render": "node scripts/sync-share.mjs && hyperframes render projects/screen-share",
     "share:sync": "node scripts/sync-share.mjs",
     "trim": "node scripts/auto-trim.mjs",
     "plan": "node scripts/cue-plan.mjs"
   },
   "devDependencies": {
-    "hyperframes": "^0.8.120"
-  },
-  "version": "0.1.0",
-  "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
-  "license": "MIT",
-  "private": true
+    "hyperframes": "0.8.120"
+  }
 }

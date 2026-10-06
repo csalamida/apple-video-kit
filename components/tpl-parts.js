@@ -46,14 +46,31 @@
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   };
 
-  // Injects the icon <defs> once per document.
+  // Injects the icon <defs> once per page. Mounted templates get a getElementById scoped to their own root,
+  // so the guard is a window-level flag plus an unscoped lookup on window.document.
   P.ensureSymbols = function () {
-    if (document.getElementById('hf-ic-defs')) return;
-    var d = document.createElement('div');
+    if (root.__hfIconDefs) return;
+    var doc = root.document || document;
+    if (doc.querySelector && doc.querySelector('#hf-ic-defs')) { root.__hfIconDefs = true; return; }
+    var d = doc.createElement('div');
     d.id = 'hf-ic-defs';
     d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
     d.innerHTML = SYMBOLS;
-    document.body.appendChild(d);
+    doc.body.appendChild(d);
+    root.__hfIconDefs = true;
+  };
+
+  // Injects a helper stylesheet ('contact' | 'pipeline' | 'panels') once per page (window-level flag).
+  // Every class these helpers emit is prefixed (ct- / pl- / pn-), so the global rules never hit other templates.
+  P.useCss = function (name) {
+    var css = { contact: P.contactCss, pipeline: P.pipelineCss, panels: P.panelsCss }[name];
+    var flags = root.__hfPartsCss = root.__hfPartsCss || {};
+    if (!css || flags[name]) return;
+    if (name === 'panels') { flags.contact = flags.pipeline = true; }
+    flags[name] = true;
+    var doc = root.document || document, st = doc.createElement('style');
+    st.setAttribute('data-hf-parts', name); st.textContent = css;
+    doc.head.appendChild(st);
   };
 
   var ALIAS = { zap: 'bolt', dollar: 'money', message: 'chat' };
@@ -108,7 +125,7 @@
       if (m.from !== 'me') {
         var ty = '#' + uid + '-t' + i;
         tl.fromTo(ty, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.2, ease: E.smooth }, at - 0.43);
-        tl.to(ty, { opacity: 0, scale: 0.88, duration: 0.12, ease: 'power2.in' }, at - 0.03);
+        tl.fromTo(ty, { opacity: 1, scale: 1 }, { opacity: 0, scale: 0.88, duration: 0.12, ease: 'power2.in', immediateRender: false }, at - 0.03);
       }
       tl.fromTo(sel, { opacity: 0, scale: 0.9, y: 8 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: E.bouncy }, at);
     });
@@ -121,7 +138,7 @@
    */
   P.contact = function (cfg) {
     var f = (cfg.fields || []).map(function (x) {
-      return '<div class="ct-tile it"><div class="ct-l">' + P.esc(x.label) + '</div><div class="ct-v' + (x.tone ? ' ' + x.tone : '') + '">' + P.esc(x.value) + '</div></div>';
+      return '<div class="ct-tile it"><div class="ct-l">' + P.esc(x.label) + '</div><div class="ct-v' + (x.tone ? ' ct-' + x.tone : '') + '">' + P.esc(x.value) + '</div></div>';
     }).join('');
     return '<div class="ct"><div class="ct-head it"><div class="ct-av">' + P.esc(cfg.initials || '') + '</div><div><div class="ct-n">' + P.esc(cfg.name) + '</div>' +
       (cfg.verifiedText ? '<div class="ct-vf">' + P.icon('seal', 15) + P.esc(cfg.verifiedText) + '</div>' : '') + '</div></div><div class="ct-grid">' + f + '</div></div>';
@@ -130,7 +147,7 @@
     '.ct-av{width:calc(60px*var(--s));height:calc(60px*var(--s));border-radius:50%;background:linear-gradient(135deg,#0a60d0,#2997ff);border:2px solid rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-size:calc(22px*var(--s));font-weight:700;flex:none}' +
     '.ct-n{font-size:calc(24px*var(--s));font-weight:700;letter-spacing:var(--track-title)}.ct-vf{display:flex;align-items:center;gap:6px;color:var(--accent-text);font-size:calc(14px*var(--s));font-weight:600;margin-top:3px}' +
     '.ct-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ct-tile{background:var(--fill-2);border:1px solid rgba(255,255,255,.12);border-radius:14px;corner-shape:var(--corner);padding:14px 16px}' +
-    '.ct-l{font-size:calc(11px*var(--s));font-weight:600;text-transform:uppercase;letter-spacing:var(--track-label);color:var(--label-secondary);margin-bottom:4px}.ct-v{font-size:calc(15px*var(--s));font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct-v.good{color:var(--green)}';
+    '.ct-l{font-size:calc(11px*var(--s));font-weight:600;text-transform:uppercase;letter-spacing:var(--track-label);color:var(--label-secondary);margin-bottom:4px}.ct-v{font-size:calc(15px*var(--s));font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct-v.ct-good{color:var(--green)}';
 
   /**
    * pipeline(cfg) -> HTML kanban for a CRM board (replaces the old JPEG). cfg:{title, columns:[{name,count,cards:[{title,tag,value}]}]}
@@ -161,23 +178,23 @@
     pipeline: function (c) { return P.pipeline(c); },
     contact: function (c) { return P.contact(c); },
     table: function (c) {
-      var cell = function (x) { return (x && typeof x === 'object') ? '<span class="tg ' + (x.tone || '') + '">' + P.esc(x.t) + '</span>' : P.esc(x); };
-      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="tbl"><div class="tr th it">' + (c.columns || []).map(function (h) { return '<span>' + P.esc(h) + '</span>'; }).join('') + '</div>' +
-        (c.rows || []).map(function (r) { return '<div class="tr it">' + r.map(function (x) { return '<span>' + cell(x) + '</span>'; }).join('') + '</div>'; }).join('') + '</div>';
+      var cell = function (x) { return (x && typeof x === 'object') ? '<span class="pn-tg' + tone(x.tone) + '">' + P.esc(x.t) + '</span>' : P.esc(x); };
+      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="pn-tbl"><div class="pn-tr pn-th it">' + (c.columns || []).map(function (h) { return '<span>' + P.esc(h) + '</span>'; }).join('') + '</div>' +
+        (c.rows || []).map(function (r) { return '<div class="pn-tr it">' + r.map(function (x) { return '<span>' + cell(x) + '</span>'; }).join('') + '</div>'; }).join('') + '</div>';
     },
     list: function (c) {
-      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="lst">' + (c.items || []).map(function (it) {
-        return '<div class="li it">' + (it.icon ? '<div class="lic">' + P.icon(it.icon, 20) + '</div>' : '') + '<div class="lt"><div class="lt1">' + P.esc(it.title) + '</div>' + (it.desc ? '<div class="lt2">' + P.esc(it.desc) + '</div>' : '') + '</div>' + (it.tag ? '<span class="tg ' + (it.tone || '') + '">' + P.esc(it.tag) + '</span>' : '') + '</div>';
+      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="pn-lst">' + (c.items || []).map(function (it) {
+        return '<div class="pn-li it">' + (it.icon ? '<div class="pn-lic">' + P.icon(it.icon, 20) + '</div>' : '') + '<div class="pn-lt"><div class="pn-lt1">' + P.esc(it.title) + '</div>' + (it.desc ? '<div class="pn-lt2">' + P.esc(it.desc) + '</div>' : '') + '</div>' + (it.tag ? '<span class="pn-tg' + tone(it.tone) + '">' + P.esc(it.tag) + '</span>' : '') + '</div>';
       }).join('') + '</div>';
     },
     stats: function (c) {
-      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="sts">' + (c.items || []).map(function (it) {
-        return '<div class="st it"><div class="sl">' + P.esc(it.label) + '</div><div class="sv ' + (it.tone || '') + '">' + P.esc(it.value) + '</div>' + (it.sub ? '<div class="ss">' + P.esc(it.sub) + '</div>' : '') + '</div>';
+      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="pn-sts">' + (c.items || []).map(function (it) {
+        return '<div class="pn-st it"><div class="pn-sl">' + P.esc(it.label) + '</div><div class="pn-sv' + tone(it.tone) + '">' + P.esc(it.value) + '</div>' + (it.sub ? '<div class="pn-ss">' + P.esc(it.sub) + '</div>' : '') + '</div>';
       }).join('') + '</div>';
     },
     chat: function (c) {
-      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="cht">' + (c.thread || []).map(function (m) {
-        return '<div class="cb it ' + (m.from === 'me' ? 'me' : 'them') + '">' + P.esc(m.text) + '</div>';
+      return '<div class="pn-h">' + P.esc(c.title || '') + '</div><div class="pn-cht">' + (c.thread || []).map(function (m) {
+        return '<div class="pn-cb it ' + (m.from === 'me' ? 'pn-me' : 'pn-them') + '">' + P.esc(m.text) + '</div>';
       }).join('') + '</div>';
     },
     text: function (c) {
@@ -185,30 +202,31 @@
         (c.body ? '<div class="pn-b it">' + P.esc(c.body) + '</div>' : '') + (c.bullets ? '<ul class="pn-u">' + c.bullets.map(function (b) { return '<li class="it">' + P.esc(b) + '</li>'; }).join('') + '</ul>' : '');
     },
     terminal: function (c) {
-      return '<div class="pn-h">' + P.esc(c.title || 'Terminal') + '</div><div class="term">' + (c.lines || []).map(function (l) {
-        return '<div class="tl it' + (/^\s*\$/.test(l) ? ' cmd' : /\b2\d\d\b/.test(l) ? ' ok' : '') + '">' + P.esc(l) + '</div>';
+      return '<div class="pn-h">' + P.esc(c.title || 'Terminal') + '</div><div class="pn-term">' + (c.lines || []).map(function (l) {
+        return '<div class="pn-tl it' + (/^\s*\$/.test(l) ? ' pn-cmd' : /\b2\d\d\b/.test(l) ? ' pn-ok' : '') + '">' + P.esc(l) + '</div>';
       }).join('') + '</div>';
     },
     image: function (c) {
-      return '<div class="img it"><img src="' + P.esc(c.src || '') + '" alt="">' + (c.caption ? '<div class="imc">' + P.esc(c.caption) + '</div>' : '') + '</div>';
+      return '<div class="pn-img it"><img src="' + P.esc(c.src || '') + '" alt="">' + (c.caption ? '<div class="pn-imc">' + P.esc(c.caption) + '</div>' : '') + '</div>';
     }
   };
+  function tone(t) { return t ? ' pn-' + String(t).replace(/[^\w-]/g, '') : ''; }
   P.panelKinds = Object.keys(PANELS);
   P.panel = function (c) { return (PANELS[c.kind] || PANELS.text)(c); };
   P.panelsCss = P.contactCss + P.pipelineCss +
     '.pn-h{font-size:calc(17px*var(--s));font-weight:600;margin-bottom:12px}.pn-e{font-size:calc(12px*var(--s));font-weight:600;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--label-secondary);margin-bottom:8px}' +
     '.pn-t{font-size:calc(30px*var(--s));font-weight:700;letter-spacing:var(--track-display);line-height:1.1;margin-bottom:12px}.pn-b{font-size:calc(16px*var(--s));line-height:1.45;color:var(--label-secondary)}' +
     '.pn-u{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:14px}.pn-u li{font-size:calc(16px*var(--s));padding-left:18px;position:relative}.pn-u li:before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--accent)}' +
-    '.tbl{display:flex;flex-direction:column;gap:2px}.tr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;padding:11px 12px;border-radius:10px;font-size:calc(14px*var(--s));font-variant-numeric:tabular-nums}.tr:nth-child(even){background:var(--fill-2)}' +
-    '.tr.th{font-size:calc(11px*var(--s));font-weight:600;text-transform:uppercase;letter-spacing:var(--track-label);color:var(--label-tertiary)}.tr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-    '.tg{display:inline-block;font-size:calc(12px*var(--s));font-weight:600;padding:3px 10px;border-radius:100px;background:var(--accent-subtle);color:#7cc2ff}.tg.good{background:rgba(48,209,88,.16);color:#6ee08c}.tg.warn{background:rgba(255,214,10,.16);color:#ffd60a}.tg.bad{background:rgba(255,69,58,.16);color:#ff8a82}' +
-    '.lst{display:flex;flex-direction:column;gap:10px}.li{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--fill-2);border:1px solid rgba(255,255,255,.1);border-radius:14px;corner-shape:var(--corner)}' +
-    '.lic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#0a60d0,#2997ff);display:flex;align-items:center;justify-content:center;flex:none}.lt{flex:1;min-width:0}.lt1{font-size:calc(15px*var(--s));font-weight:600}.lt2{font-size:calc(12px*var(--s));color:var(--label-secondary);margin-top:2px}' +
-    '.sts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.st{background:var(--fill-2);border:1px solid rgba(255,255,255,.1);border-radius:16px;corner-shape:var(--corner);padding:16px}' +
-    '.sl{font-size:calc(11px*var(--s));font-weight:600;text-transform:uppercase;letter-spacing:var(--track-label);color:var(--label-tertiary)}.sv{font-size:calc(40px*var(--s));font-weight:700;letter-spacing:-0.03em;margin:6px 0 2px;font-variant-numeric:tabular-nums}.sv.good{color:var(--green)}.sv.accent{color:var(--accent-text)}.ss{font-size:calc(13px*var(--s));color:var(--label-secondary)}' +
-    '.cht{display:flex;flex-direction:column;gap:10px}.cb{max-width:78%;padding:10px 14px;border-radius:18px;font-size:calc(15px*var(--s));line-height:1.35}.cb.them{align-self:flex-start;background:#2c2c30}.cb.me{align-self:flex-end;background:#0a84ff}' +
-    '.term{font-family:var(--font-mono);background:rgba(0,0,0,.5);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;height:calc(100% - 34px)}.tl{font-size:calc(13px*var(--s));color:var(--label-secondary);white-space:pre-wrap}.tl.cmd{color:#fff}.tl.ok{color:var(--green)}' +
-    '.img{position:relative;height:100%;border-radius:16px;overflow:hidden;corner-shape:var(--corner)}.img img{width:100%;height:100%;object-fit:cover;display:block}.imc{position:absolute;left:14px;bottom:14px;padding:8px 14px;border-radius:100px;background:rgba(28,28,32,.7);font-size:calc(13px*var(--s));font-weight:600}';
+    '.pn-tbl{display:flex;flex-direction:column;gap:2px}.pn-tr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;padding:11px 12px;border-radius:10px;font-size:calc(14px*var(--s));font-variant-numeric:tabular-nums}.pn-tr:nth-child(even){background:var(--fill-2)}' +
+    '.pn-tr.pn-th{font-size:calc(11px*var(--s));font-weight:600;text-transform:uppercase;letter-spacing:var(--track-label);color:var(--label-tertiary)}.pn-tr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '.pn-tg{display:inline-block;font-size:calc(12px*var(--s));font-weight:600;padding:3px 10px;border-radius:100px;background:var(--accent-subtle);color:#7cc2ff}.pn-tg.pn-good{background:rgba(48,209,88,.16);color:#6ee08c}.pn-tg.pn-warn{background:rgba(255,214,10,.16);color:#ffd60a}.pn-tg.pn-bad{background:rgba(255,69,58,.16);color:#ff8a82}' +
+    '.pn-lst{display:flex;flex-direction:column;gap:10px}.pn-li{display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--fill-2);border:1px solid rgba(255,255,255,.1);border-radius:14px;corner-shape:var(--corner)}' +
+    '.pn-lic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#0a60d0,#2997ff);display:flex;align-items:center;justify-content:center;flex:none}.pn-lt{flex:1;min-width:0}.pn-lt1{font-size:calc(15px*var(--s));font-weight:600}.pn-lt2{font-size:calc(12px*var(--s));color:var(--label-secondary);margin-top:2px}' +
+    '.pn-sts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.pn-st{background:var(--fill-2);border:1px solid rgba(255,255,255,.1);border-radius:16px;corner-shape:var(--corner);padding:16px}' +
+    '.pn-sl{font-size:calc(11px*var(--s));font-weight:600;text-transform:uppercase;letter-spacing:var(--track-label);color:var(--label-tertiary)}.pn-sv{font-size:calc(40px*var(--s));font-weight:700;letter-spacing:-0.03em;margin:6px 0 2px;font-variant-numeric:tabular-nums}.pn-sv.pn-good{color:var(--green)}.pn-sv.pn-accent{color:var(--accent-text)}.pn-ss{font-size:calc(13px*var(--s));color:var(--label-secondary)}' +
+    '.pn-cht{display:flex;flex-direction:column;gap:10px}.pn-cb{max-width:78%;padding:10px 14px;border-radius:18px;font-size:calc(15px*var(--s));line-height:1.35}.pn-cb.pn-them{align-self:flex-start;background:#2c2c30}.pn-cb.pn-me{align-self:flex-end;background:#0a84ff}' +
+    '.pn-term{font-family:var(--font-mono);background:rgba(0,0,0,.5);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;height:calc(100% - 34px)}.pn-tl{font-size:calc(13px*var(--s));color:var(--label-secondary);white-space:pre-wrap}.pn-tl.pn-cmd{color:#fff}.pn-tl.pn-ok{color:var(--green)}' +
+    '.pn-img{position:relative;height:100%;border-radius:16px;overflow:hidden;corner-shape:var(--corner)}.pn-img img{width:100%;height:100%;object-fit:cover;display:block}.pn-imc{position:absolute;left:14px;bottom:14px;padding:8px 14px;border-radius:100px;background:rgba(28,28,32,.7);font-size:calc(13px*var(--s));font-weight:600}';
 
   root.__hfParts = P;
   if (typeof module !== 'undefined' && module.exports) module.exports = P;

@@ -3,8 +3,8 @@
 // Add a template = add its entry here (title, category, preview time) + `use` + `examples`.
 
 const CRM = { kind: 'pipeline', title: 'Active Deals', subtitle: 'Last updated: 5m ago', columns: [
-  { name: 'Qualified', count: 16, cards: [{ title: 'Tech Solutions', tag: 'Qualified' }, { title: 'Globex Inc', tag: 'Qualified' }] },
-  { name: 'Proposal', count: 8, cards: [{ title: 'Globex Enterprise Deal', value: '$45k', tag: 'Proposal Sent' }] },
+  { name: 'Qualified', count: 16, cards: [{ title: 'Acme Labs', tag: 'Qualified' }, { title: 'Lorem Studio', tag: 'Qualified' }] },
+  { name: 'Proposal', count: 8, cards: [{ title: 'Lorem Studio Deal', value: '$45k', tag: 'Proposal Sent' }] },
   { name: 'Negotiation', count: 5, cards: [] }] };
 
 export const META = {
@@ -35,7 +35,7 @@ export const META = {
       { name: 'CRM verification', vars: { railNote: 'Open the record and confirm every field synced.' } },
       { name: 'Metrics dashboard', vars: { title: 'Pipeline Analytics', badge: 'LIVE', eyebrow: 'This week', titlePre: 'Speed to lead,', titleAccent: 'measured', railNote: 'Reply time down, bookings up.', cols: '1.2fr 1fr', panels: [
         { kind: 'stats', title: 'Response', items: [{ label: 'Avg reply', value: '38s', sub: 'was 2h 14m', tone: 'accent' }, { label: 'Booked', value: '+318%', tone: 'good' }, { label: 'Leads', value: '1,240' }, { label: 'Show rate', value: '86%' }] },
-        { kind: 'table', title: 'Latest leads', columns: ['Name', 'Source', 'Status'], rows: [['Jane Doe', 'Opt-in form', { t: 'Booked', tone: 'good' }], ['Jane Smith', 'Webinar', { t: 'Replied' }], ['Dana Cole', 'Referral', { t: 'New', tone: 'warn' }], ['Ivy Tan', 'Opt-in form', { t: 'Booked', tone: 'good' }]] }] } },
+        { kind: 'table', title: 'Latest leads', columns: ['Name', 'Source', 'Status'], rows: [['Jane Doe', 'Opt-in form', { t: 'Booked', tone: 'good' }], ['John Smith', 'Webinar', { t: 'Replied' }], ['Jane Doe', 'Referral', { t: 'New', tone: 'warn' }], ['John Smith', 'Opt-in form', { t: 'Booked', tone: 'good' }]] }] } },
       { name: 'Workflow + terminal', vars: { title: 'Automation Builder', badge: 'RUNNING', eyebrow: 'Technical proof', titlePre: 'Every lead triggers', titleAccent: 'a workflow', railNote: 'Each step runs without anyone touching it.', cols: '1fr 1fr', panels: [
         { kind: 'list', title: 'Workflow steps', items: [{ icon: 'person-plus', title: 'Lead created', desc: 'Opt-in form submitted', tag: 'Done', tone: 'good' }, { icon: 'doc', title: 'Send SMS', desc: 'Instant text with booking link', tag: 'Done', tone: 'good' }, { icon: 'table', title: 'Qualify', desc: 'AI asks 3 questions', tag: 'Running' }] },
         { kind: 'terminal', title: 'POST /api/v1/dispatch', lines: ['$ curl -X POST /api/v1/dispatch', '{ "lead": "jane.doe", "channel": "sms" }', '200 OK  (212 ms)', '$ tail -f workflow.log', 'qualified: true  slot: 2:00 PM'] }] } },
@@ -51,12 +51,12 @@ export const META = {
     title: 'Contact Card', category: 'Cards & Panels', t: 2.2, vars: { dur: 3.4 },
     desc: 'One CRM record with a verified seal and field tiles.',
     use: { when: 'A single record is the proof: a contact, lead, customer or booking.', cues: ['"the contact"', '"this lead"', '"their details"', '"make sure it\'s there"'], pairs: ['notification-stack (event) then contact-card (result)', 'app-window (as a panel)'], avoid: 'Lists of records: use an app-window table or pipeline.' },
-    examples: [{ name: 'Verified lead', vars: {} }, { name: 'Customer', vars: { name: 'Jane Smith', initials: 'JS', verifiedText: 'Paying customer', fields: [{ label: 'Plan', value: 'Pro, annual' }, { label: 'MRR', value: '$297', tone: 'good' }, { label: 'Since', value: 'Mar 2026' }, { label: 'Owner', value: 'John S.' }] } }]
+    examples: [{ name: 'Verified lead', vars: {} }, { name: 'Customer', vars: { name: 'John Smith', initials: 'JS', verifiedText: 'Paying customer', fields: [{ label: 'Plan', value: 'Pro, annual' }, { label: 'MRR', value: '$297', tone: 'good' }, { label: 'Since', value: 'Mar 2026' }, { label: 'Owner', value: 'John S.' }] } }]
   },
   'lower-third': {
     title: 'Lower Third', category: 'Overlays', t: 1.6, vars: { at: 0.4, dur: 4.6 }, desc: 'Speaker name plate with verified seal.',
     use: { when: 'First 4 s of the video, or whenever a new speaker appears. Once per speaker.', cues: ['video start', '"I\'m ..."', '"joining me today"'], pairs: ['kinetic-subtitle (start 1.8 s)', 'glass-card (after it exits)'], avoid: 'Repeating the same speaker later in the video.' },
-    examples: [{ name: 'Host', vars: {} }, { name: 'Guest', vars: { name: 'Dana Cole', role: 'Head of Growth, Acme', initials: 'DC', side: 'right' } }]
+    examples: [{ name: 'Host', vars: {} }, { name: 'Guest', vars: { name: 'Jane Doe', role: 'Head of Growth, Acme', initials: 'JD', side: 'right' } }]
   },
   'chapter-pill': {
     title: 'Chapter Pill', category: 'Overlays', t: 12.2, vars: { at: 0, dur: 21.92 }, desc: 'Progress pill. The schedule is data and state changes are seek-safe.',
@@ -66,7 +66,7 @@ export const META = {
   'notification-stack': {
     title: 'Notification Stack', category: 'Overlays', t: 1.4, vars: { dur: 3.4 }, desc: 'macOS / iOS stacked notification banner.',
     use: { when: 'An event happens in the story: a lead arrives, a message lands, a payment clears. Drops in with a bouncy spring.', cues: ['"incoming"', '"a notification"', '"you get a text"', '"someone books"'], pairs: ['imessage-phone (the reply)', 'contact-card (the record)'], avoid: 'Static facts: it implies something just happened.' },
-    examples: [{ name: 'New lead', vars: {} }, { name: 'Payment', vars: { app: 'Stripe', context: '', lead: 'Payment received:', message: '$297.00 from Jane Smith', icon: 'money', count: 1 } }]
+    examples: [{ name: 'New lead', vars: {} }, { name: 'Payment', vars: { app: 'Acme Pay', context: '', lead: 'Payment received:', message: '$297.00 from John Smith', icon: 'money', count: 1 } }]
   },
   'spotlight': {
     title: 'Spotlight', category: 'Overlays', t: 1.4, vars: { dur: 3.4 }, desc: 'Dims everything except a target rectangle, with an accent ring.',

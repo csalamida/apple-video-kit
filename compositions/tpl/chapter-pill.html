@@ -39,7 +39,7 @@
       window.__timelines = window.__timelines || {};
       (function () {
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
-var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:1.1,top:40,label:"",steps:"[]",initialLabel:"",schedule:"[]"}, window.__hyperframes);
+var V = T.vars({at:0,dur:3,safe:true,side:"left",top:40,offsetX:0,offsetY:0,scale:1.1,label:"Acme CRM Masterclass",steps:"[\"01\",\"02\",\"03\",\"✓\"]",initialLabel:"3 Core Methods",schedule:"[{\"t\":5.8,\"step\":1,\"label\":\"Method 01: Manual\"},{\"t\":8.8,\"step\":2,\"label\":\"Method 02: Spreadsheet\"},{\"t\":11.6,\"step\":3,\"label\":\"Method 03: Lead Form\"},{\"t\":14.5,\"step\":4,\"label\":\"Verification Climax\"},{\"t\":18.2,\"step\":5,\"label\":\"Details Verified ✓\"}]"}, window.__hyperframes);
         V.steps = T.json(V.steps, []); V.schedule = T.json(V.schedule, []);
         var cp = document.getElementById("cp"); cp.style.top = V.top+"px";
         var labels = [V.initialLabel].concat(V.schedule.map(function(s){return s.label;}));
@@ -48,11 +48,20 @@ var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,sca
             ACT={backgroundColor:"#0a60d0",color:"#ffffff",borderColor:"rgba(0,0,0,0)"},
             DONE={backgroundColor:"rgba(48,209,88,0.18)",color:"#a6f0bb",borderColor:"rgba(48,209,88,0.55)"};
         var tl = gsap.timeline({paused:true}); window.__timelines["chapter-pill"] = tl;
-        tl.set(cp,{opacity:1},0); tl.set("#lb0",{opacity:1},0); V.steps.forEach(function(_,i){ tl.set("#bd"+i,IDLE,0); });
+        var badge = function(step,i){ return step>V.steps.length || i < step-1 ? DONE : i===step-1 ? ACT : IDLE; };
+        // starting state (schedule entries at or before the start fold into it) as one hold per element at 0:
+        // two zero-duration sets on the same element at 0 revert when the playhead seeks back to 0
+        var hold = function(el, v){ var b = {}; for (var k in v) b[k] = v[k]; b.duration = 0.001; tl.fromTo(el, v, b, 0); };
+        var k0 = 0, step0 = 0;
+        V.schedule.forEach(function(s,k){ if (s.t - V.at <= 0) { k0 = k + 1; step0 = s.step; } });
+        hold(cp,{opacity:1});
+        labels.forEach(function(_,k){ hold("#lb"+k,{opacity:k===k0?1:0}); });
+        V.steps.forEach(function(_,i){ hold("#bd"+i, step0 ? badge(step0,i) : IDLE); });
         V.schedule.forEach(function(s,k){
-          var t = Math.max(0, s.t - V.at);
+          var t = s.t - V.at;
+          if (t <= 0) return;
           tl.set("#lb"+k,{opacity:0},t); tl.set("#lb"+(k+1),{opacity:1},t);
-          V.steps.forEach(function(_,i){ tl.set("#bd"+i, s.step>V.steps.length || i < s.step-1 ? DONE : i===s.step-1 ? ACT : IDLE, t); });
+          V.steps.forEach(function(_,i){ tl.set("#bd"+i, badge(s.step,i), t); });
         });
       })();
     </script>

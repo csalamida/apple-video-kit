@@ -4,9 +4,11 @@
 // library cannot drift from the real components.   Run: npm run build:library
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { META, MOTION } from './library-meta.mjs';
 
-const dir = 'compositions/tpl';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const dir = path.join(ROOT, 'compositions/tpl');
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.html') && !f.startsWith('_')).sort();
 const templates = files.map((f) => {
   const id = f.replace('.html', '');
@@ -16,9 +18,9 @@ const templates = files.map((f) => {
   const meta = META[id] || { title: id, category: 'Other', desc: '', t: 1.5, vars: {} };
   return { id, file: `compositions/tpl/${f}`, ...meta, variables: decl };
 });
-fs.mkdirSync('library', { recursive: true });
-fs.writeFileSync('library/manifest.json', JSON.stringify({ generated: 'scripts/build-library.mjs (content: scripts/library-meta.mjs)', templates, motion: MOTION }, null, 1));
+fs.mkdirSync(path.join(ROOT, 'library'), { recursive: true });
+fs.writeFileSync(path.join(ROOT, 'library/manifest.json'), JSON.stringify({ generated: 'scripts/build-library.mjs (content: scripts/library-meta.mjs)', templates, motion: MOTION }, null, 1));
 
-const page = fs.readFileSync('scripts/library-page.html', 'utf8').replace('/*__MANIFEST__*/null', JSON.stringify({ templates, motion: MOTION }).replace(/</g, '\\u003c'));
-fs.writeFileSync('library/index.html', page);
+const page = fs.readFileSync(path.join(ROOT, 'scripts/library-page.html'), 'utf8').replace('/*__MANIFEST__*/null', JSON.stringify({ templates, motion: MOTION }).replace(/</g, '\\u003c'));
+fs.writeFileSync(path.join(ROOT, 'library/index.html'), page);
 console.log(`library: ${templates.length} templates -> library/index.html`);

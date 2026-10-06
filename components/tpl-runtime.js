@@ -123,16 +123,37 @@
   };
 
   // Union of the head box over [start, start+dur], sampled every 0.1s.
-  // Screen-share projects (window.__hfShare + __hfShareStage): the face lives in the PiP card, so templates
-  // keep clear of the PiP rectangle at its REST size instead.
-  T.faceUnion = function (start, dur) {
-    if (root.__hfShare && root.__hfShareStage) {
-      var p = root.__hfShareStage.pip(root.__hfShare);
-      return { x0: p.x, y0: H - p.y - p.h, x1: p.x + p.w, y1: H - p.y };
+  // Screen-share projects (window.__hfShare + __hfShareStage): the face is wherever the webcam is at that time:
+  // 'pip' = the whole card (tucked by the screen zoom, scaled from its bottom-left corner), 'full' = a 480x600
+  // head box around pip.focus, 'hide' = nothing. During a swap the head box follows the morphing window
+  // (footage pan + card scale), clipped to it. Pure: works without a DOM.
+  function shareFaceAt(S, d, t) {
+    var p = S.pip(d), modes = S.camModesAt(d, t), f = p.focus || { x: 0.5, y: 0.42 };
+    var head = { x0: f.x * W - 240, y0: f.y * H - 300, x1: f.x * W + 240, y1: f.y * H + 300 };
+    var clip = function (b) { return { x0: Math.max(0, b.x0), y0: Math.max(0, b.y0), x1: Math.min(W, b.x1), y1: Math.min(H, b.y1) }; };
+    if (modes.length === 1) {
+      if (modes[0] === 'hide') return null;
+      if (modes[0] === 'full') return clip(head);
+      var s = S.pipScale(S.stateAt(d, t).scale, p), y1 = H - p.y;
+      return { x0: p.x, y0: y1 - p.h * s, x1: p.x + p.w * s, y1: y1 };
     }
+    var c = S.pipAt(d, t);
+    if (modes.indexOf('hide') >= 0 && c.opacity <= 0.05) return null;
+    if (!c.pan) return clip(head);
+    // raw frame point -> window (pan, origin 50% 50%) -> card scale from the window's bottom-left -> slide
+    var bx = c.left, by = c.top + c.height, k = c.scale;
+    var X = function (x) { return bx + (c.left + 960 + (x - 960) * c.pan.scale + c.pan.x - bx) * k; };
+    var Y = function (y) { return by + (c.top + 540 + (y - 540) * c.pan.scale + c.pan.y - by) * k + c.y; };
+    var wy0 = by + (c.top - by) * k + c.y, wx1 = bx + c.width * k;
+    var b = { x0: Math.max(X(head.x0), bx), y0: Math.max(Y(head.y0), wy0), x1: Math.min(X(head.x1), wx1), y1: Math.min(Y(head.y1), by + c.y) };
+    return b.x1 > b.x0 && b.y1 > b.y0 ? clip(b) : null;
+  }
+
+  T.faceUnion = function (start, dur) {
+    var share = root.__hfShare && root.__hfShareStage;
     var u = null;
     for (var t = start; t <= start + dur + 1e-6; t += 0.1) {
-      var f = T.faceAt(t);
+      var f = share ? shareFaceAt(root.__hfShareStage, root.__hfShare, t) : T.faceAt(t);
       if (!f) continue;
       u = u ? { x0: Math.min(u.x0, f.x0), y0: Math.min(u.y0, f.y0), x1: Math.max(u.x1, f.x1), y1: Math.max(u.y1, f.y1) } : f;
     }
@@ -196,12 +217,13 @@
     return tl;
   };
 
+  // Explicit from-values (the enter() end state), so the exit never captures a mid-entrance value on short clips.
   T.exit = function (tl, el, o) {
     o = o || {};
-    var to = { opacity: 0, duration: o.duration || 0.4, ease: 'power2.in' };
+    var to = { opacity: 0, duration: o.duration || 0.4, ease: 'power2.in', immediateRender: false }, fr = { opacity: 1 };
     var from = o.to || 'left', d = o.distance || 30;
-    if (from === 'left') to.x = -d; else if (from === 'right') to.x = d; else if (from === 'up') to.y = -d; else to.y = d;
-    tl.to(el, to, o.at || 0);
+    if (from === 'left' || from === 'right') { to.x = from === 'left' ? -d : d; fr.x = 0; } else { to.y = from === 'up' ? -d : d; fr.y = 0; }
+    tl.fromTo(el, fr, to, o.at || 0);
     return tl;
   };
 

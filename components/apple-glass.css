@@ -424,23 +424,6 @@
 }
 
 /* ==========================================================================
-   6.3 APPLE SF SYMBOLS 6 GLYPH SPECIFICATIONS
-   ========================================================================== */
-.sf-icon-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
-  color: #ffffff;
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
    7. FULLSCREEN CHAPTER TITLE INTERSTITIAL
    ========================================================================== */
 .apple-chapter-interstitial {
@@ -508,47 +491,6 @@
   background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
   box-shadow: 0 0 16px rgba(255, 255, 255, 0.8), 0 0 32px var(--theme-accent);
   margin-top: 24px;
-}
-
-/* ==========================================================================
-   8. APPLE SF SYMBOLS 6 SPECIFICATIONS & RENDERING MODES
-   Grounded in https://developer.apple.com/sf-symbols/
-   ========================================================================== */
-.sf-symbol {
-  width: 1em;
-  height: 1em;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: -0.125em;
-  fill: currentColor;
-  flex-shrink: 0;
-}
-
-.sf-symbol svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* Rendering Mode: Hierarchical (opacity layering of single tint) */
-.sf-hierarchical .sf-primary { opacity: 1.0; }
-.sf-hierarchical .sf-secondary { opacity: 0.55; }
-.sf-hierarchical .sf-tertiary { opacity: 0.28; }
-
-/* Rendering Mode: Palette (multi-color semantic token assignment) */
-.sf-palette .sf-primary { color: var(--theme-accent-bright); }
-.sf-palette .sf-secondary { color: var(--theme-accent); }
-.sf-palette .sf-tertiary { color: var(--theme-yellow); }
-
-/* SF Symbols Spring Animation Classes */
-.sf-bounce {
-  transform-origin: center bottom;
-  will-change: transform;
-}
-
-.sf-pulse {
-  will-change: opacity, transform;
 }
 
 /* ==========================================================================

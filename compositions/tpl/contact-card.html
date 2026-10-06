@@ -40,9 +40,9 @@
       window.__timelines = window.__timelines || {};
       (function () {
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
-var V = T.vars({at:0,dur:3,safe:true,side:"right",top:200,width:520,height:330,offsetX:0,offsetY:0,scale:1.1,name:"",initials:"",verifiedText:"",fields:"[]",stagger:0.45}, window.__hyperframes);
+var V = T.vars({at:0,dur:3,safe:true,side:"right",top:200,width:520,height:330,offsetX:0,offsetY:0,scale:1.1,name:"John Smith",initials:"JS",verifiedText:"Verified Contact",fields:"[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}]",stagger:0.45}, window.__hyperframes);
         V.fields = T.json(V.fields, []); P.ensureSymbols();
-        var css = document.createElement("style"); css.textContent = P.contactCss; document.head.appendChild(css);
+        P.useCss("contact");
         var cc = document.getElementById("cc"); cc.style.setProperty("--s", V.scale);
         cc.innerHTML = P.contact({name:V.name, initials:V.initials, verifiedText:V.verifiedText, fields:V.fields});
         var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:V.width,height:V.height,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:360});

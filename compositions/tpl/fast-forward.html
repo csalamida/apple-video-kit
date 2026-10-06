@@ -65,8 +65,8 @@ var V = T.vars({at:0,dur:3,safe:true,side:"right",top:60,offsetX:0,offsetY:0,sca
         for (var i = 0; i < cycles; i++) {
           var t = t0 + i*PER;
           [[a, 0], [b, LAG]].forEach(function (p) {
-            tl.to(p[0], {opacity:1, x:1.5, duration:0.2, ease:"power2.out"}, t + p[1]);
-            tl.to(p[0], {opacity:0.4, x:0, duration:0.34, ease:"power2.in"}, t + p[1] + 0.2);
+            tl.fromTo(p[0], {opacity:0.4, x:0}, {opacity:1, x:1.5, duration:0.2, ease:"power2.out", immediateRender:false}, t + p[1]);
+            tl.fromTo(p[0], {opacity:1, x:1.5}, {opacity:0.4, x:0, duration:0.34, ease:"power2.in", immediateRender:false}, t + p[1] + 0.2);
           });
         }
         T.exit(tl, ff, {to:from, at:D - 0.4, duration:0.35});

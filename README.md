@@ -4,7 +4,7 @@ Apple-style motion graphics for tutorial videos, built on [HyperFrames](https://
 
 Two formats:
 
-- **Screen share** (Screen Studio style): your screen recording floats on a wallpaper, zooms in on what you are talking about, and your webcam sits in a tall card bottom-left that tucks away while the screen zooms.
+- **Screen share**: your screen recording floats on a wallpaper, zooms in on what you are talking about, and your webcam sits in a tall card bottom-left that tucks away while the screen zooms.
 - **Talking head**: your camera full frame, with glass cards, lower-thirds, subtitles and a speaker picture-in-picture that keep clear of your face automatically.
 
 Everything is data. You describe a video as times and settings ("at 3.2 s zoom to the form", "at 9 s put a callout on the submit button"); the kit does the motion.
@@ -13,7 +13,7 @@ Everything is data. You describe a video as times and settings ("at 3.2 s zoom t
 
 ## Quick start
 
-Needs Node 18+ and ffmpeg.
+Needs Node 22+ and ffmpeg. Python 3 with OpenCV only if you run face detection on your own talking-head footage.
 
 ```bash
 npm install
@@ -22,13 +22,13 @@ npm run share:dev      # screen-share demo
 npm run library        # then open http://localhost:4173/library/
 ```
 
-The demos ship with no real footage. On first run the kit generates a faceless placeholder speaker and a test-pattern screen in `inputs/_demo/` (git-ignored).
+The demos ship with no real footage. On first run the kit generates a faceless placeholder speaker, a test-pattern screen and a matching demo face track (all git-ignored).
 
 ## Use your own footage
 
 1. Put your files in `inputs/` (git-ignored, so they never end up in the repo).
 2. Screen share: point `#screen` (silent screen recording) and `#cam` (webcam with your voice) in `projects/screen-share/index.html` at them. Talking head: point `#footage` in `index.html` at your video.
-3. Talking head only: run `scripts/detect-face.py` once so cards know where your face is (see the comment at the top of the file).
+3. Talking head only: run `scripts/detect-face.py` once so cards know where your face is (see the comment at the top of the file). It writes `inputs/face-track.js`, which stays out of git.
 4. Describe the video:
    - screen share: `projects/screen-share/share.js` (zooms, webcam moments, callouts, focus, redaction, jump cuts)
    - talking head: `components/camera.js` (camera moves) and template host tags in `index.html`
@@ -65,10 +65,11 @@ node scripts/cue-plan.mjs inputs/transcript.srt --mode screen            # trans
 **Checks**
 
 ```bash
-npm run check          # HyperFrames lint, layout, motion and contrast
-npm run share:check
-npm run check:face     # no card covers the speaker's face
-npm run check:privacy  # no footage, big files or denylisted names in git
+npm run check:all      # everything below
+npm run check          # HyperFrames lint, layout, motion and contrast (talking head)
+npm run share:check    # same for screen share, plus cards vs the webcam card
+npm run check:face     # host contracts + no card covers the speaker's face
+npm run check:privacy  # no footage, images, big files or denylisted names in git
 ```
 
 `check:privacy` reads an optional, git-ignored `.privacy-denylist` (one name per line) so you can block your own name, clients or emails from ever being committed. Hook it up as a pre-commit hook:

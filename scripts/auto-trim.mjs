@@ -11,14 +11,19 @@
 //   --handle       audio kept on each side of speech (s), so a word is never clipped
 //   --apply        also write <basename>.trimmed.mp4 (re-encoded h264/aac) for people who want one clean file
 //   --out          where to write; default = the folder of <media>
+//   --id           id of the first printed <video> clip (default: cam with --also, else footage)
 //
 // Writes <out>/<basename>.cuts.json:
 //   { source, duration, removed, segments: [{ start, end }], cuts: [t, ...] }
 // `segments` are in SOURCE time, `cuts` are in OUTPUT time (where each jump cut lands): paste them into share.js `cuts`.
-// Prints HyperFrames <video> clips that play the segments back to back with no re-encode.
+// Prints HyperFrames <video> clips that play the segments back to back with no re-encode
+// (src paths are repo-relative, which is what index.html and projects/screen-share resolve).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const MERGE_GAP = 0.1;     // keep segments closer than this are joined (a 0.08 s cut is a glitch, not an edit)
 const MIN_KEEP = 0.25;     // shortest segment we ever output
@@ -42,7 +47,7 @@ function parseArgs(argv) {
     else if (!o.media) o.media = a;
     else fail('unexpected argument ' + a);
   }
-  if (!o.media) fail('usage: node scripts/auto-trim.mjs <media> [--also <file>] [--noise -35] [--min-pause 0.45] [--handle 0.04] [--apply] [--out <dir>]');
+  if (!o.media) fail('usage: node scripts/auto-trim.mjs <media> [--also <file>] [--noise -35] [--min-pause 0.45] [--handle 0.04] [--apply] [--out <dir>] [--id cam]');
   for (const k of ['noise', 'minPause', 'handle']) if (!Number.isFinite(o[k])) fail('--' + k.replace(/[A-Z]/, (c) => '-' + c.toLowerCase()) + ' must be a number');
   if (o.minPause <= 2 * o.handle) fail('--min-pause must be more than twice --handle');
   return o;
@@ -54,7 +59,8 @@ const run = (cmd, args) => spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 6
 function requireTools() {
   for (const t of ['ffmpeg', 'ffprobe']) {
     const r = run(t, ['-version']);
-    if (r.error || r.status !== 0) fail(t + ' not found on PATH. Install ffmpeg (macOS: brew install ffmpeg) and try again.');
+    if (r.error || r.status !== 0) fail(t === 'ffmpeg' ? 'ffmpeg not found on PATH - install it (macOS: brew install ffmpeg, Windows: winget install ffmpeg)'
+      : 'ffprobe not found on PATH - it ships with ffmpeg (macOS: brew install ffmpeg, Windows: winget install ffmpeg)');
   }
 }
 
@@ -138,16 +144,15 @@ function clipsHtml(rows, src, id, voice) {
 }
 
 // Re-encode just the kept segments into one file (trim + concat in one filter graph).
-function applyTrim(file, segs, outFile, info) {
+// Cuts are by TIME, never by frame number: screen recordings are often variable frame rate, where frame N is not
+// at N / fps. Video is first normalised to a constant rate (`fps`, the voice file's rate, which the segments are
+// snapped to), so every file gets the same cut points and the screen stays in sync with the voice.
+function applyTrim(file, segs, outFile, info, fps) {
   const parts = [], labels = [];
-  const fps = info.fps;
+  const cfr = fps > 0 ? `fps=${fps},` : '';
   segs.forEach((s, i) => {
-    // with a frame rate, cut on exact frame numbers (seconds would round to a neighbouring frame and drift)
-    const f0 = Math.round(s.start * fps), f1 = Math.round(s.end * fps);
-    const a0 = fps ? f0 / fps : s.start, a1 = fps ? f1 / fps : s.end;
-    if (info.hasVideo) parts.push(fps ? `[0:v]trim=start_frame=${f0}:end_frame=${f1},setpts=PTS-STARTPTS[v${i}]`
-      : `[0:v]trim=start=${s.start}:end=${s.end},setpts=PTS-STARTPTS[v${i}]`);
-    if (info.hasAudio) parts.push(`[0:a]atrim=start=${a0}:end=${a1},asetpts=PTS-STARTPTS[a${i}]`);
+    if (info.hasVideo) parts.push(`[0:v]${cfr}trim=start=${s.start}:end=${s.end},setpts=PTS-STARTPTS[v${i}]`);
+    if (info.hasAudio) parts.push(`[0:a]atrim=start=${s.start}:end=${s.end},asetpts=PTS-STARTPTS[a${i}]`);
     labels.push((info.hasVideo ? `[v${i}]` : '') + (info.hasAudio ? `[a${i}]` : ''));
   });
   const v = info.hasVideo ? 1 : 0, a = info.hasAudio ? 1 : 0;
@@ -163,6 +168,17 @@ function applyTrim(file, segs, outFile, info) {
   if (r.status !== 0) fail('ffmpeg could not write ' + outFile + '\n' + r.stderr.trim());
   const p = probe(outFile);
   return p;
+}
+
+// <video src> as the compositions see it: repo-relative with forward slashes (index.html sits at the root and
+// projects/screen-share links inputs/ in, so "inputs/x.mp4" works in both).
+function srcFor(file) {
+  const rel = path.relative(ROOT, path.resolve(file)).split(path.sep).join('/');
+  if (rel.startsWith('../') || path.isAbsolute(rel)) {
+    console.warn(`auto-trim: note: ${file} is outside the repo; move it into inputs/ so the composition can load it.`);
+    return path.resolve(file).split(path.sep).join('/');
+  }
+  return rel;
 }
 
 // ---- main ----
@@ -209,10 +225,10 @@ function main() {
 
   const id = o.id || (also ? 'cam' : 'footage');
   console.log(`\n<!-- voice: ${segments.length} clips, no re-encode. Set the composition data-duration to ${newLen}. -->`);
-  console.log(clipsHtml(rows, o.media, id, true));
+  console.log(clipsHtml(rows, srcFor(o.media), id, true));
   if (also) {
-    console.log(`\n<!-- ${o.also}: same cuts, muted, so screen and voice stay in sync -->`);
-    console.log(clipsHtml(rows, o.also, 'screen', false));
+    console.log(`\n<!-- ${srcFor(o.also)}: same cuts, muted, so screen and voice stay in sync -->`);
+    console.log(clipsHtml(rows, srcFor(o.also), 'screen', false));
   }
   if (cuts.length) console.log(`\n// share.js (output time): duration: ${newLen},\ncuts: [${cuts.join(', ')}],`);
 
@@ -220,10 +236,10 @@ function main() {
     for (const f of [{ file: o.media, ...info }, also].filter(Boolean)) {
       const outFile = path.join(outDir, path.basename(f.file).replace(/\.[^.]+$/, '') + '.trimmed.mp4');
       process.stdout.write(`\nencoding ${outFile} ... `);
-      const got = applyTrim(f.file, segments, outFile, f);
+      const got = applyTrim(f.file, segments, outFile, f, info.fps || f.fps);
       console.log(`${got.duration.toFixed(3)} s (expected ${newLen.toFixed(3)} s; AAC adds up to ~0.05 s of padding)`);
     }
   }
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

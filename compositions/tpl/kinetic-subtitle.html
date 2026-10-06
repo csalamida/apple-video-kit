@@ -26,6 +26,7 @@
              border-radius:100px; padding:12px 38px; box-shadow: inset 0 1px 1.5px rgba(255,255,255,.5), 0 16px 40px rgba(0,0,0,.8); white-space:nowrap; }
       .cue .w { display:inline-block; margin:0 .16em; transform-origin:50% 80%; }
       .cue .kw { color: var(--accent-text); font-weight:700; }
+      .cue .kp { display:inline-block; transform-origin:50% 80%; }
     </style>
   </head>
   <body>
@@ -36,7 +37,7 @@
       window.__timelines = window.__timelines || {};
       (function () {
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
-var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:1.1,bottom:46,size:38,cues:"[]"}, window.__hyperframes);
+var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:1.1,bottom:46,size:38,cues:"[{\"start\":1.8,\"end\":2.5,\"text\":\"In this video,\"},{\"start\":2.5,\"end\":3.4,\"text\":\"I'll show you\"},{\"start\":3.4,\"end\":4.4,\"text\":\"Three *ways*\"},{\"start\":4.4,\"end\":5.0,\"text\":\"to add contacts\"},{\"start\":5.0,\"end\":5.8,\"text\":\"to *Acme CRM.*\"},{\"start\":5.8,\"end\":6.6,\"text\":\"You can add\"},{\"start\":6.6,\"end\":7.9,\"text\":\"someone *manually,*\"},{\"start\":8.8,\"end\":10.2,\"text\":\"from a *spreadsheet,*\"},{\"start\":10.2,\"end\":11.6,\"text\":\"or collect their details\"},{\"start\":11.6,\"end\":13.5,\"text\":\"through a *form.*\"},{\"start\":14.5,\"end\":15.6,\"text\":\"And after each *one,*\"},{\"start\":15.6,\"end\":17.0,\"text\":\"we'll open the *contact*\"},{\"start\":17.0,\"end\":18.2,\"text\":\"and make *sure*\"},{\"start\":18.2,\"end\":20.8,\"text\":\"the *details* are there.\"}]"}, window.__hyperframes);
         V.cues = T.json(V.cues, []);
         var dock = document.getElementById("dock"); dock.style.bottom = V.bottom+"px";
         var tl = gsap.timeline({paused:true}); window.__timelines["kinetic-subtitle"] = tl;
@@ -44,15 +45,17 @@ var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,sca
           var el = document.createElement("div"); el.className = "cue"; el.style.fontSize = V.size+"px";
           el.innerHTML = c.text.split(/(\*[^*]+\*)/).filter(Boolean).map(function(part){
             var punch = /^\*.*\*$/.test(part), txt = punch ? part.slice(1,-1) : part;
-            return txt.split(/\s+/).filter(Boolean).map(function(wd){ return '<span class="w'+(punch?' kw':'')+'">'+esc(wd)+'</span>'; }).join(" ");
+            return txt.split(/\s+/).filter(Boolean).map(function(wd){ return punch ? '<span class="w kw" data-layout-allow-overflow=""><span class="kp">'+esc(wd)+'</span></span>' : '<span class="w">'+esc(wd)+'</span>'; }).join(" ");
           }).join(" ");
           dock.appendChild(el);
-          var s = c.start - V.at, e = c.end - V.at, words = el.querySelectorAll(".w"), kw = el.querySelector(".kw");
-          tl.set(el,{display:"inline-block",opacity:0,scale:0.92,y:10},s);
-          tl.to(el,{opacity:1,scale:1,y:0,duration:0.24,ease:E.snappy},s);
+          var s = c.start - V.at, e = c.end - V.at, words = el.querySelectorAll(".w"), kw = el.querySelector(".kw"), ki = Array.prototype.indexOf.call(words, kw);
+          tl.set(el,{display:"inline-block"},s);
+          tl.fromTo(el,{opacity:0,scale:0.92,y:10},{opacity:1,scale:1,y:0,duration:0.24,ease:E.snappy,immediateRender:false},s);
           if (words.length) tl.fromTo(words,{opacity:0,scale:0.8,y:6},{opacity:1,scale:1,y:0,duration:0.2,stagger:0.045,ease:E.snappy},s+0.02);
-          if (kw) tl.to(kw,{scale:1.1,duration:0.16,yoyo:true,repeat:1,ease:"sine.inOut"},s+0.16);
-          tl.to(el,{opacity:0,scale:0.96,y:-6,duration:0.16,ease:"power2.in"},Math.max(s+0.25,e-0.16));
+          // punch pulse on an inner span (the .w itself is owned by the entrance), once that word has landed
+          var kp = kw && kw.querySelector(".kp"), pt = s + 0.02 + ki*0.045 + 0.2;
+          if (kp && pt + 0.32 <= Math.max(s+0.25,e-0.16)) tl.fromTo(kp,{scale:1},{scale:1.1,duration:0.16,yoyo:true,repeat:1,ease:"sine.inOut",immediateRender:false},pt);
+          tl.fromTo(el,{opacity:1,scale:1,y:0},{opacity:0,scale:0.96,y:-6,duration:0.16,ease:"power2.in",immediateRender:false},Math.max(s+0.25,e-0.16));
           tl.set(el,{display:"none"},e);
         });
       })();

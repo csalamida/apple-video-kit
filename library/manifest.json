@@ -91,14 +91,14 @@
           }
          ],
          [
-          "Jane Smith",
+          "John Smith",
           "Webinar",
           {
            "t": "Replied"
           }
          ],
          [
-          "Dana Cole",
+          "Jane Doe",
           "Referral",
           {
            "t": "New",
@@ -106,7 +106,7 @@
           }
          ],
          [
-          "Ivy Tan",
+          "John Smith",
           "Opt-in form",
           {
            "t": "Booked",
@@ -774,7 +774,7 @@
     {
      "name": "Customer",
      "vars": {
-      "name": "Jane Smith",
+      "name": "John Smith",
       "initials": "JS",
       "verifiedText": "Paying customer",
       "fields": [
@@ -1608,9 +1608,9 @@
     {
      "name": "Guest",
      "vars": {
-      "name": "Dana Cole",
+      "name": "Jane Doe",
       "role": "Head of Growth, Acme",
-      "initials": "DC",
+      "initials": "JD",
       "side": "right"
      }
     }
@@ -1880,10 +1880,10 @@
     {
      "name": "Payment",
      "vars": {
-      "app": "Stripe",
+      "app": "Acme Pay",
       "context": "",
       "lead": "Payment received:",
-      "message": "$297.00 from Jane Smith",
+      "message": "$297.00 from John Smith",
       "icon": "money",
       "count": 1
      }

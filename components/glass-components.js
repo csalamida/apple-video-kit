@@ -212,7 +212,7 @@
       to: function (tl, rig, win, cam, o) {
         o = o || {};
         var el = typeof rig === 'string' ? document.querySelector(rig) : rig;
-        var pan = this.pan(el), at = o.start || 0, d = o.duration || 0.85;
+        var pan = this.pan(el), at = o.start != null ? o.start : 0, d = o.duration != null ? o.duration : 0.85;
         var ease = o.ease || AppleMotion.ease.smooth;
         if (o.front) tl.set(el, { zIndex: 100 }, at);
         var props = { left: win.x, top: win.y, width: win.w, height: win.h, borderRadius: win.r || 0, duration: d, ease: ease };

@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { RULES } from './cue-rules.mjs';
+import { RULES, normalizeQuotes } from './cue-rules.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GRAPHIC_GAP = 3;     // s between two new graphics
@@ -59,7 +59,7 @@ export function parseTranscript(raw) {
     const [l, r] = lines[k].split('-->');
     const a = l.match(TIME), z = r && r.match(TIME);
     if (!a || !z) continue;
-    const text = lines.slice(k + 1).join(' ').replace(/<[^>]+>/g, '').replace(/\{\\[^}]*\}/g, '')
+    const text = normalizeQuotes(lines.slice(k + 1).join(' ')).replace(/<[^>]+>/g, '').replace(/\{\\[^}]*\}/g, '')
       .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
     if (text) cues.push({ start: secs(a), end: secs(z), text });
   }
@@ -312,7 +312,7 @@ console.log(`${kept.length} suggestions from ${list.length} rule matches` + (pri
 table(kept);
 if (skipped.length) console.log(`\n  ${skipped.length} weaker or repeated ideas thinned out (max one graphic / 3 s, no repeat within 4 s).` + (opt.all ? '' : ' --all lists them.'));
 if (opt.all && skipped.length) { console.log(''); table(skipped); }
-if (privacy.length) console.log('\n  !! PRIVACY: ' + privacy.map((c) => `${mmss(c.t)} "${c.match}"`).join(', ') + '. Check those frames before export (npm run check:privacy).');
+if (privacy.length) console.log('\n  !! PRIVACY: ' + privacy.map((c) => `${mmss(c.t)} "${c.match}"`).join(', ') + '. Review those frames and add redact regions before export.');
 
 if (opt.mode === 'screen') screenDraft(kept, steps, total, cues); else talkingDraft(kept, steps, total, cues);
 

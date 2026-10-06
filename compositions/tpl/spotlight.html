@@ -43,7 +43,7 @@ var V = T.vars({at:0,dur:3,safe:true,x:600,y:300,w:600,h:300,radius:28,strength:
         var tl = gsap.timeline({paused:true}); window.__timelines["spotlight"] = tl;
         tl.fromTo(sp,{opacity:0},{opacity:1,duration:0.45,ease:E.smooth},0);
         if (V.ring) tl.fromTo(rg,{opacity:0,scale:1.04},{opacity:1,scale:1,duration:0.5,ease:E.snappy},0.1);
-        tl.to([sp,rg],{opacity:0,duration:0.4,ease:"power2.in"},V.dur-0.45);
+        tl.fromTo(V.ring?[sp,rg]:sp,{opacity:1},{opacity:0,duration:0.4,ease:"power2.in",immediateRender:false},Math.max(0.6,V.dur-0.45));
       })();
     </script>
   </body>

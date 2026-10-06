@@ -76,7 +76,7 @@
 
         var rows = cl.querySelectorAll(".row"), spans = cl.querySelectorAll(".cnt span");
         tl.fromTo(rows, {opacity:0, y:10}, {opacity:1, y:0, duration:0.5, ease:E.smooth, stagger:0.07}, 0.22);
-        if (spans.length) tl.set(spans[0], {opacity:1}, 0);
+        if (spans.length) tl.fromTo(spans[0], {opacity:1}, {opacity:1, duration:0.001}, 0);
 
         for (var i = 0; i < rows.length; i++) {
           var t = V.first + i * V.stagger, r = rows[i];

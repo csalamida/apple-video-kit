@@ -58,10 +58,10 @@
       window.__timelines = window.__timelines || {};
       (function () {
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
-var V = T.vars({at:0,dur:3,safe:true,side:"right",top:110,width:1250,height:840,offsetX:0,offsetY:0,scale:1.1,title:"",badge:"",eyebrow:"",titlePre:"",titleAccent:"",layout:"inside",railNote:"",panels:"[]",cols:"",stagger:0.4}, window.__hyperframes);
+var V = T.vars({at:0,dur:3,safe:true,side:"right",top:110,width:1250,height:840,offsetX:0,offsetY:0,scale:1.1,title:"Acme CRM Live Data Verification",badge:"LIVE CRM",eyebrow:"Climax Verification",titlePre:"Make Sure Details",titleAccent:"Are There",layout:"inside",railNote:"",panels:"[{\"title\":\"Active Deals\",\"subtitle\":\"Last updated: 5m ago\",\"columns\":[{\"name\":\"Qualified\",\"count\":16,\"cards\":[{\"title\":\"Tech Solutions\",\"tag\":\"Qualified\"},{\"title\":\"Globex Inc\",\"tag\":\"Qualified\"}]},{\"name\":\"Proposal\",\"count\":8,\"cards\":[{\"title\":\"Globex Enterprise Deal\",\"value\":\"$45k\",\"tag\":\"Proposal Sent\"}]},{\"name\":\"Negotiation\",\"count\":5,\"cards\":[]}],\"kind\":\"pipeline\"},{\"name\":\"John Smith\",\"initials\":\"JS\",\"verifiedText\":\"Verified Contact\",\"fields\":[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}],\"kind\":\"contact\"}]",cols:"",stagger:0.4}, window.__hyperframes);
         V.panels = T.json(V.panels, []); P.ensureSymbols();
         var aw = document.getElementById("aw"); aw.style.setProperty("--s", V.scale);
-        var css = document.createElement("style"); css.textContent = P.panelsCss; document.head.appendChild(css);
+        P.useCss("panels");
         var rail = V.layout === "rail";
         var pn = V.panels.map(function(p,i){ return '<div class="pn" id="pn'+i+'"'+(p.span?' style="grid-column:span '+p.span+'"':'')+'>'+P.panel(p)+'</div>'; }).join("");
         var head = rail ? '' : '<div class="eb">'+esc(V.eyebrow)+'</div><div class="hd">'+esc(V.titlePre)+' <span>'+esc(V.titleAccent)+'</span></div>';
@@ -87,7 +87,7 @@ var V = T.vars({at:0,dur:3,safe:true,side:"right",top:110,width:1250,height:840,
         T.enter(tl, aw, {from:from, duration:0.7});
         if (rail) {
           tl.fromTo(rl.children,{opacity:0,y:14},{opacity:1,y:0,duration:0.55,stagger:0.12,ease:E.snappy},0.15);
-          tl.set(rl,{opacity:1},0.15); tl.to(rl,{opacity:0,duration:0.35,ease:"power2.in"},V.dur-0.45);
+          tl.set(rl,{opacity:1},0.15); tl.fromTo(rl,{opacity:1},{opacity:0,duration:0.35,ease:"power2.in",immediateRender:false},V.dur-0.45);
         }
         aw.querySelectorAll(".pn").forEach(function(el,i){
           tl.fromTo(el,{opacity:0,y:16,scale:0.97},{opacity:1,y:0,scale:1,duration:0.55,ease:E.snappy},0.25+i*V.stagger);

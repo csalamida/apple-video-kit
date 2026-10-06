@@ -3,14 +3,14 @@ name: apple-video-editor
 description: >
   Directs, packages and edits video to Apple design standards (Liquid Glass materials, continuous-curvature
   squircles, SF type, spring physics) in HyperFrames. Two modes: SCREEN SHARE (primary: screen recording +
-  webcam PiP, Screen Studio style, zooms as data) and TALKING HEAD (face-safe graphics over footage).
+  webcam PiP with auto-style zooms as data) and TALKING HEAD (face-safe graphics over footage).
   Everything on screen is a parameterized template mounted with a host tag; camera moves, zooms and PiP are data.
   Includes a generated library with when-to-use cues, a stage engine (window + pan, no re-crop), spring easing,
   a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request.
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.0.0"
+  version: "5.1.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -24,8 +24,8 @@ Turn raw footage into Apple-grade broadcast video without hand-animating each sc
 | **Screen share (primary)** | Screen/window recording + webcam. Most videos. | `projects/screen-share/` | `share.js` zooms; tall webcam PiP bottom-left |
 | **Talking head** | Webcam/interview footage with graphic cards | `index.html` | `components/camera.js` moves; templates stay off the face |
 
-Trigger on: an `.mp4/.mov/.webm` + optional `.srt/transcript.json`; "package this video", "add overlays/captions",
-"make it look like Screen Studio / Apple keynote", "screen share with a PiP", "edit this talking head".
+Trigger on: an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "add overlays/captions",
+"make it look like a polished screen recording / Apple keynote", "screen share with a PiP", "edit this talking head".
 
 ---
 
@@ -92,10 +92,10 @@ components/
   tpl-parts.js           icon set, iPhone, panel registry (pipeline|contact|table|list|stats|chat|text|terminal|image)
   screen-stage.js        screen-share engine (window, zooms + drift, webcam modes, annotations, jump-cut punch)
   camera.js              talking-head camera + speaker window moves as DATA
-inputs/face-track.js     face boxes (scripts/detect-face.py, opencv in a temp venv); demo track ships for the placeholder
+inputs/face-track.js     face boxes, git-ignored: generated for the placeholder, scripts/detect-face.py (opencv in a temp venv) writes yours
 inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated catalog (live previews, props editor, cue sheets)
-scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear, check-privacy, build-library, library-meta, sync-share, demo-media
+scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library-page, sync-share, demo-media, serve, detect-face.py
 ```
 
 **Templates (`compositions/tpl/*.html`)** - cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`; overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`; text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`; titles: `title-card` (intro | outro); devices: `imessage-phone`; transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint, z-index 90+). Mount:
@@ -104,13 +104,13 @@ scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear, ch
 <div id="card-1" class="clip subcomp-host" style="z-index: 40;"
      data-composition-id="glass-card-1" data-composition-src="compositions/tpl/glass-card.html"
      data-start="5.8" data-duration="3.0"
-     data-variable-values='{"at":5.8,"dur":3.0,"titlePre":"Add Someone","titleAccent":"Manually","kind":"fields","items":[{"label":"Name","value":"Alex"}]}'></div>
+     data-variable-values='{"at":5.8,"dur":3.0,"titlePre":"Add Someone","titleAccent":"Manually","kind":"fields","items":[{"label":"Name","value":"John Smith"}]}'></div>
 ```
 
 Rules every template follows:
 - `at` / `dur` variables MUST equal the host's `data-start` / `data-duration` (templates cannot read their host; the check enforces it). Template root `data-duration` is large (600) so the host governs.
 - Lists/objects are JSON text variables (HyperFrames has no json type); a host may pass real arrays.
-- Common props: `side`, `top`, `offsetX/Y`, `scale`, `safe`. `safe:true` shrinks or flips the card so it never covers the head (talking head) or the PiP (screen share).
+- Positioned templates take `side`, `top`, `offsetX/Y`, `scale`, `safe` (full-frame ones such as `transition`, `spotlight`, `kinetic-subtitle`, `chapter-pill` take fewer; read each template's variables). `safe:true` shrinks or flips the card so it never covers the head (talking head) or the PiP (screen share).
 - `app-window` hosts any mix of panels (add a kind in `tpl-parts.js` PANELS); `layout:"rail"` puts the headline in the free left column above the PiP.
 - Host ids must not equal an id inside the template (it would render into the host); use `<name>-host`. The checks catch it.
 - Placeholder copy only in defaults and examples (John Smith, Jane Doe, Acme, lorem ipsum).
@@ -134,128 +134,32 @@ Rules every template follows:
 
 ---
 
-## 5. Low-Level Preset API (what the templates use)
+## 5. Low-Level Preset API (`window.__hfGlass`, used by the templates)
 
-Presets reside in `components/glass-components.js` under `window.__hfGlass`. Prefer templates and `camera.js`/`share.js` data; reach for these directly only for something no template covers. PiP, split-stage and emphasis presets run on the stage engine (section 4); easing is spring-based.
+Prefer templates. Reach for these only when hand-building a custom composition. Every preset adds tweens to the timeline you pass (`tl`) at `opts.start`; all are seek-safe. Signatures (`components/glass-components.js`):
 
-### 1. Camera Punch-In / Punch-Out
-```javascript
-window.__hfGlass.cameraPunchIn(tl, "#speaker-card", { start: 2.4, scale: 1.20 });
-window.__hfGlass.cameraPunchOut(tl, "#speaker-card", { start: 5.8 });
-```
+| Preset | Signature | Use |
+|---|---|---|
+| `spring` | `spring(bounce)` | ease function; `ease.smooth` = 0, `snappy` = 0.15, `bouncy` = 0.3 |
+| `revealCard` / `hideCard` | `(tl, target, opts)` | spring card in / out |
+| `cameraPunchIn` / `cameraPunchOut` / `counterbalancePan` | `(tl, cameraSelector, opts)` | talking-head punch-in 1.15-1.25x and back |
+| `dockPiP` / `undockPiP` | `(tl, cameraSelector, opts)` | speaker to a PiP window and back (stage engine, no re-crop) |
+| `keynoteEmphasis` / `undockKeynoteEmphasis` | `(tl, textContainer, pipSelector, opts)` | centre-stage thesis text with the speaker docked |
+| `splitStage` / `unsplitStage` | `(tl, speakerSelector, appCanvasSelector, opts)` | speaker rail left, app canvas right |
+| `toastDropIn` / `toastDismiss` | `(tl, toastSelector, opts)` | notification banner |
+| `toggleNotificationStack` | `(tl, stackSelector, opts)` | expand / collapse a stack |
+| `revealList` | `(tl, itemsSelector, opts)` | staggered list |
+| `popCheckmark` | `(tl, itemSelector, opts)` | tick a row |
+| `animateCounter` | `(tl, elSelector, opts)` | number roll, tabular figures |
+| `chatBubblePop` | `(tl, bubbleSelector, opts)` | message bubble |
+| `kineticTextBurst` | `(tl, capsuleSelector, opts)` | caption capsule burst |
+| `updateStepper` | `(badgeElements, activeIndex, completedIndices)` | sets stepper state directly (no timeline) |
+| `pipelinePulse` | `(tl, wireSelector, opts)` | pulse along a pipeline wire |
+| `focusSpotlight` | `(tl, targetSelector, contextSelectors, opts)` | dim the context, keep the target lit |
+| `keynoteLowerThird` | `(tl, containerSelector, sweepSelector, opts)` | lower-third with a specular sweep |
+| `cursorClick` | `(tl, cursorSelector, targetSelector, opts)` | synthetic pointer for mockups only; never in screen share (the real cursor is in the recording) |
 
-### 2. Screen Studio PiP Docking
-```javascript
-window.__hfGlass.dockPiP(tl, "#speaker-card", { start: 6.0, orientation: "vertical", x: 96, y: 560 });
-window.__hfGlass.undockPiP(tl, "#speaker-card", { start: 11.5 });
-```
-
-### 3. Apple Fluid Spring Card Reveal
-```javascript
-window.__hfGlass.revealCard(tl, "#target-card", { start: 3.2, duration: 0.48 });
-```
-
-### 4. macOS / iPhone Stacked Notification Center Banner
-Faithfully replicates macOS Sequoia and iOS 18 Notification Center stacked notifications with physical background tiers, squircle app icons, corner icon badges, channel context, and optional right avatar thumbnails:
-```html
-<div class="apple-notification-stack">
-  <div class="apple-notif-stack-layer apple-notif-stack-layer-2"></div>
-  <div class="apple-notif-stack-layer apple-notif-stack-layer-1"></div>
-  <div class="apple-notification-card">
-    <div class="apple-notif-dismiss">✕</div>
-    <div class="apple-notif-icon-wrap">
-      <div class="apple-notif-app-icon"><svg>...</svg></div>
-      <div class="apple-notif-badge">${__hfParts.icon('bolt', 11)}</div>
-    </div>
-    <div class="apple-notif-content">
-      <div class="apple-notif-header">
-        <div class="apple-notif-header-left">
-          <span class="apple-notif-title">Acme CRM VIP</span>
-          <span class="apple-notif-context">(#inbound-leads)</span>
-        </div>
-        <span class="apple-notif-time">now</span>
-      </div>
-      <div class="apple-notif-msg"><strong>New Lead:</strong> Jane Doe booked call.</div>
-    </div>
-    <div class="apple-notif-right-avatar"><img src="avatar.jpg" /></div>
-  </div>
-</div>
-```
-```javascript
-window.__hfGlass.toastDropIn(tl, "#toast-stack", { start: 8.5, duration: 0.55 });
-window.__hfGlass.toggleNotificationStack(tl, "#toast-stack", { start: 10.5, expand: true });
-window.__hfGlass.toastDismiss(tl, "#toast-stack", { start: 13.0 });
-```
-
-### 5. Milestone Checklist Pop
-```javascript
-window.__hfGlass.popCheckmark(tl, "#checklist-row-1", { start: 4.2 });
-window.__hfGlass.popCheckmark(tl, "#checklist-row-2", { start: 5.1 });
-```
-
-### 6. Tabular Numeric Counter Roll
-```javascript
-window.__hfGlass.animateCounter(tl, "#metric-num", {
-  start: 12.0, duration: 1.2, from: 0, to: 318, suffix: "%", decimals: 0
-});
-```
-
-### 7. Kinetic Subtitle Capsule
-```javascript
-window.__hfGlass.kineticSubtitleWord(tl, "#word-speed", { start: 3.1, accentColor: "#2997ff" });
-```
-
-### 8. Stepper Engine State Change
-```javascript
-window.__hfGlass.stepperNext(tl, "#workflow-stepper", { start: 7.0, step: 2 });
-```
-
-### 9. iPhone 16 Pro iMessage Alert
-```javascript
-window.__hfGlass.chatBubblePop(tl, ".chat-bubble.incoming", { start: 9.2 });
-```
-
-### 10. Node-to-Node Pipeline Flow
-```javascript
-window.__hfGlass.pulsePipeline(tl, "#pipeline-flow", { start: 6.5, duration: 2.0 });
-```
-
-### 11. macOS Developer Terminal
-```javascript
-window.__hfGlass.typeTerminalLine(tl, "#terminal-output", "POST /api/v1/dispatch -> 200 OK", { start: 8.0 });
-```
-
-### 12. Screen Studio Spotlight & Focus Dimmer
-```javascript
-window.__hfGlass.focusSpotlight(tl, "#stage-canvas", "#focal-lead-card", { start: 14.0, duration: 0.45 });
-window.__hfGlass.unfocusSpotlight(tl, "#stage-canvas", { start: 18.5 });
-```
-
-### 13. macOS Interactive Pointer & Tactile Toggle
-```javascript
-window.__hfGlass.cursorClick(tl, "#macos-pointer", "#feature-toggle", { start: 13.2, moveDuration: 0.55 });
-```
-
-### 14. Keynote Glass Lower-Third
-```javascript
-window.__hfGlass.keynoteLowerThird(tl, "#speaker-lower-third", "#specular-sweep", { start: 0.8, duration: 0.45 });
-```
-
-### 15. Center-Stage Thesis & Corner PiP Dock
-```javascript
-window.__hfGlass.keynoteEmphasis(tl, "#thesis-content", "#speaker-card", {
-  start: 4.5, duration: 0.78, position: "bottom-right", punchSelector: ".punch-blue"
-});
-window.__hfGlass.undockKeynoteEmphasis(tl, "#thesis-content", "#speaker-card", { start: 10.2 });
-```
-
-### 16. Apple Split-Stage (Speaker 38% Left + Live App Canvas 60% Right)
-```javascript
-window.__hfGlass.splitStage(tl, "#speaker-card", "#macos-app-window", { start: 7.5, duration: 0.8 });
-window.__hfGlass.unsplitStage(tl, "#speaker-card", "#macos-app-window", { start: 22.0 });
-```
-
----
+The stage engine behind the PiP presets is `__hfGlass.stage` (`fit`, `pan`, `to`), described in section 4.
 
 ## 6. Icons (`__hfParts.icon`)
 
@@ -267,13 +171,16 @@ The kit ships its own 24x24 icon set (MIT, `components/tpl-parts.js`); no Apple 
 ## 7. Verification & Quality Gate
 
 ```bash
-npm run check          # talking head: lint + runtime + layout + motion + contrast (0 errors, 0 warnings)
-npm run check:face     # no template covers the speaker's head (fails with px + time)
-npm run share:check    # screen share: same gates (syncs shared files first)
+npm run check:all      # everything below in one go
+npm run check          # talking head: lint + runtime + layout + motion + contrast
+npm run check:face     # host contracts (at/dur, host ids) + no template covers the speaker's head
+npm run share:check    # screen share: same, measured against the webcam card (syncs shared files first)
+npm run check:privacy  # no footage, images, big files or denylisted names in git
 npm run build:library  # regenerate library/ after editing templates or scripts/library-meta.mjs
 npx hyperframes snapshot [DIR] --at 3.5,7,13   # look at real frames before claiming it works
 ```
 
-- Required: 0 errors, 0 warnings, WCAG AA contrast passes. Look at frames at every template's entry, hold and the camera transitions.
+- Required: 0 errors and 0 warnings from the checks, WCAG AA contrast passing. Look at frames at every template's entry, hold and exit, and at every camera, cam-mode and zoom transition.
+- Every value must be a pure function of time: renders seek the paused timeline in any order. Use `fromTo` with explicit start values where tweens on the same property meet; never let two tweens write one property at the same time.
 - Never claim done without frame evidence or a render. Do not use symlinked source files inside a project (the bundler reads them as empty); `scripts/sync-share.mjs` copies real files.
-- Preview: `npx hyperframes preview --background`, stop with `--stop`. Library: `npm run build:library`, serve the repo root and open `/library/`.
+- Preview: `npx hyperframes preview --background`, stop with `--stop`. Library: `npm run library`, open `http://localhost:4173/library/`.

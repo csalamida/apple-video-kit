@@ -16,6 +16,11 @@
 // Order does not matter: priority decides. Keep `why` short and concrete; it is what the editor reads.
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+// Curly / typographic quotes -> straight, so every rule can be written with ' and " only.
+// parseTranscript (cue-plan.mjs) runs every cue through this before any rule sees it.
+export const normalizeQuotes = (s) => String(s).replace(/[\u2018\u2019\u201A\u201B\u2032\u00B4\u0060]/g, "'").replace(/[\u201C\u201D\u201E\u201F\u2033\u00AB\u00BB]/g, '"');
+// Case-insensitive literal inside a case-SENSITIVE regex: ci("i'm") -> "[iI]'[mM]"
+const ci = (s) => s.replace(/[a-z]/gi, (c) => `[${c.toLowerCase()}${c.toUpperCase()}]`);
 const clean = (s) => String(s || '').replace(/["“”]/g, '').replace(/[.,!?;:]+$/, '').trim();
 // "click the Save button in the sidebar" -> "Save button"
 const object = (s, words = 3) => clean(s).replace(/^(on|the|a|an|your|this|that)\s+/i, '').replace(/^(the|a|an)\s+/i, '')
@@ -66,7 +71,8 @@ export const RULES = [
   },
   {
     id: 'intro-name', priority: 85, kind: 'template', suggest: 'lower-third', when: intro,
-    match: /\b(?:i'm|my name is|i am)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/,
+    // lead-in in any case ("I'm", "i am", "My name is"), but the name itself must be Capitalised
+    match: new RegExp(String.raw`\b(?:${['my name is', "my name's", "i'm", 'i am'].map(ci).join('|')})\s+(\p{Lu}[\p{L}'-]+(?:\s\p{Lu}[\p{L}'-]+)?)`, 'u'),
     why: 'Speaker introduces themself: name plate, once.',
     vars: (cue, m) => ({ name: m[1], role: 'TODO role' })
   },

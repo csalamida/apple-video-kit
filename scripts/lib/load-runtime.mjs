@@ -2,15 +2,53 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export function loadRuntime(root = process.cwd()) {
+export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// What every template loads itself; loaded after the page's own scripts if the page did not.
+const BASE = ['components/glass-components.js', 'components/camera.js', 'inputs/face-track.js', 'components/tpl-runtime.js'];
+
+// Local <script src> of a page, in order (CDN scripts such as gsap are skipped; checks never animate).
+export function pageScripts(html) {
+  return [...html.matchAll(/<script\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1])
+    .filter((s) => !/^(?:[a-z]+:)?\/\//i.test(s) && !s.startsWith('data:'))
+    .map((s) => s.replace(/^\.\//, ''));
+}
+
+// Resolve a script for a page: next to the page first (projects/screen-share/components is a synced copy),
+// then the repo root (the canonical components/ + inputs/).
+function resolveScript(src, pageDir) {
+  for (const base of [pageDir, ROOT]) {
+    const p = path.resolve(base, src);
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+
+// loadRuntime(pageFile?) runs the page's local scripts (components/, inputs/, its own share.js ...) and then
+// the template runtime in one fake window. Returns the tpl API; T.mode is 'pip' for screen-share pages
+// (templates keep off the webcam card) or 'face' (templates keep off the tracked head).
+export function loadRuntime(pageFile = path.join(ROOT, 'index.html')) {
   const ctx = { console };
   ctx.window = ctx;
   vm.createContext(ctx);
-  for (const f of ['components/glass-components.js', 'components/camera.js', 'inputs/face-track.js', 'components/tpl-runtime.js']) {
-    vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+  const pageDir = path.dirname(path.resolve(pageFile));
+  const own = fs.existsSync(pageFile) ? pageScripts(fs.readFileSync(pageFile, 'utf8')) : [];
+  const done = new Set();
+  for (const src of [...own, ...BASE]) {
+    const key = src.replace(/\\/g, '/');
+    if (done.has(key)) continue;
+    done.add(key);
+    const file = resolveScript(src, pageDir);
+    if (!file) { if (BASE.includes(key)) throw new Error(`runtime script not found: ${src}`); continue; }
+    vm.runInContext(fs.readFileSync(file, 'utf8'), ctx, { filename: path.relative(ROOT, file) });
   }
-  return ctx.__hfTpl;
+  const T = ctx.__hfTpl;
+  T.mode = ctx.__hfShare && ctx.__hfShareStage ? 'pip' : 'face';
+  // Box the templates must keep clear of at time t: the PiP card at rest (screen share) or the head (camera applied).
+  T.keepClearAt = (t) => T.mode === 'pip' ? T.faceUnion(t, 0) : T.faceAt(t);
+  return T;
 }
 
 const unescapeAttr = (s) => s.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
@@ -26,16 +64,23 @@ export function templateDefaults(file) {
 }
 
 // Hosts mounting compositions/tpl/*.html in a composition file.
+// The tag regex is quote-aware: a '>' inside an attribute value (JSON variables, "4×" labels) does not end the tag.
+const TAG = /<div\b(?:[^>"']|"[^"]*"|'[^']*')*>/g;
+const SRC = /\sdata-composition-src\s*=\s*(["'])(?:\.\/)?compositions\/tpl\/([\w-]+)\.html\1/;
 export function templateHosts(htmlFile) {
   const html = fs.readFileSync(htmlFile, 'utf8');
   const hosts = [];
-  for (const m of html.matchAll(/<div\b[^>]*data-composition-src="compositions\/tpl\/([\w-]+)\.html"[^>]*>/g)) {
-    const tag = m[0];
-    const attr = (n) => { const a = tag.match(new RegExp(n + `="([^"]*)"`)); return a ? a[1] : null; };
-    const vv = tag.match(/data-variable-values='([^']*)'/);
+  for (const m of html.matchAll(TAG)) {
+    const tag = m[0], src = tag.match(SRC);
+    if (!src) continue;
+    // value of attribute n, either quote style; (?:^|\s) so "id" never matches data-hf-id
+    const attr = (n) => { const a = tag.match(new RegExp(`(?:^|\\s)${n}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`)); return a ? (a[1] ?? a[2]) : null; };
+    const vv = attr('data-variable-values');
+    const hostId = attr('id');
     hosts.push({
-      template: m[1], id: attr('id'), hostId: (tag.match(/\sid="([^"]*)"/) || [])[1], start: parseFloat(attr('data-start')), dur: parseFloat(attr('data-duration')),
-      vars: vv ? JSON.parse(unescapeAttr(vv[1])) : {}
+      template: src[2], id: hostId || attr('data-composition-id') || src[2], hostId,
+      start: parseFloat(attr('data-start')), dur: parseFloat(attr('data-duration')),
+      vars: vv ? JSON.parse(unescapeAttr(vv)) : {}
     });
   }
   return hosts;
