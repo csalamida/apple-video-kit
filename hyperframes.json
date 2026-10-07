@@ -8,17 +8,5 @@
   },
   "media": {
     "autoProxy": true
-  },
-  "registryItems": [
-    {
-      "name": "yt-camera-move",
-      "type": "hyperframes:component",
-      "target": "compositions/components/yt-camera-move.html"
-    },
-    {
-      "name": "tilt-card",
-      "type": "hyperframes:component",
-      "target": "compositions/components/tilt-card.html"
-    }
-  ]
+  }
 }

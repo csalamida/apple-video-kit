@@ -1,10 +1,17 @@
 {
   "name": "apple-video-kit",
-  "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/csalamida/apple-video-kit.git"
+  },
+  "bin": {
+    "apple-video-kit": "bin/apple-video-kit.mjs"
+  },
   "engines": {
     "node": ">=22"
   },

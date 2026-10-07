@@ -87,6 +87,8 @@ npm run share:render   # screen share to MP4
 npm run check:all      # every gate below
 ```
 
+Kit updates: `npx github:csalamida/apple-video-kit update` (the CLI is `bin/apple-video-kit.mjs`). It replaces kit files only and never touches `inputs/`, `index.html`, `components/camera.js`, `projects/**`, `meta.json`, `hyperframes.json`. Edited kit files are backed up to `.kit/backup/`. Put per-video changes in your files, not in kit files.
+
 Agents: use `npx hyperframes preview --background` for a persistent preview, check it with `--status`, stop it with `--stop`. Do not wrap `npm run dev` in a background shell.
 
 The CLI is pinned (`hyperframes` 0.8.120 in package.json) so renders stay identical; the npm scripts use that local copy. To upgrade: `npx hyperframes@latest upgrade --project . --check`, then without `--check`.

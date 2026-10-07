@@ -95,6 +95,7 @@ components/
 inputs/face-track.js     face boxes, git-ignored: generated for the placeholder; `npm run face -- <video>` writes yours (installs OpenCV into .cache/face-venv on first run)
 inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated: index.html (Components gallery + detail + storyboard), motion.html (Animations)
+bin/apple-video-kit.mjs  CLI: npx github:csalamida/apple-video-kit init <dir> | update [--dry-run]
 scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library/ (page sources), sync-share, demo-media, serve, face-track (+ detect-face.py)
 ```
 

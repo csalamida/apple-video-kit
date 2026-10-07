@@ -15,14 +15,35 @@ Everything is data. You describe a video as times and settings ("at 3.2 s zoom t
 
 Needs Node 22+ and ffmpeg. Python 3.9+ only for face detection on your own talking-head footage (its OpenCV dependency installs itself on first use).
 
+Start a new project:
+
 ```bash
+npx github:csalamida/apple-video-kit init my-video
+cd my-video
 npm install
-npm run dev            # talking-head demo in the HyperFrames studio
+npm run library        # browse the components and animations at http://localhost:4173/library/
 npm run share:dev      # screen-share demo
-npm run library        # then open http://localhost:4173/library/
+npm run dev            # talking-head demo
 ```
 
+Or clone this repo and run `npm install` in it.
+
 The demos ship with no real footage. On first run the kit generates a faceless placeholder speaker, a test-pattern screen and a matching demo face track (all git-ignored).
+
+## Updating
+
+Get the latest templates, moves, tools and docs without losing your work. Run inside your project:
+
+```bash
+npx github:csalamida/apple-video-kit update --dry-run   # see what would change
+npx github:csalamida/apple-video-kit update
+npm install && npm run build:library && npm run check:all
+```
+
+- **Updated:** the kit's own files: `compositions/tpl/`, `components/` (except `camera.js`), `scripts/`, `library/`, `assets/demo/`, the docs and the skill. New `package.json` scripts and versions are merged in; your name, version and extra scripts stay.
+- **Never touched:** your files: `inputs/` (footage and face track), `index.html`, `components/camera.js`, everything in `projects/` (your `share.js` and pages), `meta.json`, `hyperframes.json` and `.privacy-denylist`.
+- **Your edits are safe:** if you changed a kit file (say you tweaked a template), your version is copied to `.kit/backup/<time>/` before it is replaced, and the update lists those files.
+- The kit records what it installed in `.kit/manifest.json`; commit it so the next update can tell your edits apart from old kit files. Cloned this repo instead? `git pull` works too, or run the update command in your clone.
 
 ## Use your own footage
 

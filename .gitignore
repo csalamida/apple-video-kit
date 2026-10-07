@@ -21,3 +21,6 @@ projects/screen-share/compositions/
 projects/screen-share/inputs
 projects/screen-share/assets
 snapshots/
+
+# apple-video-kit update state and backups of files you edited
+.kit/backup/

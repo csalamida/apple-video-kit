@@ -43,6 +43,15 @@ const terms = fs.existsSync(denyFile)
   ? fs.readFileSync(denyFile, 'utf8').split('\n').map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
   : [];
 
+// The repo's own address (owner/repo from package.json "repository") is public by definition and appears in
+// install commands; it is blanked before the name scan so a denylisted owner name only fails elsewhere.
+let repoSlug = '';
+try {
+  const repo = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).repository;
+  const m = String((repo && repo.url) || repo || '').match(/github\.com[/:]([\w.-]+\/[\w.-]+?)(?:\.git)?$/);
+  if (m) repoSlug = m[1].toLowerCase();
+} catch (e) { /* no package.json */ }
+
 // Binary = a NUL byte in the first 8 KB (git's own heuristic). Binaries are size/type-checked, not text-scanned.
 const isBinary = (buf) => buf.subarray(0, 8192).includes(0);
 
@@ -56,6 +65,7 @@ for (const f of files) {
   const lowerName = f.toLowerCase();
   let text = '';
   if (size <= MAX) { const buf = fs.readFileSync(abs); if (!isBinary(buf)) text = buf.toString('utf8').toLowerCase(); }
+  if (repoSlug) text = text.split(repoSlug).join(' ');
   for (const [i, t] of terms.entries()) {
     const lower = t.toLowerCase();
     if (text.includes(lower) || lowerName.includes(lower)) problems.push(`${f}: contains a denylisted term (#${i + 1})`);
