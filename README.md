@@ -36,7 +36,9 @@ The demos ship with no real footage. On first run the kit generates a faceless p
 
 ## What is in the box
 
-**The library** (`npm run library`, then `/library/`) is the menu: every block with a live preview, editable props, a "when to use it" note with the spoken cues that call for it, and a storyboard you can fill in and copy out as host tags or as a plan to hand to an AI editor.
+**The library** (`npm run library`) has two pages:
+- **Components** (`/library/`): a gallery of every block. Hover to play, click to open it with a live preview over the speaker, editable props, a "when to use it" note and the copy-ready host tag. A storyboard drawer collects blocks with times and copies them out as host tags or as a plan for an AI editor.
+- **Animations** (`/library/motion.html`): every move, playable: screen-share moves, camera moves, the transition library, the three springs, and a "which motion when" cheat sheet.
 
 | Blocks (`compositions/tpl/`) | Use it when you say... |
 |---|---|

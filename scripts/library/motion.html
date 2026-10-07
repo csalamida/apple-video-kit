@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animations - Apple Video Kit</title>
+<link rel="stylesheet" href="../components/tokens.css">
+<link rel="stylesheet" href="library.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../components/glass-components.js"></script>
+<script src="../inputs/face-track.js"></script>
+<script src="../components/screen-stage.js"></script>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">Apple Video Kit</div>
+  <nav class="nav" aria-label="Library"><a href="index.html">Components</a><a href="motion.html" aria-current="page">Animations</a></nav>
+  <div class="spacer"></div>
+</header>
+
+<main class="wrap">
+  <h1>Animations</h1>
+  <p class="sub">Every move the kit makes, playable. Moves are data: you write when and where, the kit does the motion. Each one shows the line that produces it.</p>
+  <nav class="jump" aria-label="Sections"><a href="#screen">Screen share moves</a><a href="#camera">Camera moves</a><a href="#transitions">Transitions</a><a href="#springs">Springs</a><a href="#cheatsheet">Which motion when</a></nav>
+
+  <section class="section" id="screen">
+    <h2>Screen share moves</h2>
+    <p class="lead">Your screen recording floats on a wallpaper, zooms to what you talk about, and your webcam lives in a card bottom-left. Pick a move to jump to it, or play the whole demo. Written in <code class="mono">projects/screen-share/share.js</code>.</p>
+    <div class="panel">
+      <div class="stage" id="ssstage"><div class="scale" id="ss-scale"><div id="ss" style="position:absolute;inset:0">
+        <div id="wall" class="wall" style="background:linear-gradient(115deg,transparent 52%,rgba(255,255,255,.35) 52.6%,transparent 55%),radial-gradient(120% 90% at 88% 8%,#8fdcff 0%,transparent 55%),radial-gradient(100% 85% at 8% 95%,#1c55d2 0%,transparent 62%),radial-gradient(80% 60% at 60% 72%,#10a8bd 0%,transparent 60%),linear-gradient(135deg,#0b3a8a,#2e86de 48%,#5ec8e5)"></div>
+        <div id="win"><div id="pan"></div></div>
+        <div id="pip"><div id="cam"></div></div>
+      </div></div></div>
+      <div class="modes" id="sshots"></div>
+      <pre id="sscode"></pre>
+    </div>
+  </section>
+
+  <section class="section" id="camera">
+    <h2>Camera moves</h2>
+    <p class="lead">Talking head: the speaker is a window that morphs to a picture-in-picture or a side rail. The footage is only panned and scaled inside it, so it never re-crops. Written in <code class="mono">components/camera.js</code>.</p>
+    <div class="panel">
+      <div class="stage" id="st"><div class="scale" id="st-scale">
+        <div id="st-rig" style="position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;corner-shape:var(--corner)"><div id="st-pan" class="hf-pan" style="background:url(stage.jpg) center/cover"></div></div>
+        <div id="st-app" style="position:absolute;opacity:0;border-radius:36px;corner-shape:var(--corner);background:var(--glass-bg);border:var(--glass-border);box-shadow:var(--glass-shadow);padding:40px;font-size:44px;font-weight:700;letter-spacing:var(--track-display)">Live app canvas</div>
+      </div></div>
+      <div class="modes" id="modes"></div>
+      <pre id="stcode"></pre>
+    </div>
+  </section>
+
+  <section class="section" id="transitions">
+    <h2>Transitions</h2>
+    <p class="lead">Cover a cut: the cut sits at the middle of the transition. Hover to play. Most cuts need none; use them for section changes.</p>
+    <div class="gallery" id="trgrid"></div>
+  </section>
+
+  <section class="section" id="springs">
+    <h2>Springs</h2>
+    <p class="lead">Every card, zoom and camera move uses one of three springs (<code class="mono">__hfGlass.ease.*</code>). Press a curve to replay it.</p>
+    <div class="springs" id="springgrid"></div>
+  </section>
+
+  <section class="section cuesheet" id="cheatsheet">
+    <h2>Which motion when</h2>
+    <p class="lead">What the speaker is doing, the motion that fits, and how to write it.</p>
+    <div class="panel"><table id="motioncues"></table></div>
+  </section>
+</main>
+
+<script>const MANIFEST = /*__MANIFEST__*/null;</script>
+<script src="common.js"></script>
+<script>
+// ---- screen share demo: the real __hfShareStage timeline on stills ----
+(function () {
+  const S = window.__hfShareStage;
+  fitStage($('#ssstage'), $('#ss-scale'));
+  $('#pan').style.backgroundImage = `url(${ROOT}assets/demo/dashboard.svg)`;
+  $('#cam').style.backgroundImage = `url(${ROOT}library/stage.jpg)`; $('#cam').style.backgroundSize = 'cover';
+  const DATA = {
+    duration: 24, aspect: 1.825, window: { r: 18 }, drift: true, pip: { focus: { x: 0.5, y: 0.4 } },
+    zooms: [{ t: 2.5, x: 0.33, y: 0.2, z: 1.6 }, { t: 7, z: 1 }, { t: 8.5, x: 0.92, y: 0.06, z: 2.0 }, { t: 12, z: 1 }],
+    cam: [{ t: 0, mode: 'full' }, { t: 1.2, mode: 'pip' }, { t: 13, mode: 'hide' }, { t: 16, mode: 'pip' }, { t: 21, mode: 'full' }],
+    callouts: [{ t: 9.2, end: 11.8, x: 0.905, y: 0.012, w: 0.083, h: 0.05, label: 'New deal', side: 'bottom' }],
+    focus: [{ t: 16.5, end: 20, x: 0.135, y: 0.24, w: 0.85, h: 0.76 }],
+    redact: [{ t: 3, end: 7, x: 0.15, y: 0.13, w: 0.19, h: 0.12 }]
+  };
+  S.layout(DATA);
+  const tl = gsap.timeline({ paused: true }); S.build(tl, DATA); tl.time(0);
+  const SHOTS = [
+    ['Webcam full', 0.6, "cam: [{ t: 0, mode: 'full' }, { t: 1.2, mode: 'pip' }]   // talk straight to the viewer"],
+    ['Zoom + drift', 5, "zooms: [{ t: 2.5, x: 0.33, y: 0.2, z: 1.6 }], drift: true   // zoom to a control, slow push-in while it holds"],
+    ['Redact', 5.5, "redact: [{ t: 3, end: 7, x: 0.15, y: 0.13, w: 0.19, h: 0.12 }]   // blur an email or key"],
+    ['Callout', 10.5, "callouts: [{ t: 9.2, end: 11.8, x: 0.905, y: 0.012, w: 0.083, h: 0.05, label: 'New deal' }]   // \"click this\""],
+    ['Hide webcam', 14.5, "cam: [{ t: 13, mode: 'hide' }, { t: 16, mode: 'pip' }]   // dense screen, card out of the way"],
+    ['Focus dim', 18, "focus: [{ t: 16.5, end: 20, x: 0.135, y: 0.24, w: 0.85, h: 0.76 }]   // \"look at this section\""],
+    ['Sign-off full', 22.5, "cam: [{ t: 21, mode: 'full' }]   // back to the face to close"]
+  ];
+  $('#sshots').innerHTML = SHOTS.map(([l], i) => `<button class="btn ${i === 1 ? 'on' : 'ghost'}" data-i="${i}">${l}</button>`).join('') + '<button class="btn ghost" id="ssplay">Play all</button>';
+  let run = null;
+  const go = (i) => { const [, t, code] = SHOTS[i]; run && run.kill(); run = gsap.to(tl, { time: t, duration: 0.9, ease: 'power2.inOut' }); $('#sscode').textContent = code; };
+  $('#sshots').onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    $('#sshots').querySelectorAll('button').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); });
+    if (b.id === 'ssplay') { run && run.kill(); tl.time(0); run = gsap.to(tl, { time: DATA.duration, duration: DATA.duration, ease: 'none' }); $('#sscode').textContent = 'The whole demo. Every move is one line in share.js.'; return; }
+    go(+b.dataset.i);
+  };
+  go(1);
+})();
+
+// ---- camera moves: the real __hfGlass presets ----
+(function () {
+  const rig = '#st-rig', app = '#st-app', G = window.__hfGlass;
+  fitStage($('#st'), $('#st-scale'));
+  const tr = (window.__hfFace && window.__hfFace.track) || [];
+  const focus = tr.length ? { x: tr.reduce((a, b) => a + (b.x0 + b.x1) / 2, 0) / tr.length, y: tr.reduce((a, b) => a + (b.y0 + b.y1) / 2, 0) / tr.length } : { x: 960, y: 430 };
+  G.stage.pan(rig);
+  const MODES = {
+    full: { label: 'Full frame', code: "__hfGlass.undockPiP(tl, '#rig', { start: 0 });", run: (tl) => G.undockPiP(tl, rig, { start: 0 }) },
+    punch: { label: 'Punch-in 1.2x', code: "camera.js move: { t, dur: 0.6, scale: 1.2 }   // thesis, punchline", run: (tl) => { G.undockPiP(tl, rig, { start: 0 }); tl.to('#st-pan', { scale: 1.2, duration: 0.7, ease: G.ease.smooth }, 0.1); } },
+    pip: { label: 'PiP 16:9', code: "camera.js move: { t, dur: 0.8, win: { x: 72, y: 696, w: 451, h: 254, r: 36 }, fit: 'frame', front: true }", run: (tl) => G.dockPiP(tl, rig, { start: 0, x: 59, y: 640, width: 451, height: 254 }) },
+    vert: { label: 'PiP 9:16 (face crop)', code: "__hfGlass.dockPiP(tl, '#rig', { start: 0, orientation: 'vertical', x: 96, y: 520, focus });", run: (tl) => G.dockPiP(tl, rig, { start: 0, orientation: 'vertical', x: 96, y: 520, width: 300, height: 533, focus }) },
+    split: { label: 'Split stage', code: "__hfGlass.splitStage(tl, '#rig', '#app', { start: 0, focus });", run: (tl) => G.splitStage(tl, rig, app, { start: 0, focus }) }
+  };
+  $('#modes').innerHTML = Object.entries(MODES).map(([k, m]) => `<button class="btn ${k === 'full' ? 'on' : 'ghost'}" data-k="${k}">${m.label}</button>`).join('');
+  $('#stcode').textContent = MODES.full.code;
+  $('#modes').onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return; const k = b.dataset.k;
+    $('#modes').querySelectorAll('button').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); });
+    const tl = gsap.timeline();
+    if (k !== 'split') tl.to(app, { opacity: 0, x: 30, duration: 0.3, ease: 'power2.in' }, 0);
+    if (k !== 'punch') tl.to('#st-pan', { scale: 1, duration: 0.5, ease: G.ease.smooth }, 0);
+    MODES[k].run(tl); $('#stcode').textContent = MODES[k].code;
+  };
+})();
+
+// ---- transitions: one live tile per kind ----
+(function () {
+  const t = byId('transition'); if (!t) return;
+  const WHEN = { dip: 'Calm scene or time change.', flash: 'Energetic reveal. Once per video at most.', blur: 'Soft jump cut in the same setup. The default.',
+    'glass-wipe': 'Moving to a new screen or app.', iris: 'Focusing on a detail or closing a topic.', 'light-sweep': 'Upbeat "next up" or a win.', chapter: 'Named section break.' };
+  (t.examples || []).forEach((ex, i) => {
+    const V = valsFor(t, ex.vars);
+    const tile = document.createElement('div');
+    tile.className = 'tile'; tile.tabIndex = 0;
+    tile.innerHTML = `<div class="stage"></div><div class="meta"><div class="cat">${esc(V.kind)}</div><div class="name">${esc(ex.name)}</div><div class="when">${esc(WHEN[V.kind] || '')}</div></div><div class="row" style="padding:0 6px"><button class="btn ghost copy">Copy host tag</button></div>`;
+    $('#trgrid').appendChild(tile);
+    const prev = tilePreview($('.stage', tile), t, V, { rest: V.dur * 0.3, delay: 300 + i * 150 });
+    tile.addEventListener('mouseenter', () => prev.play());
+    tile.addEventListener('mouseleave', () => prev.stop());
+    tile.addEventListener('focus', () => prev.play());
+    tile.addEventListener('blur', () => prev.stop());
+    $('.copy', tile).onclick = (e) => { e.stopPropagation(); copyText(hostTagFor(t, V, 1), e.target); };
+  });
+})();
+
+// ---- springs: the curve and a dot that moves on it ----
+(function () {
+  const E = window.__hfGlass.ease;
+  const SPRINGS = [
+    ['smooth', 'Smooth', 'No overshoot. Camera, zooms, layout moves, fades.'],
+    ['snappy', 'Snappy', 'A slight settle. Cards, pills, badges arriving.'],
+    ['bouncy', 'Bouncy', 'Playful. Toasts, chat bubbles, checkmarks.']
+  ];
+  SPRINGS.forEach(([k, name, use]) => {
+    const f = E[k], W = 300, H = 120, pad = 14, N = 80, maxV = 1.12;
+    const pts = Array.from({ length: N + 1 }, (_, i) => { const p = i / N; return [pad + p * (W - 2 * pad), H - pad - (f(p) / maxV) * (H - 2 * pad)]; });
+    const el = document.createElement('div');
+    el.className = 'panel spring';
+    el.innerHTML = `<h3>${name} <span class="mono id">ease.${k}</span></h3><p>${use}</p>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} spring curve"><line x1="${pad}" x2="${W - pad}" y1="${H - pad - (1 / maxV) * (H - 2 * pad)}" y2="${H - pad - (1 / maxV) * (H - 2 * pad)}" stroke="rgba(255,255,255,.18)" stroke-dasharray="4 4"/>
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${pts.map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' ')}"/></svg>
+      <div class="track"><div class="dot"></div></div><div class="row"><button class="btn ghost">Replay</button></div>`;
+    $('#springgrid').appendChild(el);
+    const dot = $('.dot', el), track = $('.track', el);
+    const play = () => { const dx = track.clientWidth - 42; gsap.fromTo(dot, { x: 0 }, { x: dx, duration: 0.9, ease: f }); };
+    $('.btn', el).onclick = play; $('svg', el).onclick = play;
+    new IntersectionObserver((es, io) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); setTimeout(play, 200); } }).observe(el);
+  });
+})();
+
+// ---- cheat sheet ----
+$('#motioncues').innerHTML = '<tr><th>When the speaker...</th><th>Motion</th><th>How</th></tr>' + MANIFEST.motion.map((m) => `<tr><td>${esc(m.cue)}</td><td>${esc(m.motion)}</td><td>${esc(m.how)}</td></tr>`).join('');
+</script>
+</body>
+</html>

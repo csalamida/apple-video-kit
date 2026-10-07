@@ -85,7 +85,7 @@
   var TAIL = '<svg class="apple-bubble-tail %s" viewBox="0 0 10 16"><path d="M0,0 C0,7 4,14 10,15 C4,15.5 0,14 0,16 Z" fill="currentColor"/></svg>';
 
   /**
-   * phone(cfg) -> HTML string for an iPhone 16 Pro iMessage mockup.
+   * phone(cfg) -> HTML string for an iPhone-style iMessage mockup.
    * cfg: {contact, initials, back, time, thread:[{from:'them'|'me', text}], size}
    * Message elements get ids  <uid>-m<i>  and typing dots <uid>-t<i>  so phoneTimeline() can animate them.
    */

@@ -1203,7 +1203,7 @@
    "vars": {
     "dur": 3.4
    },
-   "desc": "iPhone 16 Pro iMessage thread with typing indicator.",
+   "desc": "iPhone-style iMessage thread with typing indicator.",
    "use": {
     "when": "The story is a text conversation: an auto-reply, an SMS follow-up, a booking exchange.",
     "cues": [

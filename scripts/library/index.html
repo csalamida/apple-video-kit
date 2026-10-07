@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components - Apple Video Kit</title>
+<link rel="stylesheet" href="../components/tokens.css">
+<link rel="stylesheet" href="library.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">Apple Video Kit</div>
+  <nav class="nav" aria-label="Library"><a href="index.html" aria-current="page">Components</a><a href="motion.html">Animations</a></nav>
+  <div class="spacer"></div>
+  <button class="btn ghost" id="board-open">Storyboard<span class="count" id="board-count">0</span></button>
+</header>
+
+<main class="wrap">
+  <h1>Components</h1>
+  <p class="sub">Every block you can put in a video. Hover a block to play it, click it to edit the text, preview it over the speaker, and copy it into your composition or add it to the storyboard.</p>
+
+  <div class="toolbar">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Category"></div>
+    <input class="search" id="search" type="search" placeholder="Search blocks or cues, e.g. &quot;recap&quot;" aria-label="Search blocks">
+  </div>
+  <div class="gallery" id="gallery"></div>
+  <p class="empty" id="empty" hidden>No block matches. Try another word, or look at the cue table below.</p>
+
+  <section class="section cuesheet">
+    <details><summary>Which block do I use? (what the speaker says, and the block for it)</summary><table id="tplcues"></table></details>
+  </section>
+</main>
+
+<dialog class="sheet" id="sheet" aria-label="Block details"></dialog>
+
+<aside class="drawer" id="drawer" aria-label="Storyboard">
+  <div class="head"><h2>Storyboard</h2><button class="close" id="board-close" aria-label="Close storyboard">×</button></div>
+  <div class="body">
+    <p class="desc" id="board-empty">Empty. Open a block and press <b>Add to storyboard</b>. Blocks land here in time order; set their start time and note what is being said.</p>
+    <table class="sb" id="board-list"></table>
+  </div>
+  <div class="foot row"><button class="btn" id="board-tags">Copy host tags</button><button class="btn ghost" id="board-plan">Copy as plan text</button><button class="btn ghost" id="board-clear">Clear</button></div>
+</aside>
+
+<script>const MANIFEST = /*__MANIFEST__*/null;</script>
+<script src="common.js"></script>
+<script>
+// ---- gallery ----
+const cats = ['All', ...new Set(MANIFEST.templates.map((t) => t.category))];
+let activeCat = 'All', query = '';
+const firstSentence = (s) => (String(s || '').match(/^[^.]*\.?/) || [''])[0];
+
+function renderTabs() {
+  $('#tabs').innerHTML = cats.map((c) => `<button class="tab" role="tab" aria-selected="${c === activeCat}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+}
+$('#tabs').onclick = (e) => { const b = e.target.closest('.tab'); if (!b) return; activeCat = b.dataset.c; renderTabs(); renderGallery(); };
+$('#search').oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderGallery(); };
+
+function matches(t) {
+  if (activeCat !== 'All' && t.category !== activeCat) return false;
+  if (!query) return true;
+  const U = t.use || {};
+  return [t.id, t.title, t.desc, U.when, ...(U.cues || [])].join(' ').toLowerCase().includes(query);
+}
+
+function renderGallery() {
+  const g = $('#gallery'); g.innerHTML = '';
+  const list = MANIFEST.templates.filter(matches);
+  $('#empty').hidden = list.length > 0;
+  list.forEach((t, i) => {
+    const tile = document.createElement('button');
+    tile.className = 'tile'; tile.type = 'button'; tile.setAttribute('aria-label', `${t.title}: open details`);
+    tile.innerHTML = `<div class="stage"></div><div class="meta"><div class="cat">${esc(t.category)}</div><div class="name">${esc(t.title)}</div><div class="when">${esc(firstSentence((t.use || {}).when) || t.desc)}</div></div>`;
+    g.appendChild(tile);
+    const prev = tilePreview($('.stage', tile), t, valsFor(t), { delay: 300 + i * 150 });
+    tile.addEventListener('mouseenter', () => prev.play());
+    tile.addEventListener('mouseleave', () => prev.stop());
+    tile.addEventListener('focus', () => prev.play());
+    tile.addEventListener('blur', () => prev.stop());
+    tile.onclick = () => openSheet(t);
+  });
+}
+
+// ---- detail sheet ----
+const sheet = $('#sheet');
+let sheetPlaying = false;
+function closeSheet() { sheetPlaying = false; sheet.close(); sheet.innerHTML = ''; if (location.hash) history.replaceState(null, '', location.pathname); }
+sheet.addEventListener('cancel', (e) => { e.preventDefault(); closeSheet(); });
+sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
+
+function openSheet(t, ex, exName) {
+  sheetPlaying = false;
+  const vals = valsFor(t, ex);
+  const fields = t.variables.map((d) => {
+    const wide = isJson(d) || (d.type === 'string' && String(d.default).length > 24);
+    let input;
+    if (d.type === 'boolean') input = `<input type="checkbox" data-id="${d.id}" ${vals[d.id] ? 'checked' : ''}>`;
+    else if (d.type === 'number') input = `<input type="number" step="any" data-id="${d.id}" value="${esc(vals[d.id])}">`;
+    else if (isJson(d)) input = `<textarea data-id="${d.id}" data-json="1" spellcheck="false">${esc(JSON.stringify(JSON.parse(vals[d.id]), null, 1))}</textarea>`;
+    else input = `<input type="text" data-id="${d.id}" value="${esc(vals[d.id])}">`;
+    return `<div class="prop ${wide ? 'wide' : ''}"><label>${esc(d.label)}</label>${input}</div>`;
+  }).join('');
+  const U = t.use || { when: '', cues: [], pairs: [], avoid: '' };
+  const exSel = (t.examples && t.examples.length > 1) ? `<select class="ex" aria-label="Example">${t.examples.map((e) => `<option ${e.name === exName ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select>` : '';
+  sheet.innerHTML = `<div class="sheet-in">
+    <div class="l">
+      <div class="sheet-head"><div class="t"><h2>${esc(t.title)}</h2><div class="id mono">${esc(t.file)}</div></div></div>
+      <div class="stage"><div class="scale"><div class="bg"><div class="pan" style="background-image:url(${ROOT}library/stage.jpg)"></div></div><iframe title="${esc(t.title)} preview"></iframe><div class="face"></div></div></div>
+      <div class="ctl"><button class="btn play">Play</button><input type="range" class="seek" min="0" max="${vals.dur}" step="0.01" value="${t.t}" aria-label="Time"><span class="tt mono"></span><label><input type="checkbox" class="showface" checked> face box</label>${exSel}</div>
+      <p class="desc">${esc(t.desc)}</p>
+      <div class="use"><div><b>Use it when:</b> ${esc(U.when)}</div><div><b>Spoken cues:</b> ${(U.cues || []).map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</div><div><b>Pairs with:</b> ${esc((U.pairs || []).join('; '))}</div><div><b>Avoid:</b> ${esc(U.avoid)}</div></div>
+    </div>
+    <div class="r">
+      <div class="sheet-head"><div class="t"><h2 style="font-size:17px">Props</h2></div><button class="close" aria-label="Close">×</button></div>
+      <div class="props">${fields}</div>
+      <div class="row"><button class="btn add">Add to storyboard</button><button class="btn ghost reset">Reset</button></div>
+      <details open><summary>Host tag</summary><textarea class="tag" readonly aria-label="Host tag"></textarea><div class="row" style="margin-top:8px"><button class="btn copy">Copy host tag</button></div></details>
+    </div></div>`;
+  if (!sheet.open) sheet.showModal();
+  if (location.hash !== '#' + t.id) history.replaceState(null, '', '#' + t.id);
+
+  const stage = $('.stage', sheet), scale = $('.scale', sheet), frame = $('iframe', sheet), bg = $('.bg', sheet), face = $('.face', sheet);
+  const seek = $('.seek', sheet), tt = $('.tt', sheet), playBtn = $('.play', sheet);
+  fitStage(stage, scale);
+  let tNow = t.t, last = 0, tl = null;
+  const readVals = () => {
+    const out = {};
+    sheet.querySelectorAll('[data-id]').forEach((el) => {
+      const id = el.dataset.id, d = t.variables.find((x) => x.id === id);
+      if (d.type === 'boolean') out[id] = el.checked;
+      else if (d.type === 'number') out[id] = el.value === '' ? d.default : parseFloat(el.value);
+      else if (el.dataset.json) { try { out[id] = JSON.stringify(JSON.parse(el.value)); el.classList.remove('bad'); } catch (e) { el.classList.add('bad'); out[id] = d.default; } }
+      else out[id] = el.value;
+    });
+    return out;
+  };
+  function paint() {
+    if (!tl) return;
+    tl.pause(); tl.time(Math.min(tNow, tl.duration()));
+    seek.value = tNow; tt.textContent = tNow.toFixed(2) + 's';
+    const w = frame.contentWindow, V = readVals(), abs = (V.at || 0) + tNow;
+    if (w.__hfTpl) {
+      const c = w.__hfTpl.cameraAt(abs), win = w.__hfTpl.windowAt(abs);
+      Object.assign(bg.style, { left: win.x + 'px', top: win.y + 'px', width: win.w + 'px', height: win.h + 'px', borderRadius: win.r + 'px', boxShadow: win.w < 1900 ? '0 0 0 2.5px rgba(255,255,255,.75), 0 28px 70px rgba(0,0,0,.9)' : 'none' });
+      $('.pan', bg).style.transform = `translate(${c.x - win.x}px, ${c.y - win.y}px) scale(${c.scale})`;
+      const f = w.__hfTpl.faceAt(abs);
+      if (f && $('.showface', sheet).checked) Object.assign(face.style, { display: 'block', left: f.x0 + 'px', top: f.y0 + 'px', width: (f.x1 - f.x0) + 'px', height: (f.y1 - f.y0) + 'px' });
+      else face.style.display = 'none';
+    }
+    $('.tag', sheet).value = hostTagFor(t, V, 1);
+  }
+  async function build() { const V = readVals(); seek.max = V.dur; tl = (await loadFrame(frame, t, V)).tl; paint(); }
+  let deb;
+  sheet.oninput = (e) => {
+    if (e.target === seek) { tNow = parseFloat(seek.value); paint(); return; }
+    if (e.target.classList.contains('showface')) { paint(); return; }
+    if (e.target.dataset.id) { clearTimeout(deb); deb = setTimeout(build, 250); }
+  };
+  playBtn.onclick = () => { sheetPlaying = !sheetPlaying; playBtn.textContent = sheetPlaying ? 'Pause' : 'Play'; last = performance.now(); if (sheetPlaying) tick(); };
+  function tick() { if (!sheetPlaying || !frame.isConnected) return; const n = performance.now(); tNow += (n - last) / 1000; last = n; if (tNow > parseFloat(seek.max)) tNow = 0; paint(); requestAnimationFrame(tick); }
+  sheet.querySelectorAll('.close').forEach((b) => (b.onclick = closeSheet));
+  $('.copy', sheet).onclick = (e) => copyText($('.tag', sheet).value, e.target);
+  $('.reset', sheet).onclick = () => openSheet(t);
+  $('.add', sheet).onclick = (e) => { Board.add(t, readVals()); e.target.textContent = 'Added'; setTimeout(() => (e.target.textContent = 'Add to storyboard'), 1200); };
+  const exEl = $('.ex', sheet);
+  if (exEl) exEl.onchange = () => { const x = t.examples.find((y) => y.name === exEl.value); openSheet(t, x ? x.vars : null, exEl.value); };
+  build();
+}
+
+// ---- storyboard drawer ----
+const drawer = $('#drawer');
+$('#board-open').onclick = () => drawer.classList.toggle('open');
+$('#board-close').onclick = () => drawer.classList.remove('open');
+Board.onChange((items) => {
+  $('#board-count').textContent = items.length;
+  $('#board-empty').style.display = items.length ? 'none' : '';
+  $('#board-list').innerHTML = items.map((it, i) => `<tr data-i="${i}"><td>${esc(byId(it.id).title)}<br>
+      <input class="note" data-k="note" placeholder="what is being said here" value="${esc(it.note || '')}" aria-label="Note"></td>
+    <td>start<br><input type="number" step="0.1" min="0" data-k="at" value="${it.V.at}" aria-label="Start seconds"></td>
+    <td>for<br><input type="number" step="0.1" min="0.2" data-k="dur" value="${it.V.dur}" aria-label="Duration seconds"></td>
+    <td><button aria-label="Remove" data-rm="1">×</button></td></tr>`).join('');
+});
+$('#board-list').addEventListener('change', (e) => { const tr = e.target.closest('tr'); if (tr && e.target.dataset.k) Board.set(+tr.dataset.i, e.target.dataset.k, e.target.value); });
+$('#board-list').addEventListener('click', (e) => { if (e.target.dataset.rm) Board.remove(+e.target.closest('tr').dataset.i); });
+$('#board-tags').onclick = (e) => copyText(Board.tags(), e.target);
+$('#board-plan').onclick = (e) => copyText(Board.plan(), e.target);
+$('#board-clear').onclick = () => Board.clear();
+
+// ---- cue table ----
+$('#tplcues').innerHTML = '<tr><th>Block</th><th>Use it when</th><th>Spoken cues</th><th>Pairs with</th></tr>' + MANIFEST.templates.map((t) =>
+  `<tr><td><a href="#${t.id}">${esc(t.title)}</a></td><td>${esc(t.use.when)}</td><td>${t.use.cues.map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</td><td>${esc(t.use.pairs.join('; '))}</td></tr>`).join('');
+
+renderTabs(); renderGallery();
+const openFromHash = () => { const t = byId(location.hash.slice(1)); if (t) openSheet(t); };
+window.addEventListener('hashchange', openFromHash);
+openFromHash();
+</script>
+</body>
+</html>

@@ -78,7 +78,7 @@ Mount a template with a host tag and per-instance values:
 ```bash
 npm run dev            # talking-head preview (blocks until stopped)
 npm run share:dev      # screen-share preview
-npm run library        # template library + storyboard at http://localhost:4173/library/
+npm run library        # Components (http://localhost:4173/library/) + Animations (/library/motion.html), storyboard drawer
 npm run trim -- inputs/webcam.mp4 --also inputs/screen.mp4   # cut pauses; prints synced clips + jump-cut times
 npm run plan -- transcript.srt --mode screen                  # draft cue plan from a transcript (.srt / .vtt)
 npm run face -- inputs/speaker.mp4                            # face track for your talking-head footage (self-installing)

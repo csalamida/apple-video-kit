@@ -3,198 +3,185 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Components - Apple Video Kit</title>
+<title>Animations - Apple Video Kit</title>
 <link rel="stylesheet" href="../components/tokens.css">
 <link rel="stylesheet" href="library.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../components/glass-components.js"></script>
+<script src="../inputs/face-track.js"></script>
+<script src="../components/screen-stage.js"></script>
 </head>
 <body>
 <header class="bar">
   <div class="brand">Apple Video Kit</div>
-  <nav class="nav" aria-label="Library"><a href="index.html" aria-current="page">Components</a><a href="motion.html">Animations</a></nav>
+  <nav class="nav" aria-label="Library"><a href="index.html">Components</a><a href="motion.html" aria-current="page">Animations</a></nav>
   <div class="spacer"></div>
-  <button class="btn ghost" id="board-open">Storyboard<span class="count" id="board-count">0</span></button>
 </header>
 
 <main class="wrap">
-  <h1>Components</h1>
-  <p class="sub">Every block you can put in a video. Hover a block to play it, click it to edit the text, preview it over the speaker, and copy it into your composition or add it to the storyboard.</p>
+  <h1>Animations</h1>
+  <p class="sub">Every move the kit makes, playable. Moves are data: you write when and where, the kit does the motion. Each one shows the line that produces it.</p>
+  <nav class="jump" aria-label="Sections"><a href="#screen">Screen share moves</a><a href="#camera">Camera moves</a><a href="#transitions">Transitions</a><a href="#springs">Springs</a><a href="#cheatsheet">Which motion when</a></nav>
 
-  <div class="toolbar">
-    <div class="tabs" id="tabs" role="tablist" aria-label="Category"></div>
-    <input class="search" id="search" type="search" placeholder="Search blocks or cues, e.g. &quot;recap&quot;" aria-label="Search blocks">
-  </div>
-  <div class="gallery" id="gallery"></div>
-  <p class="empty" id="empty" hidden>No block matches. Try another word, or look at the cue table below.</p>
+  <section class="section" id="screen">
+    <h2>Screen share moves</h2>
+    <p class="lead">Your screen recording floats on a wallpaper, zooms to what you talk about, and your webcam lives in a card bottom-left. Pick a move to jump to it, or play the whole demo. Written in <code class="mono">projects/screen-share/share.js</code>.</p>
+    <div class="panel">
+      <div class="stage" id="ssstage"><div class="scale" id="ss-scale"><div id="ss" style="position:absolute;inset:0">
+        <div id="wall" class="wall" style="background:linear-gradient(115deg,transparent 52%,rgba(255,255,255,.35) 52.6%,transparent 55%),radial-gradient(120% 90% at 88% 8%,#8fdcff 0%,transparent 55%),radial-gradient(100% 85% at 8% 95%,#1c55d2 0%,transparent 62%),radial-gradient(80% 60% at 60% 72%,#10a8bd 0%,transparent 60%),linear-gradient(135deg,#0b3a8a,#2e86de 48%,#5ec8e5)"></div>
+        <div id="win"><div id="pan"></div></div>
+        <div id="pip"><div id="cam"></div></div>
+      </div></div></div>
+      <div class="modes" id="sshots"></div>
+      <pre id="sscode"></pre>
+    </div>
+  </section>
 
-  <section class="section cuesheet">
-    <details><summary>Which block do I use? (what the speaker says, and the block for it)</summary><table id="tplcues"></table></details>
+  <section class="section" id="camera">
+    <h2>Camera moves</h2>
+    <p class="lead">Talking head: the speaker is a window that morphs to a picture-in-picture or a side rail. The footage is only panned and scaled inside it, so it never re-crops. Written in <code class="mono">components/camera.js</code>.</p>
+    <div class="panel">
+      <div class="stage" id="st"><div class="scale" id="st-scale">
+        <div id="st-rig" style="position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;corner-shape:var(--corner)"><div id="st-pan" class="hf-pan" style="background:url(stage.jpg) center/cover"></div></div>
+        <div id="st-app" style="position:absolute;opacity:0;border-radius:36px;corner-shape:var(--corner);background:var(--glass-bg);border:var(--glass-border);box-shadow:var(--glass-shadow);padding:40px;font-size:44px;font-weight:700;letter-spacing:var(--track-display)">Live app canvas</div>
+      </div></div>
+      <div class="modes" id="modes"></div>
+      <pre id="stcode"></pre>
+    </div>
+  </section>
+
+  <section class="section" id="transitions">
+    <h2>Transitions</h2>
+    <p class="lead">Cover a cut: the cut sits at the middle of the transition. Hover to play. Most cuts need none; use them for section changes.</p>
+    <div class="gallery" id="trgrid"></div>
+  </section>
+
+  <section class="section" id="springs">
+    <h2>Springs</h2>
+    <p class="lead">Every card, zoom and camera move uses one of three springs (<code class="mono">__hfGlass.ease.*</code>). Press a curve to replay it.</p>
+    <div class="springs" id="springgrid"></div>
+  </section>
+
+  <section class="section cuesheet" id="cheatsheet">
+    <h2>Which motion when</h2>
+    <p class="lead">What the speaker is doing, the motion that fits, and how to write it.</p>
+    <div class="panel"><table id="motioncues"></table></div>
   </section>
 </main>
-
-<dialog class="sheet" id="sheet" aria-label="Block details"></dialog>
-
-<aside class="drawer" id="drawer" aria-label="Storyboard">
-  <div class="head"><h2>Storyboard</h2><button class="close" id="board-close" aria-label="Close storyboard">×</button></div>
-  <div class="body">
-    <p class="desc" id="board-empty">Empty. Open a block and press <b>Add to storyboard</b>. Blocks land here in time order; set their start time and note what is being said.</p>
-    <table class="sb" id="board-list"></table>
-  </div>
-  <div class="foot row"><button class="btn" id="board-tags">Copy host tags</button><button class="btn ghost" id="board-plan">Copy as plan text</button><button class="btn ghost" id="board-clear">Clear</button></div>
-</aside>
 
 <script>const MANIFEST = {"templates":[{"id":"app-window","file":"compositions/tpl/app-window.html","title":"App Window","category":"Cards & Panels","t":2.2,"vars":{"at":14.5,"dur":3.7,"layout":"rail"},"desc":"A macOS-style window that hosts ANY mix of panels: pipeline, table, list, stats, chat, text, terminal, image, contact. Panels are data, not code.","use":{"when":"The speaker is explaining software, a dashboard or a live record: the screen becomes the subject, the speaker drops to a PiP (camera move) or a split rail.","cues":["\"let me show you\"","\"here's how\"","\"in the platform / dashboard\"","\"open the ...\"","\"click ...\""],"pairs":["spotlight (point at one panel)","contact-card / notification-stack (events)","camera: speaker PiP or split rail","layout:\"rail\" puts the headline in the free left column"],"avoid":"A single quick fact: use glass-card. Needs a landscape speaker PiP: keep the left column for the headline rail."},"examples":[{"name":"CRM verification","vars":{"railNote":"Open the record and confirm every field synced."}},{"name":"Metrics dashboard","vars":{"title":"Pipeline Analytics","badge":"LIVE","eyebrow":"This week","titlePre":"Speed to lead,","titleAccent":"measured","railNote":"Reply time down, bookings up.","cols":"1.2fr 1fr","panels":[{"kind":"stats","title":"Response","items":[{"label":"Avg reply","value":"38s","sub":"was 2h 14m","tone":"accent"},{"label":"Booked","value":"+318%","tone":"good"},{"label":"Leads","value":"1,240"},{"label":"Show rate","value":"86%"}]},{"kind":"table","title":"Latest leads","columns":["Name","Source","Status"],"rows":[["Jane Doe","Opt-in form",{"t":"Booked","tone":"good"}],["John Smith","Webinar",{"t":"Replied"}],["Jane Doe","Referral",{"t":"New","tone":"warn"}],["John Smith","Opt-in form",{"t":"Booked","tone":"good"}]]}]}},{"name":"Workflow + terminal","vars":{"title":"Automation Builder","badge":"RUNNING","eyebrow":"Technical proof","titlePre":"Every lead triggers","titleAccent":"a workflow","railNote":"Each step runs without anyone touching it.","cols":"1fr 1fr","panels":[{"kind":"list","title":"Workflow steps","items":[{"icon":"person-plus","title":"Lead created","desc":"Opt-in form submitted","tag":"Done","tone":"good"},{"icon":"doc","title":"Send SMS","desc":"Instant text with booking link","tag":"Done","tone":"good"},{"icon":"table","title":"Qualify","desc":"AI asks 3 questions","tag":"Running"}]},{"kind":"terminal","title":"POST /api/v1/dispatch","lines":["$ curl -X POST /api/v1/dispatch","{ \"lead\": \"jane.doe\", \"channel\": \"sms\" }","200 OK  (212 ms)","$ tail -f workflow.log","qualified: true  slot: 2:00 PM"]}]}},{"name":"Conversation + notes","vars":{"title":"Inbox","badge":"LIVE","eyebrow":"Conversation","titlePre":"Replies in","titleAccent":"seconds","railNote":"The first reply wins the booking.","cols":"1.1fr 1fr","panels":[{"kind":"chat","title":"Jane Doe","thread":[{"from":"them","text":"Hi! I just filled out the form."},{"from":"me","text":"Welcome Jane! Want to book a quick call today?"},{"from":"them","text":"Yes, 2 PM works."},{"from":"me","text":"Booked for 2 PM. See you then!"}]},{"kind":"text","eyebrow":"Why it works","heading":"The first reply wins","body":"Leads contacted inside five minutes convert far more often.","bullets":["Instant SMS","AI qualification","Calendar booking"]}]}},{"name":"Screen recording","vars":{"title":"Acme CRM","badge":"LIVE","eyebrow":"Walkthrough","titlePre":"Your","titleAccent":"real screen","railNote":"Drop in a screen recording or screenshot.","cols":"1.6fr 1fr","panels":[{"kind":"image","src":"assets/demo/dashboard.svg","caption":"Active pipeline view"},{"kind":"list","title":"Notice","items":[{"title":"Stage counts","desc":"Update in real time"},{"title":"Auto-sync","desc":"100% matched"}]}]}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Top (px)","default":110},{"id":"width","type":"number","label":"Width (px)","default":1250},{"id":"height","type":"number","label":"Height (px)","default":840},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1.1},{"id":"title","type":"string","label":"Window title","default":"Acme CRM Live Data Verification"},{"id":"badge","type":"string","label":"Status badge","default":"LIVE CRM"},{"id":"eyebrow","type":"string","label":"Eyebrow","default":"Climax Verification"},{"id":"titlePre","type":"string","label":"Headline","default":"Make Sure Details"},{"id":"titleAccent","type":"string","label":"Headline accent","default":"Are There"},{"id":"layout","type":"string","label":"Headline placement (inside | rail)","default":"inside"},{"id":"railNote","type":"string","label":"Rail note (layout=rail)","default":""},{"id":"panels","type":"string","label":"Panels [{kind: pipeline|contact|table|list|stats|chat|text|terminal|image, span?, ...cfg}] (JSON)","default":"[{\"title\":\"Active Deals\",\"subtitle\":\"Last updated: 5m ago\",\"columns\":[{\"name\":\"Qualified\",\"count\":16,\"cards\":[{\"title\":\"Tech Solutions\",\"tag\":\"Qualified\"},{\"title\":\"Globex Inc\",\"tag\":\"Qualified\"}]},{\"name\":\"Proposal\",\"count\":8,\"cards\":[{\"title\":\"Globex Enterprise Deal\",\"value\":\"$45k\",\"tag\":\"Proposal Sent\"}]},{\"name\":\"Negotiation\",\"count\":5,\"cards\":[]}],\"kind\":\"pipeline\"},{\"name\":\"John Smith\",\"initials\":\"JS\",\"verifiedText\":\"Verified Contact\",\"fields\":[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}],\"kind\":\"contact\"}]"},{"id":"cols","type":"string","label":"Grid columns (CSS, e.g. 1.4fr 1fr; blank = equal)","default":""},{"id":"stagger","type":"number","label":"Panel stagger (s)","default":0.4}]},{"id":"before-after","file":"compositions/tpl/before-after.html","title":"Before / After","category":"Cards & Panels","t":2.2,"vars":{"dur":5},"desc":"Glass-framed comparison: a divider with a glass handle sweeps across, revealing the after image over the before.","use":{"when":"The speaker contrasts the old way with the new result: a cleanup, a redesign, a messy sheet turned into a pipeline. Hold 4-6 s. On full-frame talking head use side left/right with width 800-900.","cues":["\"before / after\"","\"this is what it looked like\"","\"compare that to\"","\"from this... to this\"","\"the old way\""],"pairs":["camera: speaker PiP while it plays","metric-counter (the improvement in numbers)"],"avoid":"Images with different aspect ratios (set aspect), or results with no visual difference."},"examples":[{"name":"Spreadsheet to CRM","vars":{}},{"name":"Side, custom labels","vars":{"side":"left","width":900,"top":260,"beforeLabel":"Old sheet","afterLabel":"Acme CRM"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":5},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"center"},{"id":"top","type":"number","label":"Top (px)","default":230},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Label and handle scale","default":1},{"id":"width","type":"number","label":"Frame width (px)","default":1100},{"id":"before","type":"string","label":"Before image","default":"assets/demo/dashboard-before.svg"},{"id":"after","type":"string","label":"After image","default":"assets/demo/dashboard.svg"},{"id":"beforeLabel","type":"string","label":"Before label","default":"Before"},{"id":"afterLabel","type":"string","label":"After label","default":"After"},{"id":"aspect","type":"number","label":"Image aspect (width / height)","default":1.8251}]},{"id":"chapter-pill","file":"compositions/tpl/chapter-pill.html","title":"Chapter Pill","category":"Overlays","t":12.2,"vars":{"at":0,"dur":21.92},"desc":"Progress pill. The schedule is data and state changes are seek-safe.","use":{"when":"Any video with 2+ named sections. Mount once for the whole video; the schedule moves it.","cues":["\"three ways\"","\"step one / two\"","any structure statement"],"pairs":["glass-card (one per step)"],"avoid":"Single-idea videos under ~15 s."},"examples":[{"name":"Masterclass","vars":{}},{"name":"2 steps","vars":{"label":"Quick Start","steps":["01","02","✓"],"initialLabel":"2 Steps","schedule":[{"t":4,"step":1,"label":"Step 01: Connect"},{"t":9,"step":2,"label":"Step 02: Launch"},{"t":15,"step":4,"label":"Done ✓"}]}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"top","type":"number","label":"Top (px)","default":40},{"id":"label","type":"string","label":"Series label","default":"Acme CRM Masterclass"},{"id":"steps","type":"string","label":"Step badges (JSON)","default":"[\"01\",\"02\",\"03\",\"✓\"]"},{"id":"initialLabel","type":"string","label":"Label before first step","default":"3 Core Methods"},{"id":"schedule","type":"string","label":"Schedule [{t,step,label}] (step 5 = all done) (JSON)","default":"[{\"t\":5.8,\"step\":1,\"label\":\"Method 01: Manual\"},{\"t\":8.8,\"step\":2,\"label\":\"Method 02: Spreadsheet\"},{\"t\":11.6,\"step\":3,\"label\":\"Method 03: Lead Form\"},{\"t\":14.5,\"step\":4,\"label\":\"Verification Climax\"},{\"t\":18.2,\"step\":5,\"label\":\"Details Verified ✓\"}]"}]},{"id":"checklist","file":"compositions/tpl/checklist.html","title":"Checklist","category":"Cards & Panels","t":2.6,"vars":{"dur":4.5},"desc":"Recap list that ticks off one item at a time, with a running \"N of N\" counter.","use":{"when":"The speaker sums up the steps just covered, or lists what to have ready. Set stagger to the speaking pace.","cues":["\"to recap\"","\"quick recap\"","\"make sure you've\"","\"before you move on\""],"pairs":["glass-card (the steps earlier)","title-card outro (right after)"],"avoid":"More than 5 items, or new information: it is a recap, not a teaching card."},"examples":[{"name":"Recap","vars":{}},{"name":"Prep list, left","vars":{"side":"left","eyebrow":"Before you start","title":"Have these ready","items":["A list of contacts","Your booking link","A form template","Ten minutes"],"stagger":0.55}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":4.5},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Top (px)","default":200},{"id":"width","type":"number","label":"Width (px)","default":520},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1},{"id":"eyebrow","type":"string","label":"Eyebrow","default":"Recap"},{"id":"title","type":"string","label":"Title","default":"Before you move on"},{"id":"items","type":"string","label":"Items (JSON list of strings)","default":"[\"Add the contact\",\"Send the form\",\"Check the details\"]"},{"id":"first","type":"number","label":"First tick (s after start)","default":0.9},{"id":"stagger","type":"number","label":"Seconds between ticks","default":0.7}]},{"id":"contact-card","file":"compositions/tpl/contact-card.html","title":"Contact Card","category":"Cards & Panels","t":2.2,"vars":{"dur":3.4},"desc":"One CRM record with a verified seal and field tiles.","use":{"when":"A single record is the proof: a contact, lead, customer or booking.","cues":["\"the contact\"","\"this lead\"","\"their details\"","\"make sure it's there\""],"pairs":["notification-stack (event) then contact-card (result)","app-window (as a panel)"],"avoid":"Lists of records: use an app-window table or pipeline."},"examples":[{"name":"Verified lead","vars":{}},{"name":"Customer","vars":{"name":"John Smith","initials":"JS","verifiedText":"Paying customer","fields":[{"label":"Plan","value":"Pro, annual"},{"label":"MRR","value":"$297","tone":"good"},{"label":"Since","value":"Mar 2026"},{"label":"Owner","value":"John S."}]}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Top (px)","default":200},{"id":"width","type":"number","label":"Width (px)","default":520},{"id":"height","type":"number","label":"Min height (px)","default":330},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1.1},{"id":"name","type":"string","label":"Name","default":"John Smith"},{"id":"initials","type":"string","label":"Initials","default":"JS"},{"id":"verifiedText","type":"string","label":"Verified text","default":"Verified Contact"},{"id":"fields","type":"string","label":"Fields [{label,value,tone}] (JSON)","default":"[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}]"},{"id":"stagger","type":"number","label":"Tile stagger (s)","default":0.45}]},{"id":"fast-forward","file":"compositions/tpl/fast-forward.html","title":"Fast-Forward Badge","category":"Overlays","t":1.4,"vars":{"dur":3},"desc":"Glass pill with a pulsing fast-forward glyph and a speed label in tabular figures, shown while footage is sped up.","use":{"when":"Mount for exactly the span where footage is sped up or a long wait is compressed (installs, imports, loading).","cues":["\"let me speed this up\"","\"this takes a minute\"","\"skipping ahead\"","\"while it loads\""],"pairs":["transition blur (out of the sped-up span)"],"avoid":"Real-time footage, or spans under ~1.5 s."},"examples":[{"name":"2x","vars":{}},{"name":"Skip ahead","vars":{"label":"8×","caption":"Skipping the import","side":"left"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s), the length of the sped-up span","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Top (px)","default":60},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Scale","default":1},{"id":"label","type":"string","label":"Speed label","default":"2×"},{"id":"caption","type":"string","label":"Caption","default":"Fast-forward"}]},{"id":"glass-card","file":"compositions/tpl/glass-card.html","title":"Glass Card","category":"Cards & Panels","t":2.4,"vars":{"dur":3.4},"desc":"One idea at a time: eyebrow, headline with an accent word, and 2-3 supporting rows. The default talking-point graphic.","use":{"when":"Introduce a single method, step or concept while the speaker explains it. Hold 2.5-3.5 s.","cues":["\"method one / two / three\"","\"first, second, then\"","\"there are N ways\"","\"let me break this down\""],"pairs":["chapter-pill (advance the step)","kinetic-subtitle","lower-third (first card only)"],"avoid":"More than 3 rows, or a live-software walkthrough: use app-window."},"examples":[{"name":"Steps overview","vars":{"kind":"steps","eyebrow":"Pipeline","badge":"Overview","titlePre":"Add Contacts to","titleAccent":"Acme CRM","stagger":0.9,"items":[{"icon":"person-plus","title":"1. Add Manually","desc":"Direct single contact creation","tag":"Step 01","active":true},{"icon":"table","title":"2. CSV Spreadsheet","desc":"Bulk import database lists","tag":"Step 02"},{"icon":"doc","title":"3. Web Lead Form","desc":"Automated visitor opt-ins","tag":"Step 03"}],"footer":null}},{"name":"Rows + callout","vars":{"kind":"rows","eyebrow":"Method 02","badge":"Bulk Ingestion","titlePre":"Import a","titleAccent":"Spreadsheet","items":[{"left":"contacts_q4_leads.csv","right":"1,240 Rows"},{"left":"Column Mapping","right":"Auto-Matched (100%)","tone":"good"}],"footer":{"label":"Bulk Operations","text":"Automated tag assignment & smart list sync"}}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},{"id":"top","type":"number","label":"Top (px)","default":140},{"id":"width","type":"number","label":"Width (px)","default":560},{"id":"height","type":"number","label":"Min height (px)","default":520},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1.15},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"eyebrow","type":"string","label":"Eyebrow","default":"Method 01"},{"id":"badge","type":"string","label":"Badge","default":"Manual Entry"},{"id":"titlePre","type":"string","label":"Title","default":"Add Someone"},{"id":"titleAccent","type":"string","label":"Title accent word","default":"Manually"},{"id":"kind","type":"string","label":"Body kind (steps | fields | rows | none)","default":"fields"},{"id":"items","type":"string","label":"Body items (JSON)","default":"[{\"label\":\"Contact Name\",\"value\":\"John Smith\",\"cursor\":true},{\"label\":\"Email Address\",\"value\":\"john@example.com\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-4820\"}]"},{"id":"footer","type":"string","label":"Footer {label,text,tag} (JSON)","default":"{\"text\":\"✓ Quick Single Record Save\",\"tag\":\"\u003c 30s\"}"},{"id":"aside","type":"string","label":"Embedded phone (iMessage) or null (JSON)","default":"null"},{"id":"stagger","type":"number","label":"Item stagger (s)","default":0.6}]},{"id":"imessage-phone","file":"compositions/tpl/imessage-phone.html","title":"iMessage Phone","category":"Devices","t":2.4,"vars":{"dur":3.4},"desc":"iPhone-style iMessage thread with typing indicator.","use":{"when":"The story is a text conversation: an auto-reply, an SMS follow-up, a booking exchange.","cues":["\"text\", \"SMS\"","\"message\", \"reply\"","\"the automation responds\""],"pairs":["notification-stack (the trigger)","glass-card with aside (phone beside a card)"],"avoid":"Email or chat apps; use an app-window chat panel."},"examples":[{"name":"Auto-reply","vars":{}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},{"id":"top","type":"number","label":"Top (px)","default":140},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1.1},{"id":"contact","type":"string","label":"Contact name","default":"John Smith"},{"id":"initials","type":"string","label":"Initials","default":"JS"},{"id":"thread","type":"string","label":"Thread (JSON)","default":"[{\"from\":\"them\",\"text\":\"New lead: Jane Doe (Opt-in Form)\",\"at\":0.8},{\"from\":\"me\",\"text\":\"AI qualified & booked for 2 PM!\",\"at\":1.6}]"}]},{"id":"keys","file":"compositions/tpl/keys.html","title":"Keyboard Shortcut","category":"Overlays","t":1.6,"vars":{"dur":2.5},"desc":"Keycaps that pop in and press as a chord, with an optional caption. Shows what was pressed when the viewer cannot see the keyboard.","use":{"when":"The speaker presses or names a shortcut. Show it the moment it is pressed, hold 2-3 s.","cues":["\"press command K\"","\"hit ...\"","\"use the shortcut\"","\"hold shift and ...\""],"pairs":["app-window / screen share (the result of the shortcut)","spotlight (where it opened)"],"avoid":"Long sequences of shortcuts back to back; one per beat."},"examples":[{"name":"Command bar","vars":{"keys":["⌘","K"],"label":"Open command bar"}},{"name":"Save, three keys","vars":{"keys":["⌘","⇧","S"],"label":"Save a copy"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":2.5},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"center"},{"id":"top","type":"number","label":"Top (px)","default":820},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Scale","default":1},{"id":"keys","type":"string","label":"Keys, in press order (JSON list)","default":"[\"⌘\",\"K\"]"},{"id":"label","type":"string","label":"Caption (optional)","default":"Open command bar"}]},{"id":"kinetic-subtitle","file":"compositions/tpl/kinetic-subtitle.html","title":"Kinetic Subtitles","category":"Text","t":12.6,"vars":{"at":0,"dur":21.92},"desc":"Word-by-word subtitle capsules. Cues are data; *star* the 1-3 punch words.","use":{"when":"Always-on pacing for talking-head video. Highlight numbers, verbs and the thesis, never whole sentences.","cues":["every sentence","punch words: numbers, \"manually\", \"contact\""],"pairs":["any card (keep captions at the bottom, cards at the sides)"],"avoid":"Hiding captions behind a PiP; cut a cue when a graphic already shows the same words."},"examples":[{"name":"Masterclass cues","vars":{}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"bottom","type":"number","label":"Bottom (px)","default":46},{"id":"size","type":"number","label":"Font size (px)","default":38},{"id":"cues","type":"string","label":"Cues [{start,end,text}] - wrap punch words in *stars* (JSON)","default":"[{\"start\":1.8,\"end\":2.5,\"text\":\"In this video,\"},{\"start\":2.5,\"end\":3.4,\"text\":\"I'll show you\"},{\"start\":3.4,\"end\":4.4,\"text\":\"Three *ways*\"},{\"start\":4.4,\"end\":5.0,\"text\":\"to add contacts\"},{\"start\":5.0,\"end\":5.8,\"text\":\"to *Acme CRM.*\"},{\"start\":5.8,\"end\":6.6,\"text\":\"You can add\"},{\"start\":6.6,\"end\":7.9,\"text\":\"someone *manually,*\"},{\"start\":8.8,\"end\":10.2,\"text\":\"from a *spreadsheet,*\"},{\"start\":10.2,\"end\":11.6,\"text\":\"or collect their details\"},{\"start\":11.6,\"end\":13.5,\"text\":\"through a *form.*\"},{\"start\":14.5,\"end\":15.6,\"text\":\"And after each *one,*\"},{\"start\":15.6,\"end\":17.0,\"text\":\"we'll open the *contact*\"},{\"start\":17.0,\"end\":18.2,\"text\":\"and make *sure*\"},{\"start\":18.2,\"end\":20.8,\"text\":\"the *details* are there.\"}]"}]},{"id":"link-chip","file":"compositions/tpl/link-chip.html","title":"Link Chip","category":"Overlays","t":1.6,"vars":{"dur":4},"desc":"Glass pill with an accent icon, a call to action and a URL. Bouncy entrance, small icon nudge.","use":{"when":"The speaker points the viewer to a resource: description link, download, booking page. 3-5 s.","cues":["\"link in the description\"","\"grab the template\"","\"I'll put it below\"","\"go to acme.com\""],"pairs":["kinetic-subtitle (captions bottom-centre, chip bottom-right)"],"avoid":"Long URLs (use a short path) or more than one chip on screen."},"examples":[{"name":"Description link","vars":{}},{"name":"Booking","vars":{"text":"Book a free call","url":"acme.com/book","icon":"calendar","side":"left"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":4},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Top (px)","default":900},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Scale","default":1},{"id":"text","type":"string","label":"Text","default":"Link in the description"},{"id":"url","type":"string","label":"URL","default":"acme.com/guide"},{"id":"icon","type":"string","label":"Icon","default":"link"}]},{"id":"lower-third","file":"compositions/tpl/lower-third.html","title":"Lower Third","category":"Overlays","t":1.6,"vars":{"at":0.4,"dur":4.6},"desc":"Speaker name plate with verified seal.","use":{"when":"First 4 s of the video, or whenever a new speaker appears. Once per speaker.","cues":["video start","\"I'm ...\"","\"joining me today\""],"pairs":["kinetic-subtitle (start 1.8 s)","glass-card (after it exits)"],"avoid":"Repeating the same speaker later in the video."},"examples":[{"name":"Host","vars":{}},{"name":"Guest","vars":{"name":"Jane Doe","role":"Head of Growth, Acme","initials":"JD","side":"right"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},{"id":"top","type":"number","label":"Top (px)","default":900},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1.1},{"id":"name","type":"string","label":"Name","default":"John Smith"},{"id":"role","type":"string","label":"Role","default":"Acme CRM Automation Lead"},{"id":"initials","type":"string","label":"Initials","default":"JS"},{"id":"verified","type":"boolean","label":"Verified seal","default":true}]},{"id":"metric-counter","file":"compositions/tpl/metric-counter.html","title":"Metric Counter","category":"Data","t":1.8,"vars":{"dur":3.4},"desc":"Big tabular number that counts up.","use":{"when":"A number is the point of the sentence: percent, seconds, money, growth.","cues":["\"percent\", \"%\"","\"seconds\"","\"times\"","\"growth\", \"increase\"","any dollar amount"],"pairs":["app-window (stats panel for many numbers)"],"avoid":"More than one number at a time; use an app-window stats panel for several."},"examples":[{"name":"Percent","vars":{}},{"name":"Seconds","vars":{"label":"Average reply","sub":"was 2h 14m","from":120,"to":38,"suffix":"s","decimals":0}},{"name":"Money","vars":{"label":"Monthly revenue","sub":"recurring","from":0,"to":12400,"prefix":"$","suffix":"","decimals":0}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},{"id":"top","type":"number","label":"Top (px)","default":140},{"id":"width","type":"number","label":"Width (px)","default":420},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1.1},{"id":"label","type":"string","label":"Label","default":"Faster follow-up"},{"id":"sub","type":"string","label":"Sub-label","default":"vs. manual entry"},{"id":"from","type":"number","label":"From","default":0},{"id":"to","type":"number","label":"To","default":318},{"id":"prefix","type":"string","label":"Prefix","default":""},{"id":"suffix","type":"string","label":"Suffix","default":"%"},{"id":"decimals","type":"number","label":"Decimals","default":0},{"id":"countDur","type":"number","label":"Count time (s)","default":1.4}]},{"id":"notification-stack","file":"compositions/tpl/notification-stack.html","title":"Notification Stack","category":"Overlays","t":1.4,"vars":{"dur":3.4},"desc":"macOS / iOS stacked notification banner.","use":{"when":"An event happens in the story: a lead arrives, a message lands, a payment clears. Drops in with a bouncy spring.","cues":["\"incoming\"","\"a notification\"","\"you get a text\"","\"someone books\""],"pairs":["imessage-phone (the reply)","contact-card (the record)"],"avoid":"Static facts: it implies something just happened."},"examples":[{"name":"New lead","vars":{}},{"name":"Payment","vars":{"app":"Acme Pay","context":"","lead":"Payment received:","message":"$297.00 from John Smith","icon":"money","count":1}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Top (px)","default":80},{"id":"width","type":"number","label":"Width (px)","default":460},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"app","type":"string","label":"App name","default":"Acme CRM"},{"id":"context","type":"string","label":"Context","default":"#inbound-leads"},{"id":"lead","type":"string","label":"Bold lead-in","default":"New Lead:"},{"id":"message","type":"string","label":"Message","default":"Jane Doe booked a call."},{"id":"time","type":"string","label":"Time","default":"now"},{"id":"icon","type":"string","label":"Badge icon (bolt, bell, money, chat, mail, calendar, sparkle, star, check)","default":"bolt"},{"id":"count","type":"number","label":"Stack depth (1-3)","default":3},{"id":"scale","type":"number","label":"Scale","default":1}]},{"id":"quote","file":"compositions/tpl/quote.html","title":"Pull Quote","category":"Text","t":2.6,"vars":{"dur":4},"desc":"One key line on glass: accent quotation mark, word-by-word reveal, punch words in blue, attribution last.","use":{"when":"The speaker says the line worth remembering (the thesis), or quotes a customer.","cues":["\"the one thing to remember\"","\"as one client put it\"","\"here's the rule\"","the thesis sentence"],"pairs":["camera punch-in (same beat)","kinetic-subtitle (cut that cue)"],"avoid":"More than ~20 words, or more than one quote per minute."},"examples":[{"name":"Thesis","vars":{}},{"name":"Customer quote, right","vars":{"side":"right","text":"We stopped losing leads *overnight*.","attribution":"Jane Doe","role":"Owner, Acme Dental"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":4},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"side","type":"string","label":"Side (left | right | center)","default":"left"},{"id":"top","type":"number","label":"Top (px)","default":260},{"id":"width","type":"number","label":"Width (px)","default":620},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1},{"id":"text","type":"string","label":"Quote - wrap punch words in *stars*","default":"Reply in the first five minutes and the *booking* is yours."},{"id":"attribution","type":"string","label":"Attribution","default":"John Smith"},{"id":"role","type":"string","label":"Role (optional)","default":"Founder, Acme"},{"id":"size","type":"number","label":"Quote size (px, 34-44)","default":40}]},{"id":"spotlight","file":"compositions/tpl/spotlight.html","title":"Spotlight","category":"Overlays","t":1.4,"vars":{"dur":3.4},"desc":"Dims everything except a target rectangle, with an accent ring.","use":{"when":"Point the viewer at one area of a busy screen or app-window while the speaker names it.","cues":["\"notice\"","\"look at this\"","\"right here\"","\"this part\""],"pairs":["app-window (set x/y/w/h to a panel)"],"avoid":"Plain talking-head shots; it needs something to point at."},"examples":[{"name":"Default","vars":{}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3},{"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},{"id":"x","type":"number","label":"Target X","default":600},{"id":"y","type":"number","label":"Target Y","default":300},{"id":"w","type":"number","label":"Target width","default":600},{"id":"h","type":"number","label":"Target height","default":300},{"id":"radius","type":"number","label":"Corner radius","default":28},{"id":"strength","type":"number","label":"Dim strength (0-1)","default":0.55},{"id":"ring","type":"boolean","label":"Accent ring","default":true}]},{"id":"title-card","file":"compositions/tpl/title-card.html","title":"Title Card","category":"Titles","t":1.8,"vars":{"dur":3.5},"desc":"Intro: full-frame blurred scrim with a word-by-word title reveal. Outro: an \"Up next\" card with a thumbnail and call to action.","use":{"when":"Intro on the opening line that names the topic; outro on the sign-off that points to the next video. Hold 3-4 s.","cues":["\"in this video\"","\"today we're going to\"","\"watch this one next\"","\"see you in the next one\""],"pairs":["lower-third (after the intro clears)","kinetic-subtitle (off during the intro)"],"avoid":"Mid-video section breaks: use transition (chapter). More than one intro per video."},"examples":[{"name":"Intro","vars":{"mode":"intro","eyebrow":"Acme CRM tutorial","title":"Add contacts the *easy* way","subtitle":"Three methods, under five minutes"}},{"name":"Up next","vars":{"mode":"outro","safe":true,"eyebrow":"Up next","title":"Build your first *workflow*","cta":"Link in the description"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s)","default":3.5},{"id":"mode","type":"string","label":"Mode (intro | outro)","default":"intro"},{"id":"safe","type":"boolean","label":"Keep clear of the face (outro only; intro is full frame)","default":false},{"id":"side","type":"string","label":"Outro side (left | right | center)","default":"right"},{"id":"top","type":"number","label":"Outro top (px)","default":200},{"id":"width","type":"number","label":"Outro width (px)","default":600},{"id":"offsetX","type":"number","label":"Offset X","default":0},{"id":"offsetY","type":"number","label":"Offset Y","default":0},{"id":"scale","type":"number","label":"Text scale","default":1},{"id":"eyebrow","type":"string","label":"Eyebrow","default":"Acme CRM tutorial"},{"id":"title","type":"string","label":"Title - wrap accent words in *stars*","default":"Add contacts the *easy* way"},{"id":"subtitle","type":"string","label":"Subtitle (intro)","default":"Three methods, under five minutes"},{"id":"src","type":"string","label":"Outro thumbnail image (optional)","default":""},{"id":"cta","type":"string","label":"Outro call to action","default":"Link in the description"},{"id":"scrim","type":"number","label":"Intro scrim darkness (0-1)","default":0.55}]},{"id":"transition","file":"compositions/tpl/transition.html","title":"Transition","category":"Transitions","t":0.4,"vars":{"at":0,"dur":0.8},"desc":"Full-frame transition library over a cut: dip, flash, blur, glass-wipe, iris, light-sweep, chapter. The cut sits at at + dur/2; clear at both ends.","use":{"when":"Cover a cut in the footage: put the cut at the midpoint (at + dur/2). dip = calm scene or time change; flash = energetic reveal (sparingly); blur = soft jump cut in the same setup; glass-wipe = moving to a new screen or app, direction = travel; iris = focusing in on a detail or closing a topic; light-sweep = upbeat \"next up\" or a win; chapter = named section break (set dur 1.4-2 s).","cues":["\"next\"","\"now let's open / switch to ...\"","\"moving on\"","\"later that day\"","\"and here's the result\"","\"part two\""],"pairs":["chapter-pill (advance on the chapter kind)","camera reframe right after the cut","glass-card on the new section"],"avoid":"Stacking transitions on every cut (most cuts need none), and more than one flash per video. Never on a mid-sentence jump cut."},"examples":[{"name":"Dip to black","vars":{"kind":"dip","dur":1}},{"name":"Flash","vars":{"kind":"flash","dur":0.5}},{"name":"Blur-through","vars":{"kind":"blur","dur":0.8}},{"name":"Glass wipe","vars":{"kind":"glass-wipe","dur":1,"direction":"right"}},{"name":"Iris","vars":{"kind":"iris","dur":1}},{"name":"Light sweep","vars":{"kind":"light-sweep","dur":1}},{"name":"Chapter break","vars":{"kind":"chapter","dur":1.6,"eyebrow":"Chapter 2","title":"Import your contacts"}}],"variables":[{"id":"at","type":"number","label":"Start (s, absolute)","default":0},{"id":"dur","type":"number","label":"Duration (s); the cut sits at at + dur/2 (chapter: use 1.6)","default":0.8},{"id":"kind","type":"string","label":"Kind (dip | flash | blur | glass-wipe | iris | light-sweep | chapter)","default":"dip"},{"id":"color","type":"color","label":"Colour (dip, iris)","default":"#000000"},{"id":"direction","type":"string","label":"Direction (left | right | up | down)","default":"right"},{"id":"eyebrow","type":"string","label":"Chapter eyebrow","default":"Chapter 2"},{"id":"title","type":"string","label":"Chapter title","default":"Import your contacts"},{"id":"scale","type":"number","label":"Chapter text scale","default":1}]}],"motion":[{"cue":"Thesis, punchline, emotional emphasis","motion":"Camera punch-in 1.15-1.25x + edge-defocus pulse","how":"camera.js move {scale: 1.2}; never hold a tight punch-in more than 5 s without a reframe"},{"cue":"Explaining software, metrics or a diagram","motion":"Speaker PiP, 16:9, on the page margin","how":"camera.js move {win, fit:\"frame\", front:true} or __hfGlass.dockPiP; pair with app-window layout:\"rail\""},{"cue":"Long UI walkthrough or a portrait speaker","motion":"Split-stage rail (speaker left, app right)","how":"__hfGlass.splitStage: face-centred portrait crop, no re-crop while it morphs"},{"cue":"Conclusion, summary, call to action","motion":"Back to full-bleed + 1.2x punch-in","how":"camera.js move {win:\"full\", scale:1.2}; speaker returns to eye contact"},{"cue":"A card or graphic arrives","motion":"snappy spring from the side AWAY from the face (0.6 s), exit power2.in 0.35 s","how":"__hfGlass.ease.snappy; templates with safe:true place themselves"},{"cue":"Something happens (event, alert)","motion":"bouncy drop-in, 4.6% overshoot","how":"__hfGlass.ease.bouncy via notification-stack / chat bubbles"},{"cue":"A number is spoken","motion":"Counter roll 1.4 s, smooth, tabular figures","how":"metric-counter (or a stats panel)"},{"cue":"One word matters","motion":"Punch word: blue + scale 1.1, once per cue","how":"kinetic-subtitle *word*; 1-3 words per sentence"},{"cue":"Look at this part","motion":"Spotlight dim 0.55 + accent ring","how":"spotlight template over an app-window panel"},{"cue":"Next step in a list","motion":"Chapter pill advances, new card replaces the old one","how":"chapter-pill schedule + glass-card, one card at a time"},{"cue":"SCREEN SHARE: pointing at a control, field or button","motion":"Zoom to the target 1.5-1.9x (spring 0.7 s); PiP tucks to 0.7x","how":"projects/screen-share/share.js zooms: [{t, x, y, z}]; zoom OUT ({t, z:1}) before the next topic"},{"cue":"SCREEN SHARE: reading small text or a modal","motion":"Zoom 2.0-2.5x, hold 2-4 s","how":"Only for text too small at 1080p; never hold a tight zoom without cursor activity"},{"cue":"SCREEN SHARE: switching apps or tabs","motion":"Back to overview (z:1) first, then the next zoom","how":"Avoid chained zoom-to-zoom jumps; a reset in between reads as a cut"},{"cue":"SCREEN SHARE: speaker talks without touching the screen","motion":"Overview, PiP at rest size (1.0x)","how":"PiP stays bottom-left on the margin; never move it to another corner"},{"cue":"SCREEN SHARE: a zoom holds longer than ~2 s","motion":"Slow drift: +3.5% push-in on the same point until the next keyframe","how":"share.js drift: true (or { amount, minHold }); a static zoom looks frozen"},{"cue":"SCREEN SHARE: \"click this\", \"this button\", \"right here\"","motion":"Callout: accent ring + label pill, locked to the spot through zooms","how":"share.js callouts: [{ t, end, x, y, w, h, label, side }] in screen 0-1 coords; usually inside a zoom"},{"cue":"SCREEN SHARE: \"look at this section\", \"notice\"","motion":"Focus dim: everything except the region darkens to 55%","how":"share.js focus: [{ t, end, x, y, w, h, dim }]; softer than a callout, for areas not buttons"},{"cue":"SCREEN SHARE: an email, API key, phone number or client name is visible","motion":"Redact: frosted blur (or solid) box that follows every zoom","how":"share.js redact: [{ x, y, w, h }] (whole video) or with t/end; run cue-plan to catch spoken ones"},{"cue":"SCREEN SHARE: talking straight to the viewer (intro, opinion, sign-off)","motion":"Webcam swap: the card grows to full screen, then back","how":"share.js cam: [{ t, mode: 'full' }, { t, mode: 'pip' }]; no re-crop, face stays centred"},{"cue":"SCREEN SHARE: dense screen, the card covers content","motion":"Hide webcam: card slides down and out, returns on the next topic","how":"share.js cam: [{ t, mode: 'hide' }, { t, mode: 'pip' }]"},{"cue":"A pause or filler was cut (jump cut)","motion":"Jump-cut punch: framing alternates 1.0 / 1.06 at each cut","how":"node scripts/auto-trim.mjs \u003cvoice file>, then paste its cuts into share.js cuts or camera.js cuts"},{"cue":"Section change, new app or screen, a cut that should feel intended","motion":"Transition over the cut (cut at the midpoint): blur 0.8 s by default, glass-wipe for a new screen, chapter 1.6 s for a named section","how":"transition template, kind = dip | flash | blur | glass-wipe | iris | light-sweep | chapter; z-index 90; most cuts need none"},{"cue":"Breath, filler, mid-sentence pause","motion":"No motion","how":"Never zoom or move graphics mid-breath; trim dead air > 0.4 s instead"}]};</script>
 <script src="common.js"></script>
 <script>
-// ---- gallery ----
-const cats = ['All', ...new Set(MANIFEST.templates.map((t) => t.category))];
-let activeCat = 'All', query = '';
-const firstSentence = (s) => (String(s || '').match(/^[^.]*\.?/) || [''])[0];
+// ---- screen share demo: the real __hfShareStage timeline on stills ----
+(function () {
+  const S = window.__hfShareStage;
+  fitStage($('#ssstage'), $('#ss-scale'));
+  $('#pan').style.backgroundImage = `url(${ROOT}assets/demo/dashboard.svg)`;
+  $('#cam').style.backgroundImage = `url(${ROOT}library/stage.jpg)`; $('#cam').style.backgroundSize = 'cover';
+  const DATA = {
+    duration: 24, aspect: 1.825, window: { r: 18 }, drift: true, pip: { focus: { x: 0.5, y: 0.4 } },
+    zooms: [{ t: 2.5, x: 0.33, y: 0.2, z: 1.6 }, { t: 7, z: 1 }, { t: 8.5, x: 0.92, y: 0.06, z: 2.0 }, { t: 12, z: 1 }],
+    cam: [{ t: 0, mode: 'full' }, { t: 1.2, mode: 'pip' }, { t: 13, mode: 'hide' }, { t: 16, mode: 'pip' }, { t: 21, mode: 'full' }],
+    callouts: [{ t: 9.2, end: 11.8, x: 0.905, y: 0.012, w: 0.083, h: 0.05, label: 'New deal', side: 'bottom' }],
+    focus: [{ t: 16.5, end: 20, x: 0.135, y: 0.24, w: 0.85, h: 0.76 }],
+    redact: [{ t: 3, end: 7, x: 0.15, y: 0.13, w: 0.19, h: 0.12 }]
+  };
+  S.layout(DATA);
+  const tl = gsap.timeline({ paused: true }); S.build(tl, DATA); tl.time(0);
+  const SHOTS = [
+    ['Webcam full', 0.6, "cam: [{ t: 0, mode: 'full' }, { t: 1.2, mode: 'pip' }]   // talk straight to the viewer"],
+    ['Zoom + drift', 5, "zooms: [{ t: 2.5, x: 0.33, y: 0.2, z: 1.6 }], drift: true   // zoom to a control, slow push-in while it holds"],
+    ['Redact', 5.5, "redact: [{ t: 3, end: 7, x: 0.15, y: 0.13, w: 0.19, h: 0.12 }]   // blur an email or key"],
+    ['Callout', 10.5, "callouts: [{ t: 9.2, end: 11.8, x: 0.905, y: 0.012, w: 0.083, h: 0.05, label: 'New deal' }]   // \"click this\""],
+    ['Hide webcam', 14.5, "cam: [{ t: 13, mode: 'hide' }, { t: 16, mode: 'pip' }]   // dense screen, card out of the way"],
+    ['Focus dim', 18, "focus: [{ t: 16.5, end: 20, x: 0.135, y: 0.24, w: 0.85, h: 0.76 }]   // \"look at this section\""],
+    ['Sign-off full', 22.5, "cam: [{ t: 21, mode: 'full' }]   // back to the face to close"]
+  ];
+  $('#sshots').innerHTML = SHOTS.map(([l], i) => `<button class="btn ${i === 1 ? 'on' : 'ghost'}" data-i="${i}">${l}</button>`).join('') + '<button class="btn ghost" id="ssplay">Play all</button>';
+  let run = null;
+  const go = (i) => { const [, t, code] = SHOTS[i]; run && run.kill(); run = gsap.to(tl, { time: t, duration: 0.9, ease: 'power2.inOut' }); $('#sscode').textContent = code; };
+  $('#sshots').onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    $('#sshots').querySelectorAll('button').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); });
+    if (b.id === 'ssplay') { run && run.kill(); tl.time(0); run = gsap.to(tl, { time: DATA.duration, duration: DATA.duration, ease: 'none' }); $('#sscode').textContent = 'The whole demo. Every move is one line in share.js.'; return; }
+    go(+b.dataset.i);
+  };
+  go(1);
+})();
 
-function renderTabs() {
-  $('#tabs').innerHTML = cats.map((c) => `<button class="tab" role="tab" aria-selected="${c === activeCat}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
-}
-$('#tabs').onclick = (e) => { const b = e.target.closest('.tab'); if (!b) return; activeCat = b.dataset.c; renderTabs(); renderGallery(); };
-$('#search').oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderGallery(); };
+// ---- camera moves: the real __hfGlass presets ----
+(function () {
+  const rig = '#st-rig', app = '#st-app', G = window.__hfGlass;
+  fitStage($('#st'), $('#st-scale'));
+  const tr = (window.__hfFace && window.__hfFace.track) || [];
+  const focus = tr.length ? { x: tr.reduce((a, b) => a + (b.x0 + b.x1) / 2, 0) / tr.length, y: tr.reduce((a, b) => a + (b.y0 + b.y1) / 2, 0) / tr.length } : { x: 960, y: 430 };
+  G.stage.pan(rig);
+  const MODES = {
+    full: { label: 'Full frame', code: "__hfGlass.undockPiP(tl, '#rig', { start: 0 });", run: (tl) => G.undockPiP(tl, rig, { start: 0 }) },
+    punch: { label: 'Punch-in 1.2x', code: "camera.js move: { t, dur: 0.6, scale: 1.2 }   // thesis, punchline", run: (tl) => { G.undockPiP(tl, rig, { start: 0 }); tl.to('#st-pan', { scale: 1.2, duration: 0.7, ease: G.ease.smooth }, 0.1); } },
+    pip: { label: 'PiP 16:9', code: "camera.js move: { t, dur: 0.8, win: { x: 72, y: 696, w: 451, h: 254, r: 36 }, fit: 'frame', front: true }", run: (tl) => G.dockPiP(tl, rig, { start: 0, x: 59, y: 640, width: 451, height: 254 }) },
+    vert: { label: 'PiP 9:16 (face crop)', code: "__hfGlass.dockPiP(tl, '#rig', { start: 0, orientation: 'vertical', x: 96, y: 520, focus });", run: (tl) => G.dockPiP(tl, rig, { start: 0, orientation: 'vertical', x: 96, y: 520, width: 300, height: 533, focus }) },
+    split: { label: 'Split stage', code: "__hfGlass.splitStage(tl, '#rig', '#app', { start: 0, focus });", run: (tl) => G.splitStage(tl, rig, app, { start: 0, focus }) }
+  };
+  $('#modes').innerHTML = Object.entries(MODES).map(([k, m]) => `<button class="btn ${k === 'full' ? 'on' : 'ghost'}" data-k="${k}">${m.label}</button>`).join('');
+  $('#stcode').textContent = MODES.full.code;
+  $('#modes').onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return; const k = b.dataset.k;
+    $('#modes').querySelectorAll('button').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); });
+    const tl = gsap.timeline();
+    if (k !== 'split') tl.to(app, { opacity: 0, x: 30, duration: 0.3, ease: 'power2.in' }, 0);
+    if (k !== 'punch') tl.to('#st-pan', { scale: 1, duration: 0.5, ease: G.ease.smooth }, 0);
+    MODES[k].run(tl); $('#stcode').textContent = MODES[k].code;
+  };
+})();
 
-function matches(t) {
-  if (activeCat !== 'All' && t.category !== activeCat) return false;
-  if (!query) return true;
-  const U = t.use || {};
-  return [t.id, t.title, t.desc, U.when, ...(U.cues || [])].join(' ').toLowerCase().includes(query);
-}
-
-function renderGallery() {
-  const g = $('#gallery'); g.innerHTML = '';
-  const list = MANIFEST.templates.filter(matches);
-  $('#empty').hidden = list.length > 0;
-  list.forEach((t, i) => {
-    const tile = document.createElement('button');
-    tile.className = 'tile'; tile.type = 'button'; tile.setAttribute('aria-label', `${t.title}: open details`);
-    tile.innerHTML = `<div class="stage"></div><div class="meta"><div class="cat">${esc(t.category)}</div><div class="name">${esc(t.title)}</div><div class="when">${esc(firstSentence((t.use || {}).when) || t.desc)}</div></div>`;
-    g.appendChild(tile);
-    const prev = tilePreview($('.stage', tile), t, valsFor(t), { delay: 300 + i * 150 });
+// ---- transitions: one live tile per kind ----
+(function () {
+  const t = byId('transition'); if (!t) return;
+  const WHEN = { dip: 'Calm scene or time change.', flash: 'Energetic reveal. Once per video at most.', blur: 'Soft jump cut in the same setup. The default.',
+    'glass-wipe': 'Moving to a new screen or app.', iris: 'Focusing on a detail or closing a topic.', 'light-sweep': 'Upbeat "next up" or a win.', chapter: 'Named section break.' };
+  (t.examples || []).forEach((ex, i) => {
+    const V = valsFor(t, ex.vars);
+    const tile = document.createElement('div');
+    tile.className = 'tile'; tile.tabIndex = 0;
+    tile.innerHTML = `<div class="stage"></div><div class="meta"><div class="cat">${esc(V.kind)}</div><div class="name">${esc(ex.name)}</div><div class="when">${esc(WHEN[V.kind] || '')}</div></div><div class="row" style="padding:0 6px"><button class="btn ghost copy">Copy host tag</button></div>`;
+    $('#trgrid').appendChild(tile);
+    const prev = tilePreview($('.stage', tile), t, V, { rest: V.dur * 0.3, delay: 300 + i * 150 });
     tile.addEventListener('mouseenter', () => prev.play());
     tile.addEventListener('mouseleave', () => prev.stop());
     tile.addEventListener('focus', () => prev.play());
     tile.addEventListener('blur', () => prev.stop());
-    tile.onclick = () => openSheet(t);
+    $('.copy', tile).onclick = (e) => { e.stopPropagation(); copyText(hostTagFor(t, V, 1), e.target); };
   });
-}
+})();
 
-// ---- detail sheet ----
-const sheet = $('#sheet');
-let sheetPlaying = false;
-function closeSheet() { sheetPlaying = false; sheet.close(); sheet.innerHTML = ''; if (location.hash) history.replaceState(null, '', location.pathname); }
-sheet.addEventListener('cancel', (e) => { e.preventDefault(); closeSheet(); });
-sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
+// ---- springs: the curve and a dot that moves on it ----
+(function () {
+  const E = window.__hfGlass.ease;
+  const SPRINGS = [
+    ['smooth', 'Smooth', 'No overshoot. Camera, zooms, layout moves, fades.'],
+    ['snappy', 'Snappy', 'A slight settle. Cards, pills, badges arriving.'],
+    ['bouncy', 'Bouncy', 'Playful. Toasts, chat bubbles, checkmarks.']
+  ];
+  SPRINGS.forEach(([k, name, use]) => {
+    const f = E[k], W = 300, H = 120, pad = 14, N = 80, maxV = 1.12;
+    const pts = Array.from({ length: N + 1 }, (_, i) => { const p = i / N; return [pad + p * (W - 2 * pad), H - pad - (f(p) / maxV) * (H - 2 * pad)]; });
+    const el = document.createElement('div');
+    el.className = 'panel spring';
+    el.innerHTML = `<h3>${name} <span class="mono id">ease.${k}</span></h3><p>${use}</p>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} spring curve"><line x1="${pad}" x2="${W - pad}" y1="${H - pad - (1 / maxV) * (H - 2 * pad)}" y2="${H - pad - (1 / maxV) * (H - 2 * pad)}" stroke="rgba(255,255,255,.18)" stroke-dasharray="4 4"/>
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${pts.map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' ')}"/></svg>
+      <div class="track"><div class="dot"></div></div><div class="row"><button class="btn ghost">Replay</button></div>`;
+    $('#springgrid').appendChild(el);
+    const dot = $('.dot', el), track = $('.track', el);
+    const play = () => { const dx = track.clientWidth - 42; gsap.fromTo(dot, { x: 0 }, { x: dx, duration: 0.9, ease: f }); };
+    $('.btn', el).onclick = play; $('svg', el).onclick = play;
+    new IntersectionObserver((es, io) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); setTimeout(play, 200); } }).observe(el);
+  });
+})();
 
-function openSheet(t, ex, exName) {
-  sheetPlaying = false;
-  const vals = valsFor(t, ex);
-  const fields = t.variables.map((d) => {
-    const wide = isJson(d) || (d.type === 'string' && String(d.default).length > 24);
-    let input;
-    if (d.type === 'boolean') input = `<input type="checkbox" data-id="${d.id}" ${vals[d.id] ? 'checked' : ''}>`;
-    else if (d.type === 'number') input = `<input type="number" step="any" data-id="${d.id}" value="${esc(vals[d.id])}">`;
-    else if (isJson(d)) input = `<textarea data-id="${d.id}" data-json="1" spellcheck="false">${esc(JSON.stringify(JSON.parse(vals[d.id]), null, 1))}</textarea>`;
-    else input = `<input type="text" data-id="${d.id}" value="${esc(vals[d.id])}">`;
-    return `<div class="prop ${wide ? 'wide' : ''}"><label>${esc(d.label)}</label>${input}</div>`;
-  }).join('');
-  const U = t.use || { when: '', cues: [], pairs: [], avoid: '' };
-  const exSel = (t.examples && t.examples.length > 1) ? `<select class="ex" aria-label="Example">${t.examples.map((e) => `<option ${e.name === exName ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select>` : '';
-  sheet.innerHTML = `<div class="sheet-in">
-    <div class="l">
-      <div class="sheet-head"><div class="t"><h2>${esc(t.title)}</h2><div class="id mono">${esc(t.file)}</div></div></div>
-      <div class="stage"><div class="scale"><div class="bg"><div class="pan" style="background-image:url(${ROOT}library/stage.jpg)"></div></div><iframe title="${esc(t.title)} preview"></iframe><div class="face"></div></div></div>
-      <div class="ctl"><button class="btn play">Play</button><input type="range" class="seek" min="0" max="${vals.dur}" step="0.01" value="${t.t}" aria-label="Time"><span class="tt mono"></span><label><input type="checkbox" class="showface" checked> face box</label>${exSel}</div>
-      <p class="desc">${esc(t.desc)}</p>
-      <div class="use"><div><b>Use it when:</b> ${esc(U.when)}</div><div><b>Spoken cues:</b> ${(U.cues || []).map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</div><div><b>Pairs with:</b> ${esc((U.pairs || []).join('; '))}</div><div><b>Avoid:</b> ${esc(U.avoid)}</div></div>
-    </div>
-    <div class="r">
-      <div class="sheet-head"><div class="t"><h2 style="font-size:17px">Props</h2></div><button class="close" aria-label="Close">×</button></div>
-      <div class="props">${fields}</div>
-      <div class="row"><button class="btn add">Add to storyboard</button><button class="btn ghost reset">Reset</button></div>
-      <details open><summary>Host tag</summary><textarea class="tag" readonly aria-label="Host tag"></textarea><div class="row" style="margin-top:8px"><button class="btn copy">Copy host tag</button></div></details>
-    </div></div>`;
-  if (!sheet.open) sheet.showModal();
-  if (location.hash !== '#' + t.id) history.replaceState(null, '', '#' + t.id);
-
-  const stage = $('.stage', sheet), scale = $('.scale', sheet), frame = $('iframe', sheet), bg = $('.bg', sheet), face = $('.face', sheet);
-  const seek = $('.seek', sheet), tt = $('.tt', sheet), playBtn = $('.play', sheet);
-  fitStage(stage, scale);
-  let tNow = t.t, last = 0, tl = null;
-  const readVals = () => {
-    const out = {};
-    sheet.querySelectorAll('[data-id]').forEach((el) => {
-      const id = el.dataset.id, d = t.variables.find((x) => x.id === id);
-      if (d.type === 'boolean') out[id] = el.checked;
-      else if (d.type === 'number') out[id] = el.value === '' ? d.default : parseFloat(el.value);
-      else if (el.dataset.json) { try { out[id] = JSON.stringify(JSON.parse(el.value)); el.classList.remove('bad'); } catch (e) { el.classList.add('bad'); out[id] = d.default; } }
-      else out[id] = el.value;
-    });
-    return out;
-  };
-  function paint() {
-    if (!tl) return;
-    tl.pause(); tl.time(Math.min(tNow, tl.duration()));
-    seek.value = tNow; tt.textContent = tNow.toFixed(2) + 's';
-    const w = frame.contentWindow, V = readVals(), abs = (V.at || 0) + tNow;
-    if (w.__hfTpl) {
-      const c = w.__hfTpl.cameraAt(abs), win = w.__hfTpl.windowAt(abs);
-      Object.assign(bg.style, { left: win.x + 'px', top: win.y + 'px', width: win.w + 'px', height: win.h + 'px', borderRadius: win.r + 'px', boxShadow: win.w < 1900 ? '0 0 0 2.5px rgba(255,255,255,.75), 0 28px 70px rgba(0,0,0,.9)' : 'none' });
-      $('.pan', bg).style.transform = `translate(${c.x - win.x}px, ${c.y - win.y}px) scale(${c.scale})`;
-      const f = w.__hfTpl.faceAt(abs);
-      if (f && $('.showface', sheet).checked) Object.assign(face.style, { display: 'block', left: f.x0 + 'px', top: f.y0 + 'px', width: (f.x1 - f.x0) + 'px', height: (f.y1 - f.y0) + 'px' });
-      else face.style.display = 'none';
-    }
-    $('.tag', sheet).value = hostTagFor(t, V, 1);
-  }
-  async function build() { const V = readVals(); seek.max = V.dur; tl = (await loadFrame(frame, t, V)).tl; paint(); }
-  let deb;
-  sheet.oninput = (e) => {
-    if (e.target === seek) { tNow = parseFloat(seek.value); paint(); return; }
-    if (e.target.classList.contains('showface')) { paint(); return; }
-    if (e.target.dataset.id) { clearTimeout(deb); deb = setTimeout(build, 250); }
-  };
-  playBtn.onclick = () => { sheetPlaying = !sheetPlaying; playBtn.textContent = sheetPlaying ? 'Pause' : 'Play'; last = performance.now(); if (sheetPlaying) tick(); };
-  function tick() { if (!sheetPlaying || !frame.isConnected) return; const n = performance.now(); tNow += (n - last) / 1000; last = n; if (tNow > parseFloat(seek.max)) tNow = 0; paint(); requestAnimationFrame(tick); }
-  sheet.querySelectorAll('.close').forEach((b) => (b.onclick = closeSheet));
-  $('.copy', sheet).onclick = (e) => copyText($('.tag', sheet).value, e.target);
-  $('.reset', sheet).onclick = () => openSheet(t);
-  $('.add', sheet).onclick = (e) => { Board.add(t, readVals()); e.target.textContent = 'Added'; setTimeout(() => (e.target.textContent = 'Add to storyboard'), 1200); };
-  const exEl = $('.ex', sheet);
-  if (exEl) exEl.onchange = () => { const x = t.examples.find((y) => y.name === exEl.value); openSheet(t, x ? x.vars : null, exEl.value); };
-  build();
-}
-
-// ---- storyboard drawer ----
-const drawer = $('#drawer');
-$('#board-open').onclick = () => drawer.classList.toggle('open');
-$('#board-close').onclick = () => drawer.classList.remove('open');
-Board.onChange((items) => {
-  $('#board-count').textContent = items.length;
-  $('#board-empty').style.display = items.length ? 'none' : '';
-  $('#board-list').innerHTML = items.map((it, i) => `<tr data-i="${i}"><td>${esc(byId(it.id).title)}<br>
-      <input class="note" data-k="note" placeholder="what is being said here" value="${esc(it.note || '')}" aria-label="Note"></td>
-    <td>start<br><input type="number" step="0.1" min="0" data-k="at" value="${it.V.at}" aria-label="Start seconds"></td>
-    <td>for<br><input type="number" step="0.1" min="0.2" data-k="dur" value="${it.V.dur}" aria-label="Duration seconds"></td>
-    <td><button aria-label="Remove" data-rm="1">×</button></td></tr>`).join('');
-});
-$('#board-list').addEventListener('change', (e) => { const tr = e.target.closest('tr'); if (tr && e.target.dataset.k) Board.set(+tr.dataset.i, e.target.dataset.k, e.target.value); });
-$('#board-list').addEventListener('click', (e) => { if (e.target.dataset.rm) Board.remove(+e.target.closest('tr').dataset.i); });
-$('#board-tags').onclick = (e) => copyText(Board.tags(), e.target);
-$('#board-plan').onclick = (e) => copyText(Board.plan(), e.target);
-$('#board-clear').onclick = () => Board.clear();
-
-// ---- cue table ----
-$('#tplcues').innerHTML = '<tr><th>Block</th><th>Use it when</th><th>Spoken cues</th><th>Pairs with</th></tr>' + MANIFEST.templates.map((t) =>
-  `<tr><td><a href="#${t.id}">${esc(t.title)}</a></td><td>${esc(t.use.when)}</td><td>${t.use.cues.map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</td><td>${esc(t.use.pairs.join('; '))}</td></tr>`).join('');
-
-renderTabs(); renderGallery();
-const openFromHash = () => { const t = byId(location.hash.slice(1)); if (t) openSheet(t); };
-window.addEventListener('hashchange', openFromHash);
-openFromHash();
+// ---- cheat sheet ----
+$('#motioncues').innerHTML = '<tr><th>When the speaker...</th><th>Motion</th><th>How</th></tr>' + MANIFEST.motion.map((m) => `<tr><td>${esc(m.cue)}</td><td>${esc(m.motion)}</td><td>${esc(m.how)}</td></tr>`).join('');
 </script>
 </body>
 </html>

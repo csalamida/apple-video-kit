@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Generates library/manifest.json + library/index.html from compositions/tpl/*.html.
+// Generates library/ from compositions/tpl/*.html: manifest.json, index.html (Components), motion.html (Animations),
+// plus the shared library.css + common.js. Page sources live in scripts/library/.
 // The variable schemas are read from each template's data-composition-variables, so the
 // library cannot drift from the real components.   Run: npm run build:library
 import fs from 'node:fs';
@@ -21,6 +22,10 @@ const templates = files.map((f) => {
 fs.mkdirSync(path.join(ROOT, 'library'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'library/manifest.json'), JSON.stringify({ generated: 'scripts/build-library.mjs (content: scripts/library-meta.mjs)', templates, motion: MOTION }, null, 1));
 
-const page = fs.readFileSync(path.join(ROOT, 'scripts/library-page.html'), 'utf8').replace('/*__MANIFEST__*/null', JSON.stringify({ templates, motion: MOTION }).replace(/</g, '\\u003c'));
-fs.writeFileSync(path.join(ROOT, 'library/index.html'), page);
-console.log(`library: ${templates.length} templates -> library/index.html`);
+const SRC = path.join(ROOT, 'scripts/library');
+const data = JSON.stringify({ templates, motion: MOTION }).replace(/</g, '\\u003c');
+for (const f of ['index.html', 'motion.html']) {
+  fs.writeFileSync(path.join(ROOT, 'library', f), fs.readFileSync(path.join(SRC, f), 'utf8').replace('/*__MANIFEST__*/null', data));
+}
+for (const f of ['library.css', 'common.js']) fs.copyFileSync(path.join(SRC, f), path.join(ROOT, 'library', f));
+console.log(`library: ${templates.length} templates -> library/index.html (Components) + library/motion.html (Animations)`);

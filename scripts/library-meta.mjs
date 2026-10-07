@@ -84,7 +84,7 @@ export const META = {
     examples: [{ name: 'Percent', vars: {} }, { name: 'Seconds', vars: { label: 'Average reply', sub: 'was 2h 14m', from: 120, to: 38, suffix: 's', decimals: 0 } }, { name: 'Money', vars: { label: 'Monthly revenue', sub: 'recurring', from: 0, to: 12400, prefix: '$', suffix: '', decimals: 0 } }]
   },
   'imessage-phone': {
-    title: 'iMessage Phone', category: 'Devices', t: 2.4, vars: { dur: 3.4 }, desc: 'iPhone 16 Pro iMessage thread with typing indicator.',
+    title: 'iMessage Phone', category: 'Devices', t: 2.4, vars: { dur: 3.4 }, desc: 'iPhone-style iMessage thread with typing indicator.',
     use: { when: 'The story is a text conversation: an auto-reply, an SMS follow-up, a booking exchange.', cues: ['"text", "SMS"', '"message", "reply"', '"the automation responds"'], pairs: ['notification-stack (the trigger)', 'glass-card with aside (phone beside a card)'], avoid: 'Email or chat apps; use an app-window chat panel.' },
     examples: [{ name: 'Auto-reply', vars: {} }]
   },
