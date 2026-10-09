@@ -161,6 +161,12 @@ export const META = {
     use: { when: 'Mount for exactly the span where footage is sped up or a long wait is compressed (installs, imports, loading).', cues: ['"let me speed this up"', '"this takes a minute"', '"skipping ahead"', '"while it loads"'], pairs: ['transition blur (out of the sped-up span)'], avoid: 'Real-time footage, or spans under ~1.5 s.' },
     examples: [{ name: '2x', vars: {} }, { name: 'Skip ahead', vars: { label: '8×', caption: 'Skipping the import', side: 'left' } }]
   },
+  'title-behind': {
+    title: 'Title Behind You', category: 'Titles', t: 1.8, vars: { dur: 3.5 }, behind: true,
+    desc: 'Big type that sits BEHIND the speaker: it needs the transparent cutout (npm run cutout) above it. Mount it at z-index 30, under the cutout at 50. Its text is marked as intentionally covered, so the layout check accepts it. Centres itself on the upper head from the face track.',
+    use: { when: 'The one line the video hangs on: the hook, the thesis, a big number or promise. Hold 3-4 s while the speaker keeps talking in front of it.', cues: ['"here is the thing"', '"the one idea"', '"the secret is"', '"say less, show more"', 'the hook line'], pairs: ['kinetic-subtitle (captions bottom-centre)', 'a scene or gradient background (projects/speaker-cutout)'], avoid: 'Without the cutout (the title would sit on top of your face), or more than one per minute.' },
+    examples: [{ name: 'Two lines', vars: {} }, { name: 'Big number', vars: { text: '3x|*faster*', size: 300, dur: 3.5 } }]
+  },
 };
 
 // The animation library: when to reach for which MOTION (camera, spring, preset). Rows render as a cheat-sheet.
@@ -187,5 +193,9 @@ export const MOTION = [
   { cue: 'SCREEN SHARE: dense screen, the card covers content', motion: 'Hide webcam: card slides down and out, returns on the next topic', how: "share.js cam: [{ t, mode: 'hide' }, { t, mode: 'pip' }]" },
   { cue: 'A pause or filler was cut (jump cut)', motion: 'Jump-cut punch: framing alternates 1.0 / 1.06 at each cut', how: 'node scripts/auto-trim.mjs <voice file>, then paste its cuts into share.js cuts or camera.js cuts' },
   { cue: 'Section change, new app or screen, a cut that should feel intended', motion: 'Transition over the cut (cut at the midpoint): blur 0.8 s by default, glass-wipe for a new screen, chapter 1.6 s for a named section', how: 'transition template, kind = dip | flash | blur | glass-wipe | iris | light-sweep | chapter; z-index 90; most cuts need none' },
+  { cue: 'SPEAKER CUTOUT: the video needs a place (an office, a studio, a living room)', motion: 'Scene background matched to your camera angle, soft focus, slight parallax when you move', how: 'npm run cutout -- <video>, npm run backdrop -- <video> --scene office (measures your framing and light, writes the image prompt), then cutout.js backgrounds: [{ kind: "scene", src }]' },
+  { cue: 'SPEAKER CUTOUT: the hook line, the one idea, a big number', motion: 'Title BEHIND the head, rising line by line while you talk in front of it', how: 'title-behind template at z-index 30 under the cutout (50); centres on the upper head from the face track' },
+  { cue: 'SPEAKER CUTOUT: switching topic or mood', motion: 'Background crossfade (0.8 s): room to studio colour to evening room', how: 'cutout.js backgrounds: later entries fade in over the earlier ones' },
+  { cue: 'SPEAKER CUTOUT: making room for a card or number', motion: 'Speaker glides aside and scales down, the room drifts a fraction (parallax)', how: 'cutout.js moves: [{ t, dur, x, scale }] and parallax: 0.12; mount the card on the freed side' },
   { cue: 'Breath, filler, mid-sentence pause', motion: 'No motion', how: 'Never zoom or move graphics mid-breath; trim dead air > 0.4 s instead' }
 ];

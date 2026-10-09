@@ -10,6 +10,7 @@
 <script src="../components/glass-components.js"></script>
 <script src="../inputs/face-track.js"></script>
 <script src="../components/screen-stage.js"></script>
+<script src="../components/cutout-stage.js"></script>
 </head>
 <body>
 <header class="bar">
@@ -21,7 +22,7 @@
 <main class="wrap">
   <h1>Animations</h1>
   <p class="sub">Every move the kit makes, playable. Moves are data: you write when and where, the kit does the motion. Each one shows the line that produces it.</p>
-  <nav class="jump" aria-label="Sections"><a href="#screen">Screen share moves</a><a href="#camera">Camera moves</a><a href="#transitions">Transitions</a><a href="#springs">Springs</a><a href="#cheatsheet">Which motion when</a></nav>
+  <nav class="jump" aria-label="Sections"><a href="#screen">Screen share moves</a><a href="#camera">Camera moves</a><a href="#cutout">Speaker cutout</a><a href="#transitions">Transitions</a><a href="#springs">Springs</a><a href="#cheatsheet">Which motion when</a></nav>
 
   <section class="section" id="screen">
     <h2>Screen share moves</h2>
@@ -47,6 +48,21 @@
       </div></div>
       <div class="modes" id="modes"></div>
       <pre id="stcode"></pre>
+    </div>
+  </section>
+
+  <section class="section" id="cutout">
+    <h2>Speaker cutout</h2>
+    <p class="lead">Remove the background behind you and put yourself anywhere: a room, a studio colour, your own room blurred. Put titles BEHIND your head. Prepare with <code class="mono">npm run cutout</code> (the transparent video) and <code class="mono">npm run backdrop</code> (measures your angle and light, writes the prompt for a scene that matches). Written in <code class="mono">projects/speaker-cutout/cutout.js</code>. Here the speaker is a faceless placeholder.</p>
+    <div class="panel">
+      <div class="stage" id="cstage"><div class="scale" id="c-scale">
+        <div id="c-orig" style="position:absolute;inset:0;background:url(stage.jpg) center/cover"></div>
+        <div id="c-bgs" style="position:absolute;inset:0;transform:scale(1.1)"><div id="c-bg" style="position:absolute;inset:0"></div></div>
+        <div id="c-title" style="position:absolute;left:0;right:0;top:190px;text-align:center;color:#fff;font-weight:700;font-size:210px;line-height:.95;letter-spacing:-0.045em;opacity:0">Say less.<br><span style="color:var(--accent-text)">Show</span> more.</div>
+        <img id="c-cut" alt="" src="stage-cutout.png" style="position:absolute;inset:0;width:1920px;height:1080px;transform-origin:50% 80%;filter:drop-shadow(0 30px 50px rgba(0,0,0,.45))">
+      </div></div>
+      <div class="modes" id="cmodes"></div>
+      <pre id="ccode"></pre>
     </div>
   </section>
 
@@ -133,6 +149,43 @@
     if (k !== 'punch') tl.to('#st-pan', { scale: 1, duration: 0.5, ease: G.ease.smooth }, 0);
     MODES[k].run(tl); $('#stcode').textContent = MODES[k].code;
   };
+})();
+
+// ---- speaker cutout: backgrounds, title behind, speaker aside ----
+(function () {
+  const C = window.__hfCutoutStage;
+  fitStage($('#cstage'), $('#c-scale'));
+  const room = ROOT + 'assets/demo/office.svg';
+  const BGS = [
+    ['Room', { kind: 'scene', src: room, blur: 9, brightness: 0.96, tone: 'neutral' }, "{ kind: 'scene', src: 'inputs/office.png', blur: 3, brightness: 0.96, tone: 'neutral' }   // a room matched to your angle (npm run backdrop)"],
+    ['Evening room', { kind: 'scene', src: room, blur: 16, brightness: 0.7, tone: 'warm' }, "{ kind: 'scene', src: 'inputs/office.png', blur: 6, brightness: 0.7, tone: 'warm' }   // the same room, evening light"],
+    ['Studio colour', { kind: 'gradient', preset: 'midnight' }, "{ kind: 'gradient', preset: 'midnight' }   // aurora | midnight | studio | graphite | paper"],
+    ['Your room, blurred', { kind: 'blur', blur: 36, dim: 0.55 }, "{ kind: 'blur', blur: 36, dim: 0.55 }   // your own footage, blurred and dimmed"]
+  ];
+  let bgI = 0, titleOn = false, aside = false;
+  const bg = $('#c-bg');
+  function setBg(i) {
+    bgI = i;
+    bg.style.cssText = 'position:absolute;inset:0';
+    const st = C.bgStyle(BGS[i][1]); for (const k in st) bg.style[k] = st[k];
+    gsap.fromTo(bg, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: __hfGlass.ease.smooth });
+    note();
+  }
+  function note() {
+    $('#ccode').textContent = 'backgrounds: [' + BGS[bgI][2] + ']' + (titleOn ? "\n+ title-behind host at z-index 30 (under the cutout at 50)" : '') + (aside ? '\nmoves: [{ t, dur: 1, x: -430, scale: 0.8 }], parallax: 0.12' : '');
+  }
+  $('#cmodes').innerHTML = BGS.map(([l], i) => `<button class="btn ${i ? 'ghost' : 'on'}" data-bg="${i}">${l}</button>`).join('') +
+    '<button class="btn ghost" id="c-t">Title behind you</button><button class="btn ghost" id="c-a">Speaker aside</button>';
+  $('#cmodes').onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.bg !== undefined) { $('#cmodes').querySelectorAll('[data-bg]').forEach((x) => { x.className = 'btn ' + (x === b ? 'on' : 'ghost'); }); setBg(+b.dataset.bg); }
+    if (b.id === 'c-t') { titleOn = !titleOn; b.className = 'btn ' + (titleOn ? 'on' : 'ghost'); gsap.to('#c-title', { opacity: titleOn ? 1 : 0, y: titleOn ? 0 : 60, duration: 0.7, ease: __hfGlass.ease.smooth }); note(); }
+    if (b.id === 'c-a') { aside = !aside; b.className = 'btn ' + (aside ? 'on' : 'ghost');
+      gsap.to('#c-cut', { x: aside ? -430 : 0, scale: aside ? 0.8 : 1, duration: 0.9, ease: __hfGlass.ease.smooth });
+      gsap.to('#c-bgs', { x: aside ? -430 * 0.12 : 0, duration: 0.9, ease: __hfGlass.ease.smooth }); note(); }
+  };
+  gsap.set('#c-title', { y: 60 });
+  setBg(0);
 })();
 
 // ---- transitions: one live tile per kind ----

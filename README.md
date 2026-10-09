@@ -75,6 +75,22 @@ npm install && npm run build:library && npm run check:all
 | `fast-forward` | a sped-up or skipped stretch |
 | `spotlight` | "look at this part" (talking head) |
 | `transition` | section changes: dip, flash, blur, glass wipe, iris, light sweep, chapter |
+| `title-behind` | the hook or the one idea, with the cutout (type behind your head) |
+
+**Speaker cutout and scenes** (`projects/speaker-cutout/`): remove the background behind you and put yourself in a place.
+- **Background:** a photoreal room (office, studio, living room, cafe, library, conference room) that matches your camera angle, a studio colour, your own room blurred, or your own image. Backgrounds crossfade, and the room drifts slightly when you move (parallax).
+- **Title behind you:** big type that sits behind your head while you talk in front of it (`title-behind`).
+- **Speaker aside:** you glide to one side and shrink to make room for a card or a number.
+
+```bash
+npm run cutout -- inputs/me.mp4 --from 10 --to 25     # transparent video of you (local AI, nothing uploaded)
+npm run backdrop -- inputs/me.mp4 --scene office       # measures your framing and light, writes the image prompt
+npm run speaker:dev                                    # the demo: faceless placeholder, stylised office
+```
+
+`npm run cutout` uses HyperFrames' own background-removal model. It is slow (about 0.5 to 1 frame per second on a laptop, 10 s of 30 fps video is roughly 5 minutes), so cut only the stretches that use it with `--from` and `--to`. The first run downloads the model (about 170 MB). Hair and shoulders come out clean; a piece of a chair or object right behind you can survive (re-record against a plain background, or keep it out of frame).
+
+`npm run backdrop` makes the scene match you. It measures from a frame of your video (no upload): where your eyes sit (the horizon the room must share), how big your head is, which side the light comes from, how bright you are and how warm the room is. It writes two prompts: a text-only one for any image model, and an image-edit one to use with the reference frame it saves. Generate the image with the tool you prefer, save it as `inputs/office.png`, and add `{ kind: 'scene', src: 'inputs/office.png', blur: 3 }` to `cutout.js`. Not included: automatic light wrap on the edges (the matte edge is cleaned, not re-lit).
 
 **Screen-share moves** (`projects/screen-share/share.js`): zoom + slow drift, callout, focus dim, redact, webcam full / card / hidden, jump-cut punch.
 
@@ -91,6 +107,7 @@ node scripts/cue-plan.mjs inputs/transcript.srt --mode screen            # trans
 npm run check:all      # everything below
 npm run check          # HyperFrames lint, layout, motion and contrast (talking head)
 npm run share:check    # same for screen share, plus cards vs the webcam card
+npm run speaker:check  # same for the speaker-cutout demo
 npm run check:face     # host contracts + no card covers the speaker's face
 npm run check:privacy  # no footage, images, big files or denylisted names in git
 ```

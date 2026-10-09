@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Speaker Cutout</title>
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+    <link rel="stylesheet" href="components/tokens.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/cutout-stage.js"></script>
+    <script src="cutout.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { width: 1920px; height: 1080px; overflow: hidden; background: #0b0b0f; font-family: var(--font-ui); color: #fff; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      .subcomp-host { position: absolute; inset: 0; width: 1920px; height: 1080px; pointer-events: none; }
+      /* z-order: #orig 5 < backgrounds 10+ < title-behind 30 < #cut 50 < lower-thirds, subtitles, cards 55+ */
+      #orig { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 5; }
+      #cut { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 50; will-change: transform; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="21.92">
+      <video id="orig" class="clip" src="inputs/_demo/speaker.mp4" data-start="0" data-duration="21.92" data-media-start="0" data-has-audio="true" playsinline></video>
+      <div id="bgs" data-layout-allow-overflow=""></div>
+
+      <div id="behind-host" class="clip subcomp-host" style="z-index: 30;" data-composition-id="title-behind-0" data-composition-src="compositions/tpl/title-behind.html" data-start="7.2" data-duration="4.6" data-variable-values='{"at": 7.2, "dur": 4.6, "text": "Say less.|*Show* more."}'></div>
+
+      <video id="cut" class="clip" src="inputs/_demo/speaker-cutout.webm" data-start="0" data-duration="21.92" muted playsinline></video>
+
+      <div id="lower-host" class="clip subcomp-host" style="z-index: 55;" data-composition-id="lower-third-0" data-composition-src="compositions/tpl/lower-third.html" data-start="1" data-duration="4" data-variable-values='{"at": 1, "dur": 4, "safe": false, "side": "left", "top": 900}'></div>
+      <div id="metric-host" class="clip subcomp-host" style="z-index: 56;" data-composition-id="metric-counter-0" data-composition-src="compositions/tpl/metric-counter.html" data-start="15" data-duration="4" data-variable-values='{"at": 15, "dur": 4, "safe": false, "side": "right", "top": 380}'></div>
+      <div id="subtitles" class="clip subcomp-host" style="z-index: 75;" data-composition-id="kinetic-subtitle-0" data-composition-src="compositions/tpl/kinetic-subtitle.html" data-start="0" data-duration="21.92" data-variable-values='{"at": 0, "dur": 21.92, "safe": false, "cues": [{"start": 7.4, "end": 11.4, "text": "Put the words *behind* you"}, {"start": 15.2, "end": 18.8, "text": "And the numbers *beside* you"}]}'></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      __hfCutoutStage.layout(window.__hfCutout);
+      __hfCutoutStage.build(tl, window.__hfCutout);
+    </script>
+  </body>
+</html>

@@ -35,6 +35,7 @@ const FOOT = {
   'before-after': (v) => ({ w: v.width, h: Math.round((v.width - 20) / v.aspect + 20) }),
   'link-chip': (v) => ({ w: 420 * v.scale, h: 70 * v.scale }),
   'fast-forward': (v) => ({ w: 300 * v.scale, h: 60 * v.scale }),
+  'title-behind': () => null,   // sits BEHIND the speaker on purpose (z-index 30 under the cutout)
   'title-card': (v) => v.mode === 'outro' ? ({ w: v.width, h: 475 * v.scale }) : null,   // intro is a full-frame scrim on purpose
   'transition': () => null,   // full-frame wipe / chapter slate
   'spotlight': () => null     // full-frame dim with a hole

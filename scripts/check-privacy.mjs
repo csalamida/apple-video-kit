@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Guard for a public repo: fails if a commit would publish footage, photos, big binaries or personal names.
 //   1. No video/audio/image files tracked (demo media is generated, real media stays in git-ignored inputs/).
-//      Kit assets are allowlisted: assets/demo/** and library/stage.jpg.
+//      Kit assets are allowlisted: assets/demo/**, library/stage.jpg and library/stage-cutout.png.
 //   2. No tracked file over 2 MB.
 //   3. No term from .privacy-denylist (one term per line, git-ignored, so the names themselves are never published).
 //      The denylist itself must never be tracked.
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MEDIA = /\.(mp4|mov|m4v|webm|mkv|avi|mts|m2ts|3gp|wav|mp3|m4a|aac|flac|ogg|oga|opus|aiff|aif)$/i;
 const IMAGE = /\.(png|jpe?g|gif|webp|heic|heif|avif|tiff?|bmp)$/i;
-const ALLOW = (f) => f.startsWith('assets/demo/') || f === 'library/stage.jpg';
+const ALLOW = (f) => f.startsWith('assets/demo/') || f === 'library/stage.jpg' || f === 'library/stage-cutout.png';
 const MAX = 2 * 1024 * 1024;
 const DENYLIST = '.privacy-denylist';
 // Only for the working-tree walk (no git): folders that are never published anyway.

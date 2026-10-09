@@ -8,7 +8,7 @@ const getSrc = (file) => srcCache[file] || (srcCache[file] = fetch(ROOT + file).
 const byId = (id) => MANIFEST.templates.find((t) => t.id === id);
 
 // Stacking order of a mounted host (same scale as cue-plan.mjs): by template id first, then by category.
-const Z_ID = { 'kinetic-subtitle': 75, 'title-card': 70, 'chapter-pill': 60, 'lower-third': 55 };
+const Z_ID = { 'kinetic-subtitle': 75, 'title-card': 70, 'chapter-pill': 60, 'lower-third': 55, 'title-behind': 30 };
 const Z_CAT = { Transitions: 90, Overlays: 60, Titles: 70, 'Cards & Panels': 40 };
 const zFor = (t) => Z_ID[t.id] ?? Z_CAT[t.category] ?? 40;
 // JSON-typed variables are strings; compare them by parsed value so re-formatted but unchanged lists are not emitted.
@@ -27,7 +27,7 @@ function hostTagFor(t, V, n) {
   const changed = {};
   t.variables.forEach((d) => { if (norm(d, V[d.id]) !== norm(d, d.default)) changed[d.id] = isJson(d) ? JSON.parse(V[d.id]) : V[d.id]; });
   changed.at = V.at; changed.dur = V.dur;
-  return `<div id="${t.id}-${n}-host" class="clip subcomp-host" style="z-index: ${zFor(t)};" data-composition-id="${t.id}-${n}" data-composition-src="${t.file}" data-start="${V.at}" data-duration="${V.dur}" data-variable-values='${JSON.stringify(changed).replace(/'/g, '&#39;')}'></div>`;
+  return `<div id="${t.id}-${n}-host" class="clip subcomp-host" style="z-index: ${zFor(t)};"" data-composition-id="${t.id}-${n}" data-composition-src="${t.file}" data-start="${V.at}" data-duration="${V.dur}" data-variable-values='${JSON.stringify(changed).replace(/'/g, '&#39;')}'></div>`;
 }
 
 // Loads a template into an iframe with the given variables. Resolves with { tl } (its paused timeline).
@@ -55,10 +55,13 @@ function fitStage(stage, scale) {
   new ResizeObserver(fit).observe(stage); fit();
 }
 
+// Blocks that sit BEHIND the speaker are previewed with the transparent silhouette drawn above them.
+const behindImg = () => `<img alt="" src="${ROOT}library/stage-cutout.png" style="position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none">`;
+
 // A small looping preview: shows `t.t` at rest, plays the whole template on hover (or when play() is called).
 function tilePreview(stage, t, V, opts) {
   opts = opts || {};
-  stage.innerHTML = `<div class="scale"><div class="bg"><div class="pan" style="background-image:url(${ROOT}${opts.bg || 'library/stage.jpg'})"></div></div><iframe tabindex="-1" aria-hidden="true" title=""></iframe></div>`;
+  stage.innerHTML = `<div class="scale"><div class="bg"><div class="pan" style="background-image:url(${ROOT}${opts.bg || 'library/stage.jpg'})"></div></div><iframe tabindex="-1" aria-hidden="true" title=""></iframe>${t.behind ? behindImg() : ''}</div>`;
   const scale = $('.scale', stage), frame = $('iframe', stage);
   let tl = null, raf = 0, started = false;
   const rest = opts.rest != null ? opts.rest : t.t;

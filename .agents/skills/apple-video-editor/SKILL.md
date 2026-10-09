@@ -2,7 +2,7 @@
 name: apple-video-editor
 description: >
   Directs, packages and edits video to Apple design standards (Liquid Glass materials, continuous-curvature
-  squircles, SF type, spring physics) in HyperFrames. Two modes: SCREEN SHARE (primary: screen recording +
+  squircles, SF type, spring physics) in HyperFrames. Three modes: SPEAKER CUTOUT (scenes behind you, title behind the head), SCREEN SHARE (primary: screen recording +
   webcam PiP with auto-style zooms as data) and TALKING HEAD (face-safe graphics over footage).
   Everything on screen is a parameterized template mounted with a host tag; camera moves, zooms and PiP are data.
   Includes a generated library with when-to-use cues, a stage engine (window + pan, no re-crop), spring easing,
@@ -10,7 +10,7 @@ description: >
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.1.0"
+  version: "5.2.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -23,6 +23,7 @@ Turn raw footage into Apple-grade broadcast video without hand-animating each sc
 |---|---|---|---|
 | **Screen share (primary)** | Screen/window recording + webcam. Most videos. | `projects/screen-share/` | `share.js` zooms; tall webcam PiP bottom-left |
 | **Talking head** | Webcam/interview footage with graphic cards | `index.html` | `components/camera.js` moves; templates stay off the face |
+| **Speaker cutout** | You, with the background replaced by a room or colour; title behind your head | `projects/speaker-cutout/` | `cutout.js` backgrounds, moves, parallax |
 
 Trigger on: an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "add overlays/captions",
 "make it look like a polished screen recording / Apple keynote", "screen share with a PiP", "edit this talking head".
@@ -72,6 +73,8 @@ Editorial guide, not an automated parser. The full, editable version is the cue 
 | "moving on / now let's / step two" | `transition` (`chapter` kind 1.6 s, or `blur` 0.8 s) | zoom back to overview |
 | "to recap" | `checklist` | none |
 | "link in the description" | `link-chip` | none |
+| the hook, the one idea, a big number (cutout mode) | `title-behind` (z-index 30, under the cutout) | background crossfade, speaker aside for a card |
+| the video needs a place (office, studio) | none | cutout scene background from `npm run backdrop` |
 | sign-off, "see you next time" | `title-card` outro | screen share: `cam` full; talking head: full bleed + 1.2x |
 | screen share: zoom held > 2 s | none | `drift: true` |
 | screen share: dense screen, webcam in the way | none | `cam` hide, then pip |
@@ -84,7 +87,7 @@ Editorial guide, not an automated parser. The full, editable version is the cue 
 ```
 projects/screen-share/   index.html + share.js (zooms, cam, callouts, focus, redact, cuts) <- primary mode
 index.html               talking-head root; mounts templates, builds camera from camera.js
-compositions/tpl/        18 templates (variables = the API), incl. the transition library
+compositions/tpl/        19 templates (variables = the API), incl. the transition library
 components/
   tokens.css             ONLY place for colour, type, glass, corner values
   glass-components.js    __hfGlass: spring eases + stage engine + presets
@@ -95,6 +98,7 @@ components/
 inputs/face-track.js     face boxes, git-ignored: generated for the placeholder; `npm run face -- <video>` writes yours (installs OpenCV into .cache/face-venv on first run)
 inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated: index.html (Components gallery + detail + storyboard), motion.html (Animations)
+scripts/cutout.mjs, backdrop.mjs  speaker cutout prep and scene prompt
 bin/apple-video-kit.mjs  CLI: npx github:csalamida/apple-video-kit init <dir> | update [--dry-run]
 scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library/ (page sources), sync-share, demo-media, serve, face-track (+ detect-face.py)
 ```
@@ -118,6 +122,8 @@ Rules every template follows:
 - Add a template: new file in `compositions/tpl/`, an entry (`use`, `examples`) in `scripts/library-meta.mjs`, then `npm run build:library`.
 
 **Stage engine (`__hfGlass.stage`)** - the speaker is a WINDOW (left/top/width/height/radius, squircle, ring+shadow as box-shadow) whose footage lives in a fixed-size `.hf-pan` that is only translated/scaled. Nothing re-crops while it morphs and radius/ring stay true pixels. `dockPiP`, `undockPiP`, `splitStage`, `unsplitStage`, `keynoteEmphasis` all use it. Never animate `width`/`height` on a `<video>`. Moves in `camera.js`: `win`, `fit: 'frame'|'cover'` (cover is face-centred), `front`, `chrome`.
+
+**Speaker cutout (`cutout.js`, engine `components/cutout-stage.js`)** - layers: `#orig` z5 (voice), `#bgs` z10, `title-behind` hosts z30, `#cut` z50, overlays z55+. `backgrounds` crossfade (`scene` photoreal room with `blur`/`brightness`/`tone`, `gradient` presets, `color`, `image`, `blur` of your own footage); `moves` glide the speaker; `parallax` drifts the room. `npm run cutout` makes the transparent video (HyperFrames local `remove-background`, about 0.5-1 frame/s: matte only the stretches that need it). `npm run backdrop` measures the speaker's eye-line, shot size, key-light side and warmth and writes the image prompt so the scene matches the camera angle. `title-behind` marks its own text `data-layout-allow-occlusion` (the layout check reads the flag on the text itself). Limits: no automatic light wrap; objects touching the speaker (a chair back) can survive the matte; face safety assumes the speaker does not move.
 
 **Screen-share moves (`share.js`, engine `components/screen-stage.js`)** - `drift` (slow +3.5% push-in while a zoom holds), `cam: [{t, mode: 'full'|'pip'|'hide'}]` (webcam to full screen without re-crop, back to the card, or tucked away), `cuts` + `punch` (jump-cut punch on the webcam), and screen-space annotations that live inside the zoomed screen so they stay locked to their spot: `callouts` (ring + label, label keeps its size), `focus` (dim the rest), `redact` (blur or solid; whole video when no t/end).
 

@@ -20,7 +20,15 @@ projects/screen-share/components/
 projects/screen-share/compositions/
 projects/screen-share/inputs
 projects/screen-share/assets
+projects/speaker-cutout/components/
+projects/speaker-cutout/compositions/
+projects/speaker-cutout/inputs
+projects/speaker-cutout/assets
 snapshots/
 
 # apple-video-kit update state and backups of files you edited
 .kit/backup/
+
+# HyperFrames transcode caches (can contain video)
+.transcode-cache/
+**/.transcode-cache/

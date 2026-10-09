@@ -1,5 +1,6 @@
 // Synthetic demo media, generated on first run so the repo ships no footage of a real person.
 //   inputs/_demo/speaker.mp4  faceless silhouette + silent audio (talking-head demo, webcam card)
+//   inputs/_demo/speaker-cutout.webm  the same silhouette with a transparent background (speaker-cutout demo)
 //   inputs/_demo/screen.mp4   test pattern (screen-share demo)
 //   inputs/face-track.js/.json  head boxes for the silhouette (only written when missing; detect-face.py
 //                               overwrites them with the track of your own footage)
@@ -25,20 +26,41 @@ const ff = (args) => {
   return r.status === 0;
 };
 
+// The faceless silhouette as ffmpeg expressions: `person` is 1 inside it, `ch(bg, fg)` is one colour channel.
+function shape() {
+  const head = `lt(pow((X-${HEAD.cx})/${HEAD.rx},2)+pow((Y-${HEAD.cy})/${HEAD.ry},2),1)`;
+  const body = `lt(pow((X-${HEAD.cx})/560,2)+pow((Y-1160)/380,2),1)`;
+  const neck = `lt(abs(X-${HEAD.cx}),85)*gt(Y,600)*lt(Y,860)`;
+  const person = `gt(${head}+${body}+${neck},0)`;
+  const glow = `exp(-(pow(X-${HEAD.cx},2)+pow(Y-420,2))/500000)`;
+  const ch = (bg, fg) => `if(${person},${fg}-0.03*(Y-300),${bg[0]}+${bg[1]}*${glow})`;
+  return { person, ch };
+}
+const rgb = (ch) => `r='${ch([14, 30], 64)}':g='${ch([18, 34], 68)}':b='${ch([26, 48], 80)}'`;
+
+// One PNG of the silhouette with a transparent background (the demo "cutout"); also used by the library previews.
+export function silhouetteStill(out) {
+  const { person, ch } = shape();
+  return ff(['-f', 'lavfi', '-i', 'color=c=black:s=1920x1080', '-frames:v', '1',
+    '-vf', `format=rgba,geq=${rgb(ch)}:a='if(${person},255,0)'`, out]);
+}
+
 const MAKERS = {
   'inputs/_demo/speaker.mp4': (out) => {
-    const head = `lt(pow((X-${HEAD.cx})/${HEAD.rx},2)+pow((Y-${HEAD.cy})/${HEAD.ry},2),1)`;
-    const body = `lt(pow((X-${HEAD.cx})/560,2)+pow((Y-1160)/380,2),1)`;
-    const neck = `lt(abs(X-${HEAD.cx}),85)*gt(Y,600)*lt(Y,860)`;
-    const person = `gt(${head}+${body}+${neck},0)`;
-    const glow = `exp(-(pow(X-${HEAD.cx},2)+pow(Y-420,2))/500000)`;
-    const ch = (bg, fg) => `if(${person},${fg}-0.03*(Y-300),${bg[0]}+${bg[1]}*${glow})`;
+    const { ch } = shape();
     const still = out.replace(/\.mp4$/, '.png');
     return ff(['-f', 'lavfi', '-i', 'color=c=black:s=1920x1080', '-frames:v', '1',
-      '-vf', `format=rgb24,geq=r='${ch([14, 30], 64)}':g='${ch([18, 34], 68)}':b='${ch([26, 48], 80)}'`, still]) &&
+      '-vf', `format=rgb24,geq=${rgb(ch)}`, still]) &&
       ff(['-loop', '1', '-framerate', '30', '-i', still, '-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo',
         '-t', String(DEMO_DURATION), '-vf', 'noise=alls=5:allf=t,format=yuv420p', '-c:v', 'libx264', '-crf', '26',
         '-c:a', 'aac', '-shortest', out]) && (fs.rmSync(still), true);
+  },
+  // the same silhouette as a transparent VP9 video: stands in for `npm run cutout` output in the speaker-cutout demo
+  'inputs/_demo/speaker-cutout.webm': (out) => {
+    const still = out.replace(/\.webm$/, '.png');
+    return silhouetteStill(still) &&
+      ff(['-loop', '1', '-framerate', '30', '-i', still, '-t', String(DEMO_DURATION), '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuva420p',
+        '-b:v', '0', '-crf', '32', '-auto-alt-ref', '0', '-an', out]) && (fs.rmSync(still), true);
   },
   'inputs/_demo/screen.mp4': (out) => ff(['-f', 'lavfi', '-i', `testsrc2=size=1920x1080:rate=30:duration=${DEMO_DURATION}`,
     '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '28', out])

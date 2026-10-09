@@ -106,7 +106,7 @@ function openSheet(t, ex, exName) {
   sheet.innerHTML = `<div class="sheet-in">
     <div class="l">
       <div class="sheet-head"><div class="t"><h2>${esc(t.title)}</h2><div class="id mono">${esc(t.file)}</div></div></div>
-      <div class="stage"><div class="scale"><div class="bg"><div class="pan" style="background-image:url(${ROOT}library/stage.jpg)"></div></div><iframe title="${esc(t.title)} preview"></iframe><div class="face"></div></div></div>
+      <div class="stage"><div class="scale"><div class="bg"><div class="pan" style="background-image:url(${ROOT}library/stage.jpg)"></div></div><iframe title="${esc(t.title)} preview"></iframe>${t.behind ? behindImg() : ''}<div class="face"></div></div></div>
       <div class="ctl"><button class="btn play">Play</button><input type="range" class="seek" min="0" max="${vals.dur}" step="0.01" value="${t.t}" aria-label="Time"><span class="tt mono"></span><label><input type="checkbox" class="showface" checked> face box</label>${exSel}</div>
       <p class="desc">${esc(t.desc)}</p>
       <div class="use"><div><b>Use it when:</b> ${esc(U.when)}</div><div><b>Spoken cues:</b> ${(U.cues || []).map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</div><div><b>Pairs with:</b> ${esc((U.pairs || []).join('; '))}</div><div><b>Avoid:</b> ${esc(U.avoid)}</div></div>

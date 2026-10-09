@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3.5},
+  {"id":"text","type":"string","label":"Text (| starts a new line, *word* gets the accent colour)","default":"Say less.|*Show* more."},
+  {"id":"size","type":"number","label":"Font size (px, shrinks to fit the width)","default":220},
+  {"id":"top","type":"number","label":"Top (px). -1 = centre the block on the upper head","default":-1},
+  {"id":"color","type":"color","label":"Text colour","default":"#ffffff"},
+  {"id":"accent","type":"color","label":"Accent word colour","default":"#78bdff"},
+  {"id":"stagger","type":"number","label":"Delay between lines (s)","default":0.12}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <style>
+      /* Mount this host BELOW the cutout (z-index 30, the cutout is 50): the speaker stands in front of the type.
+         Its text carries data-layout-allow-occlusion: the layout check reads that flag on the text itself. */
+      #tb { position: absolute; left: 80px; right: 80px; text-align: center; font-weight: 700; line-height: 0.95;
+            letter-spacing: var(--track-display); white-space: nowrap; }
+      #tb .ln { overflow: hidden; padding: 0.06em 0 0.1em; }
+      #tb .ln span { display: inline-block; }
+      #tb em { font-style: normal; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="title-behind" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="tb"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, E = __hfGlass.ease;
+        var V = T.vars({at:0,dur:3.5,text:"Say less.|*Show* more.",size:220,top:-1,color:"#ffffff",accent:"#78bdff",stagger:0.12}, window.__hyperframes);
+        var esc = function (s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
+        var tb = document.getElementById("tb");
+        tb.style.color = V.color; tb.style.fontSize = V.size + "px";
+        tb.innerHTML = String(V.text).split("|").map(function (l) {
+          return '<div class="ln" data-layout-allow-occlusion=""><span data-layout-allow-occlusion="">' + esc(l).replace(/\*([^*]+)\*/g, '<em data-layout-allow-occlusion="" style="color:' + V.accent + '">$1</em>') + '</span></div>';
+        }).join("");
+        // shrink so the widest line fits the frame
+        var widest = 0; tb.querySelectorAll(".ln span").forEach(function (s) { widest = Math.max(widest, s.offsetWidth); });
+        if (widest > 1760) tb.style.fontSize = (V.size * 1760 / widest) + "px";
+        // vertical position: centred on the upper head (from the face track), or an explicit top
+        var h = tb.offsetHeight, top;
+        if (V.top >= 0) top = V.top;
+        else {
+          var u = T.faceUnion(V.at + 0.5, Math.max(0, V.dur - 0.9));
+          top = u ? u.y0 + (u.y1 - u.y0) * 0.32 - h / 2 : (1080 - h) / 2;
+        }
+        tb.style.top = Math.max(30, Math.min(1080 - h - 30, top)) + "px";
+
+        var tl = gsap.timeline({paused:true}); window.__timelines["title-behind"] = tl;
+        tl.fromTo(tb.querySelectorAll(".ln span"), {yPercent:105, opacity:0}, {yPercent:0, opacity:1, duration:0.9, ease:E.smooth, stagger:V.stagger}, 0.1);
+        tl.fromTo(tb, {opacity:1}, {opacity:0, duration:0.45, ease:"power2.in", immediateRender:false}, Math.max(0.6, V.dur - 0.5));
+      })();
+    </script>
+  </body>
+</html>

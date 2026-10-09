@@ -8,12 +8,13 @@ Apple-style motion graphics for tutorial videos: a screen-share stage (primary) 
 - HyperFrames framework skills (`/hyperframes`, `/hyperframes-core`, `/hyperframes-animation`, `/hyperframes-cli`): install with `npx hyperframes skills update`. Start at `/hyperframes` for framework questions.
 - Docs: `npx hyperframes docs <topic>` (offline), or discover pages via `https://hyperframes.heygen.com/llms.txt` (do not guess URLs).
 
-## Two modes
+## Three modes
 
 | Mode | Files | Per-video data |
 |---|---|---|
 | Screen share (primary) | `projects/screen-share/index.html` | `projects/screen-share/share.js` |
 | Talking head | `index.html` | `components/camera.js` + template host tags |
+| Speaker cutout (scenes) | `projects/speaker-cutout/index.html` | `projects/speaker-cutout/cutout.js` |
 
 ### Screen share
 
@@ -36,6 +37,15 @@ The cursor is baked into the screen recording: never synthesise or restyle one.
 - Speaker PiP docks bottom-left on the page margin; `app-window` with `layout:"rail"` fills the column above it.
 - Face boxes: `inputs/face-track.js` (git-ignored). The demo track is generated; for your footage run `npm run face -- inputs/<video>.mp4` (installs OpenCV into `.cache/face-venv` on first run).
 
+### Speaker cutout (scenes)
+
+Layers bottom to top: `#orig` (your video, voice) z5, `#bgs` backgrounds z10, `title-behind` hosts z30, `#cut` (transparent cutout) z50, your overlays z55+. Engine: `components/cutout-stage.js`.
+
+`cutout.js` keys: `backgrounds: [{ t, dur?, kind: 'scene' | 'gradient' | 'color' | 'image' | 'blur', ... }]` (first entry t:0, later ones crossfade in), `speaker: { shadow, x, y, scale }`, `moves: [{ t, dur, x, y, scale }]`, `parallax: 0.12`.
+- `npm run cutout -- <video> [--from s --to s] [--edge 0-3]`: transparent VP9 via HyperFrames' local `remove-background`. Slow (about 0.5-1 frame/s): matte only the stretches that use it. Output is git-ignored (`inputs/`).
+- `npm run backdrop -- <video> --scene office|studio|living-room|cafe|library|conference-room` (or `--describe "..."`): measures the speaker's framing and light and writes the prompt for a scene that matches the camera angle (eye-line = horizon, shot type, key light side, warmth). Save the generated image as `inputs/<scene>.png` and use `{ kind: 'scene', src }`.
+- Face safety assumes the speaker does not move; with `moves`, mount cards with `safe:false` on the freed side. Never use `title-behind` without the cutout above it; the template marks its own text `data-layout-allow-occlusion` (the layout check reads that flag on the text, not on the cover).
+
 ## Templates (compositions/tpl): use these, never copy-paste scenes
 
 Mount a template with a host tag and per-instance values:
@@ -47,10 +57,10 @@ Mount a template with a host tag and per-instance values:
      data-variable-values='{"at":5.8,"dur":3.0,"titlePre":"Add someone","titleAccent":"manually","kind":"fields","items":[{"label":"Name","value":"John Smith"}]}'></div>
 ```
 
-- 18 templates. Cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`. Overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`. Text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`. Titles: `title-card` (intro | outro). Devices: `imessage-phone`. Transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint).
+- 19 templates. Cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`. Overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`. Text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`. Titles: `title-card` (intro | outro), `title-behind` (needs the speaker cutout). Devices: `imessage-phone`. Transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint).
 - `at` / `dur` MUST equal the host's `data-start` / `data-duration` (templates cannot read their host).
 - Host ids must not equal an id inside the template (it would render into the host); use `<name>-host`.
-- z-index: cards 40, overlays 55-60, title cards 70, subtitles 75, transitions 90+.
+- z-index: title-behind 30 (under the cutout), cards 40, cutout 50, overlays 55-60, title cards 70, subtitles 75, transitions 90+.
 - List/object variables are JSON text (HyperFrames has no json type); a host may pass real arrays.
 - Positioned templates take `side`, `top`, `offsetX/Y`, `scale`, `safe`; `safe:true` shrinks or flips the card so it never covers the speaker's head (talking head) or the webcam card (screen share, cam-mode aware). Full-frame templates take fewer; read each template's variables.
 - `app-window` hosts any mix of panels (`pipeline`, `contact`, `table`, `list`, `stats`, `chat`, `text`, `terminal`, `image`); add a kind in `components/tpl-parts.js`.
@@ -82,6 +92,9 @@ npm run library        # Components (http://localhost:4173/library/) + Animation
 npm run trim -- inputs/webcam.mp4 --also inputs/screen.mp4   # cut pauses; prints synced clips + jump-cut times
 npm run plan -- transcript.srt --mode screen                  # draft cue plan from a transcript (.srt / .vtt)
 npm run face -- inputs/speaker.mp4                            # face track for your talking-head footage (self-installing)
+npm run speaker:dev    # speaker-cutout demo (scenes, title behind you)
+npm run cutout -- inputs/me.mp4 --from 10 --to 25      # transparent video of the speaker (slow, local)
+npm run backdrop -- inputs/me.mp4 --scene office       # prompt for a scene that matches the camera angle
 npm run render         # talking head to MP4
 npm run share:render   # screen share to MP4
 npm run check:all      # every gate below
@@ -115,9 +128,10 @@ The CLI is pinned (`hyperframes` 0.8.120 in package.json) so renders stay identi
 ```
 index.html                talking-head demo (root composition)
 projects/screen-share/    screen-share demo: index.html + share.js
-compositions/tpl/         the 18 templates
+projects/speaker-cutout/  speaker-cutout demo: index.html + cutout.js
+compositions/tpl/         the 19 templates
 components/               tokens.css, glass CSS, glass-components.js (__hfGlass), screen-stage.js,
-                          tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js
+                          tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js, cutout-stage.js
 scripts/                  auto-trim, cue-plan + cue-rules, checks, library generator, demo media, serve, face-track + detect-face.py
 library/                  generated template library (npm run build:library)
 assets/demo/              placeholder screens for demos
