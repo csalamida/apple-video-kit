@@ -1,6 +1,6 @@
 {
   "name": "apple-video-kit",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
   "license": "MIT",
   "private": true,

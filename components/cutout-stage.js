@@ -17,7 +17,7 @@
  *                        a photoreal room that follows your angle: write it with `npm run backdrop` (measures your framing and
  *                        light, writes the image prompt), save the image, then point src at it
  *       kind 'blur'      blur: 36 (px), dim: 0.55   blurs and darkens your own original footage
- *   speaker:  { shadow: true, x, y, scale, origin }   starting framing of the cutout (px offset, scale)
+ *   speaker:  { shadow: true, x, y, scale, origin }   starting framing of the cutout (px offset, scale); origin defaults to '50% 100%'
  *   moves:    [{ t, dur?, x, y, scale }]              the speaker glides; each move starts where the last one ended
  *   parallax: 0.12                                    backgrounds drift this fraction of the speaker's move (depth)
  * Every value is a pure function of time (fromTo with computed start values), so renders can seek in any order.
@@ -69,7 +69,8 @@
     });
     var sp = cfg.speaker || {};
     if (sp.shadow !== false) cut.style.filter = 'drop-shadow(0 30px 50px rgba(0,0,0,0.45))';
-    cut.style.transformOrigin = sp.origin || '50% 80%';
+    // pivot at the bottom centre: when the speaker shrinks or glides, the cut-off bust stays on the bottom edge of the frame
+    cut.style.transformOrigin = sp.origin || '50% 100%';
     cut.style.transform = 'translate(' + (sp.x || 0) + 'px,' + (sp.y || 0) + 'px) scale(' + (sp.scale || 1) + ')';
   };
 
