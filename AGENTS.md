@@ -39,11 +39,14 @@ The cursor is baked into the screen recording: never synthesise or restyle one.
 
 ### Speaker cutout (scenes)
 
+Read `.agents/skills/apple-video-editor/references/speaker-cutout.md` before running the cutout commands (shooting, plates, props, verification, troubleshooting).
+
 Layers bottom to top: `#orig` (your video, voice) z5, `#bgs` backgrounds z10, `title-behind` hosts z30, `#cut` (transparent cutout) z50, your overlays z55+. Engine: `components/cutout-stage.js`.
 
 `cutout.js` keys: `backgrounds: [{ t, dur?, kind: 'scene' | 'gradient' | 'color' | 'image' | 'blur', ... }]` (first entry t:0, later ones crossfade in), `speaker: { shadow, x, y, scale }`, `moves: [{ t, dur, x, y, scale }]`, `parallax: 0.12`, `foreground: [{ src }]` (props in front of the speaker, z 52).
 - `npm run cutout -- <video> [--from s --to s] [--edge 0-3]`: transparent VP9 via HyperFrames' local `remove-background`. Slow (about 0.5-1 frame/s): matte only the stretches that use it. Output is git-ignored (`inputs/`).
 - `npm run backdrop -- <video> --scene office|studio|living-room|cafe|library|conference-room` (or `--describe "..."`): measures the speaker's framing and light and writes the prompt for a scene that matches the camera angle (eye-line = horizon, shot type, key light side, warmth). Save the generated image as `inputs/<scene>.png` and use `{ kind: 'scene', src }`.
+- `npm run plate -- <image with the person in it>`: removes the person (matte + inpaint) so the image works as an empty plate; prefer an empty room from backdrop prompt A.
 - `npm run prop -- <video> --at s --box x,y,w,h --name mic --keep dark [--exclude "x,y,w,h;..."]`: the cutout model keeps people only, so a mic or mug in front of the speaker is dropped. This cuts it once from a frame (OpenCV GrabCut, installs itself) into `inputs/<name>.prop.png`, a full-frame transparent PNG for `foreground`. Static objects only; check the `.preview.png` it writes.
 - Face safety assumes the speaker does not move; with `moves`, mount cards with `safe:false` on the freed side. Never use `title-behind` without the cutout above it; the template marks its own text `data-layout-allow-occlusion` (the layout check reads that flag on the text, not on the cover).
 
@@ -133,7 +136,7 @@ projects/speaker-cutout/  speaker-cutout demo: index.html + cutout.js
 compositions/tpl/         the 19 templates
 components/               tokens.css, glass CSS, glass-components.js (__hfGlass), screen-stage.js,
                           tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js, cutout-stage.js
-scripts/                  auto-trim, cue-plan + cue-rules, cutout, backdrop, prop, checks, library generator, demo media, serve, face-track + detect-face.py
+scripts/                  auto-trim, cue-plan + cue-rules, cutout, backdrop, plate, prop, checks, library generator, demo media, serve, face-track + detect-face.py
 library/                  generated template library (npm run build:library)
 assets/demo/              placeholder screens for demos
 inputs/                   your footage (git-ignored except README); demo media generated into inputs/_demo/

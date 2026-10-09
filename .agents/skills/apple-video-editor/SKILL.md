@@ -10,7 +10,7 @@ description: >
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.3.0"
+  version: "5.4.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -40,6 +40,13 @@ Trigger on: an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package thi
 5. Mount templates on top (captions at minimum): host tags with `data-variable-values`. `place()` keeps them off the PiP rectangle. Host ids must not equal an id inside the template (use `<name>-host`).
 6. `npm run share:check` (host checks + lint, runtime, layout, motion, contrast) then `npm run share:render`.
 7. The cursor is baked into the screen recording; do not synthesise one. Redact anything private you see (emails, keys, client names) even if it is not spoken.
+
+**Speaker cutout (scenes)** - read `references/speaker-cutout.md` first (how to shoot, matte, generate the room, bring props back, verify, troubleshoot).
+1. Matte only the stretches that use it: `npm run cutout -- inputs/me.mp4 --from 10 --to 25` (about 1 frame/s).
+2. `npm run backdrop -- inputs/me.mp4 --scene office` writes the image prompt from the measured angle and light; generate an EMPTY room (prompt A). If you only have an image with the person in it, `npm run plate -- <image>` removes the person.
+3. Mic or other gear in front of the speaker: `npm run prop -- inputs/me.mp4 --at 8 --box x,y,w,h --name mic --keep dark`, then `foreground` in `cutout.js`.
+4. Edit `projects/speaker-cutout/cutout.js` and the page, then `npm run speaker:check` and look at frames (edges, light match, props, plate seams).
+5. Nothing that shows the speaker goes in git: everything lives in `inputs/`.
 
 **Talking head**
 1. Footage -> `index.html` (`#footage` inside `#punch`); `npm run plan -- transcript.srt --mode talking` for cues. Camera moves and jump `cuts` go in `components/camera.js`, never inline tweens.
@@ -98,7 +105,8 @@ components/
 inputs/face-track.js     face boxes, git-ignored: generated for the placeholder; `npm run face -- <video>` writes yours (installs OpenCV into .cache/face-venv on first run)
 inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated: index.html (Components gallery + detail + storyboard), motion.html (Animations)
-scripts/cutout.mjs, backdrop.mjs, prop.mjs  speaker cutout prep, scene prompt, foreground props
+scripts/cutout.mjs, backdrop.mjs, plate.mjs, prop.mjs  speaker cutout prep, scene prompt, plate from a person-in-it image, foreground props
+.agents/skills/apple-video-editor/references/speaker-cutout.md  the playbook for the cutout workflow
 bin/apple-video-kit.mjs  CLI: npx github:csalamida/apple-video-kit init <dir> | update [--dry-run]
 scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library/ (page sources), sync-share, demo-media, serve, face-track (+ detect-face.py)
 ```
@@ -123,7 +131,7 @@ Rules every template follows:
 
 **Stage engine (`__hfGlass.stage`)** - the speaker is a WINDOW (left/top/width/height/radius, squircle, ring+shadow as box-shadow) whose footage lives in a fixed-size `.hf-pan` that is only translated/scaled. Nothing re-crops while it morphs and radius/ring stay true pixels. `dockPiP`, `undockPiP`, `splitStage`, `unsplitStage`, `keynoteEmphasis` all use it. Never animate `width`/`height` on a `<video>`. Moves in `camera.js`: `win`, `fit: 'frame'|'cover'` (cover is face-centred), `front`, `chrome`.
 
-**Speaker cutout (`cutout.js`, engine `components/cutout-stage.js`)** - layers: `#orig` z5 (voice), `#bgs` z10, `title-behind` hosts z30, `#cut` z50, overlays z55+. `backgrounds` crossfade (`scene` photoreal room with `blur`/`brightness`/`tone`, `gradient` presets, `color`, `image`, `blur` of your own footage); `moves` glide the speaker; `parallax` drifts the room. `npm run cutout` makes the transparent video (HyperFrames local `remove-background`, about 0.5-1 frame/s: matte only the stretches that need it). `npm run prop` cuts a static object in front of the speaker (a mic, a mug) from one frame into a full-frame transparent PNG, layered via `foreground: [{ src }]` at z 52 (the matte model keeps people only and drops it). `npm run backdrop` measures the speaker's eye-line, shot size, key-light side and warmth and writes the image prompt so the scene matches the camera angle. `title-behind` marks its own text `data-layout-allow-occlusion` (the layout check reads the flag on the text itself). Limits: no automatic light wrap; objects touching the speaker (a chair back) can survive the matte; face safety assumes the speaker does not move.
+**Speaker cutout (`cutout.js`, engine `components/cutout-stage.js`)** - layers: `#orig` z5 (voice), `#bgs` z10, `title-behind` hosts z30, `#cut` z50, overlays z55+. `backgrounds` crossfade (`scene` photoreal room with `blur`/`brightness`/`tone`, `gradient` presets, `color`, `image`, `blur` of your own footage); `moves` glide the speaker; `parallax` drifts the room. `npm run cutout` makes the transparent video (HyperFrames local `remove-background`, about 0.5-1 frame/s: matte only the stretches that need it). `npm run plate` turns an image that has the person in it into an empty plate (matte, inpaint, 1920x1080). `npm run prop` cuts a static object in front of the speaker (a mic, a mug) from one frame into a full-frame transparent PNG, layered via `foreground: [{ src }]` at z 52 (the matte model keeps people only and drops it). `npm run backdrop` measures the speaker's eye-line, shot size, key-light side and warmth and writes the image prompt so the scene matches the camera angle. `title-behind` marks its own text `data-layout-allow-occlusion` (the layout check reads the flag on the text itself). Limits: no automatic light wrap; objects touching the speaker (a chair back) can survive the matte; face safety assumes the speaker does not move.
 
 **Screen-share moves (`share.js`, engine `components/screen-stage.js`)** - `drift` (slow +3.5% push-in while a zoom holds), `cam: [{t, mode: 'full'|'pip'|'hide'}]` (webcam to full screen without re-crop, back to the card, or tucked away), `cuts` + `punch` (jump-cut punch on the webcam), and screen-space annotations that live inside the zoomed screen so they stay locked to their spot: `callouts` (ring + label, label keeps its size), `focus` (dim the rest), `redact` (blur or solid; whole video when no t/end).
 
