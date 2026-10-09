@@ -35,6 +35,11 @@ try {
   });
   walk('');
 }
+// bin/gitignore.template is what `npx ... init/update` installs (npm drops .gitignore files): keep it equal to .gitignore
+try {
+  const tpl = fs.readFileSync(path.join(ROOT, 'bin/gitignore.template'), 'utf8'), gi = fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8');
+  if (tpl !== gi) problems.push('bin/gitignore.template differs from .gitignore (run: cp .gitignore bin/gitignore.template)');
+} catch (e) { /* not the kit source (a project): nothing to compare */ }
 if (inGit && files.includes(DENYLIST)) problems.push(`${DENYLIST}: the denylist itself is tracked (git rm --cached ${DENYLIST})`);
 files = files.filter((f) => f !== DENYLIST && fs.existsSync(path.join(ROOT, f)) && fs.statSync(path.join(ROOT, f)).isFile());
 

@@ -19,6 +19,8 @@ import { fileURLToPath } from 'node:url';
 const KIT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PKG = JSON.parse(fs.readFileSync(path.join(KIT, 'package.json'), 'utf8'));
 const STATE = '.kit/manifest.json';
+// npm never ships .gitignore files, so the rules travel as bin/gitignore.template (scripts/check-privacy.mjs keeps it equal to .gitignore).
+const GITIGNORE = path.join(KIT, 'bin/gitignore.template');
 
 // Owned by the kit: replaced on update. Directories are copied recursively.
 const KIT_PATHS = [
@@ -29,7 +31,7 @@ const KIT_PATHS = [
 const USER_IN_KIT = new Set(['components/camera.js']);
 // Starter files copied by init only (yours afterwards).
 const STARTER = ['index.html', 'components/camera.js', 'projects/screen-share/index.html', 'projects/screen-share/share.js',
-  'projects/screen-share/meta.json', 'projects/screen-share/hyperframes.json', 'hyperframes.json', '.gitignore',
+  'projects/screen-share/meta.json', 'projects/screen-share/hyperframes.json', 'hyperframes.json',
   'projects/speaker-cutout/index.html', 'projects/speaker-cutout/cutout.js', 'projects/speaker-cutout/meta.json', 'projects/speaker-cutout/hyperframes.json'];
 const SKIP = /(^|\/)(node_modules|\.git|\.DS_Store|snapshots)(\/|$)/;
 
@@ -73,8 +75,9 @@ function mergePackage(dest, name) {
 function mergeGitignore(dest) {
   const file = path.join(dest, '.gitignore');
   const mine = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+  if (!fs.existsSync(GITIGNORE)) return [];
   const have = new Set(mine.split('\n').map((l) => l.trim()));
-  const add = fs.readFileSync(path.join(KIT, '.gitignore'), 'utf8').split('\n').filter((l) => l.trim() && !l.startsWith('#') && !have.has(l.trim()));
+  const add = fs.readFileSync(GITIGNORE, 'utf8').split('\n').filter((l) => l.trim() && !l.startsWith('#') && !have.has(l.trim()));
   if (add.length) fs.writeFileSync(file, mine.replace(/\n?$/, '\n') + '\n# added by apple-video-kit update\n' + add.join('\n') + '\n');
   return add;
 }
@@ -92,6 +95,7 @@ function init(dir) {
   const files = kitFiles();
   files.forEach((r) => copy(r, dest));
   STARTER.forEach((r) => { if (fs.existsSync(path.join(KIT, r))) copy(r, dest); });
+  if (fs.existsSync(GITIGNORE)) fs.copyFileSync(GITIGNORE, path.join(dest, '.gitignore'));
   mergePackage(dest, path.basename(dest).toLowerCase().replace(/[^a-z0-9-]+/g, '-'));
   writeState(dest, files);
   const name = path.relative(process.cwd(), dest) || '.';
