@@ -122,7 +122,7 @@ export function buildPrompts(m, sceneText) {
     `The person sits ${m.subjectSide}; keep the area from ${clearL}% to ${clearR}% across the frame, from ${Math.max(0, m.eyeLinePct - 22)}% down to the bottom, free of furniture and objects (a ${m.shot}). ` +
     `Lighting: ${light}, ${temp}, ${m.exposure === 'dim' ? 'low-key and moody' : m.exposure === 'bright' ? 'bright and airy' : 'balanced exposure'}. ` +
     'Shallow depth of field (about f/2): the background is softly out of focus with natural bokeh. 16:9 landscape, 1920x1080, photoreal, natural colour, no text, no logos, no watermarks.';
-  const A = `Photorealistic background plate for a talking-head video, with no people in it: ${sceneText}. ${common}`;
+  const A = `Photorealistic background plate for a talking-head video, with no people in it, no chair and no microphone or desk equipment (those are added separately): ${sceneText}. ${common}`;
   const B = `Edit the attached frame: keep the person exactly as they are (face, hair, glasses, clothes, pose, lighting on them) and replace ONLY the background with ${sceneText}. ` +
     `Match the attached frame's camera angle and perspective: ${common.replace(/^Perspective: /, '')} The new background must look lit by the same light as the person.`;
   return { A, B };

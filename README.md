@@ -85,8 +85,11 @@ npm install && npm run build:library && npm run check:all
 ```bash
 npm run cutout -- inputs/me.mp4 --from 10 --to 25     # transparent video of you (local AI, nothing uploaded)
 npm run backdrop -- inputs/me.mp4 --scene office       # measures your framing and light, writes the image prompt
+npm run prop -- inputs/me.mp4 --at 8 --box 230,770,560,310 --name mic --keep dark   # bring your mic back (see below)
 npm run speaker:dev                                    # the demo: faceless placeholder, stylised office
 ```
+
+The matting model keeps people only, so a microphone or mug in front of you disappears. `npm run prop` cuts such an object out of one frame (OpenCV GrabCut inside the box you give it; the Python packages install themselves) into a transparent full-frame PNG, and `foreground: [{ src: 'inputs/mic.prop.png' }]` in `cutout.js` layers it back in front of you, exactly where it is in the footage. It writes a `.preview.png`; use `--exclude "x,y,w,h;..."` to clear leftovers. For things that do not move.
 
 `npm run cutout` uses HyperFrames' own background-removal model. It is slow (about 0.5 to 1 frame per second on a laptop, 10 s of 30 fps video is roughly 5 minutes), so cut only the stretches that use it with `--from` and `--to`. The first run downloads the model (about 170 MB). Hair and shoulders come out clean; a piece of a chair or object right behind you can survive (re-record against a plain background, or keep it out of frame).
 

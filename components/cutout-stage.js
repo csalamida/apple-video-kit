@@ -6,6 +6,7 @@
  *   #bgs > ...  background layers built from `backgrounds`                                    z 10+
  *   title-behind hosts (compositions/tpl/title-behind.html), mounted at z-index 30            z 30
  *   #cut        the transparent cutout (npm run cutout)                                       z 50
+ *   foreground  props in front of you (npm run prop): a microphone, a mug                     z 52
  *   your lower-thirds, subtitles, cards ...                                                   z 55+
  *
  * Data (projects/speaker-cutout/cutout.js):
@@ -20,6 +21,8 @@
  *   speaker:  { shadow: true, x, y, scale, origin }   starting framing of the cutout (px offset, scale); origin defaults to '50% 100%'
  *   moves:    [{ t, dur?, x, y, scale }]              the speaker glides; each move starts where the last one ended
  *   parallax: 0.12                                    backgrounds drift this fraction of the speaker's move (depth)
+ *   foreground: [{ src: 'inputs/mic.prop.png' }]      things that stay IN FRONT of the speaker (z 52): a microphone, a mug.
+ *                                                     Cut them from the footage with `npm run prop` (full-frame transparent PNGs)
  * Every value is a pure function of time (fromTo with computed start values), so renders can seek in any order.
  */
 (function (root) {
@@ -66,6 +69,13 @@
       el.style.cssText = 'position:absolute;inset:0;z-index:' + (10 + i) + ';opacity:' + (i === 0 ? 1 : 0);
       var st = S.bgStyle(b); for (var k in st) el.style[k] = st[k];
       host.appendChild(el);
+    });
+    // props that stay in front of the speaker, exactly where they are in the footage (full-frame transparent PNGs)
+    (cfg.foreground || []).forEach(function (f, i) {
+      var im = document.createElement('img');
+      im.id = 'fg-' + i; im.alt = ''; im.src = f.src;
+      im.style.cssText = 'position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:52;pointer-events:none';
+      host.parentNode.appendChild(im);
     });
     var sp = cfg.speaker || {};
     if (sp.shadow !== false) cut.style.filter = 'drop-shadow(0 30px 50px rgba(0,0,0,0.45))';

@@ -115,7 +115,8 @@ async function main() {
   console.log(`\ncutout: wrote ${rel}  (${(fs.statSync(out).size / 1048576).toFixed(1)} MB, transparent VP9)\n
 Layer it above your background and below your lower-thirds. The file starts at ${from.toFixed(2)} s of the source, so place it there:
   <video id="cut" class="clip" src="${rel}" data-start="${from.toFixed(2)}" data-duration="${len.toFixed(2)}" muted playsinline></video>
-Keep your original video in the page for the voice (data-has-audio="true"); the cutout is silent. See projects/speaker-cutout/.`);
+Keep your original video in the page for the voice (data-has-audio="true"); the cutout is silent. See projects/speaker-cutout/.
+The model keeps people only: a microphone or mug in front of you is dropped. Bring it back with: npm run prop -- ${path.relative(ROOT, src).split(path.sep).join('/')} --at ${from.toFixed(0)} --box x,y,w,h --name mic --keep dark`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

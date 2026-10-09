@@ -10,6 +10,8 @@
    speaker:  { shadow: true, x: 0, y: 0, scale: 1 }   starting framing of the cutout
    moves:    [{ t, dur, x, y, scale }]                 the speaker glides (px offset, scale); each starts where the last ended
    parallax: 0.12                                      the background drifts this fraction of the speaker's move
+   foreground: [{ src: 'inputs/mic.prop.png' }]        things that stay IN FRONT of you (z 52): a microphone, a mug. The cutout model
+               keeps people only, so cut the prop from one frame:  npm run prop -- inputs/<video>.mp4 --at 8 --box x,y,w,h --name mic --keep dark
    Titles BEHIND your head: mount compositions/tpl/title-behind.html as a host at z-index 30 (see index.html). */
 window.__hfCutout = {
   duration: 21.92,
