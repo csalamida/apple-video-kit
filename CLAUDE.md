@@ -73,7 +73,7 @@ Mount a template with a host tag and per-instance values:
      data-variable-values='{"at":5.8,"dur":3.0,"titlePre":"Add someone","titleAccent":"manually","kind":"fields","items":[{"label":"Name","value":"John Smith"}]}'></div>
 ```
 
-- 19 templates. Cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`. Overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`. Text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`. Titles: `title-card` (intro | outro), `title-behind` (needs the speaker cutout). Devices: `imessage-phone`. Transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint).
+- 23 templates (the four newest: `progress-bar`, `pointer`, `sticker`, `media-panel`). Cards and panels: `glass-card`, `app-window`, `contact-card`, `checklist`, `before-after`. Overlays: `lower-third`, `notification-stack`, `spotlight`, `keys`, `link-chip`, `fast-forward`. Text: `kinetic-subtitle`, `quote`, `metric-counter`, `chapter-pill`. Titles: `title-card` (intro | outro), `title-behind` (needs the speaker cutout). Devices: `imessage-phone`. Transitions: `transition` (`dip`, `flash`, `blur`, `glass-wipe`, `iris`, `light-sweep`, `chapter`; the cut sits at the midpoint).
 - `at` / `dur` MUST equal the host's `data-start` / `data-duration` (templates cannot read their host).
 - Host ids must not equal an id inside the template (it would render into the host); use `<name>-host`.
 - z-index: title-behind 30 (under the cutout), cards 40, cutout 50, overlays 55-60, title cards 70, subtitles 75, transitions 90+.
@@ -110,7 +110,9 @@ npm run plan -- transcript.srt --mode screen                  # draft cue plan f
 npm run face -- inputs/speaker.mp4                            # face track for your talking-head footage (self-installing)
 npm run speaker:dev    # speaker-cutout demo (scenes, title behind you)
 npm run short:dev      # vertical 1080x1920 reel demo (safe zones, captions)
-npm run reel           # short-form rules: caption hold, safe zones, glyph clipping
+npm run reel           # short-form rules: caption hold, safe zones, colour contrast
+npm run check:glyphs   # renders every caption cue with and without clips: fails if lettering is cut (needs Chrome + a connection once)
+npm run script -- inputs/script.txt   # plan a reel BEFORE filming: length, hook, flat stretches, ending, block ideas
 npm run cutout -- inputs/me.mp4 --from 10 --to 25      # transparent video of the speaker (slow, local)
 npm run backdrop -- inputs/me.mp4 --scene office       # prompt for a scene that matches the camera angle
 npm run render         # talking head to MP4
@@ -151,7 +153,7 @@ index.html                talking-head demo (root composition)
 projects/screen-share/    screen-share demo: index.html + share.js
 projects/speaker-cutout/  speaker-cutout demo: index.html + cutout.js
 projects/short-form/      vertical reel demo: index.html (1080x1920)
-compositions/tpl/         the 19 templates
+compositions/tpl/         the 23 templates
 components/               tokens.css, glass CSS, glass-components.js (__hfGlass), screen-stage.js,
                           tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js, cutout-stage.js
 scripts/                  auto-trim, cue-plan + cue-rules, cutout, backdrop, plate, prop, polish, grade, qa, checks, library generator, demo media, serve, face-track + detect-face.py

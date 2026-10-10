@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-composition-variables='[
+  {"id":"at","type":"number","label":"Start (s, absolute)","default":0},
+  {"id":"dur","type":"number","label":"Duration (s)","default":3},
+  {"id":"x","type":"number","label":"Target X (px on the frame)","default":960},
+  {"id":"y","type":"number","label":"Target Y (px on the frame)","default":540},
+  {"id":"kind","type":"string","label":"Kind (arrow | ring)","default":"arrow"},
+  {"id":"from","type":"string","label":"Arrow comes from (up | down | left | right)","default":"down"},
+  {"id":"size","type":"number","label":"Size (px)","default":150},
+  {"id":"scale","type":"number","label":"Label scale","default":1},
+  {"id":"label","type":"string","label":"Label (optional)","default":"Look here"},
+  {"id":"color","type":"color","label":"Colour","default":"#2997ff"}
+]'>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="components/tokens.css">
+    <link rel="stylesheet" href="components/apple-glass.css">
+    <link rel="stylesheet" href="components/glass-components.css">
+    <link rel="stylesheet" href="components/tpl-base.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/glass-components.js"></script>
+    <script src="components/camera.js"></script>
+    <script src="inputs/face-track.js"></script>
+    <script src="components/canvas.js"></script>
+    <script src="components/tpl-runtime.js"></script>
+    <script src="components/tpl-parts.js"></script>
+    <style>
+      #pt { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; will-change: transform, opacity; }
+      #pt svg { position: absolute; overflow: visible; }
+      #lb { position: absolute; white-space: nowrap; font-weight: 700; letter-spacing: var(--track-title); color: #fff; padding: calc(10px*var(--s)) calc(22px*var(--s));
+            border-radius: 100px; background: rgba(28,28,32,.72); border: 1px solid rgba(255,255,255,.3); box-shadow: 0 12px 30px rgba(0,0,0,.55); -webkit-backdrop-filter: var(--glass-filter-thin); backdrop-filter: var(--glass-filter-thin); }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="clip" data-composition-id="pointer" data-width="1920" data-height="1080" data-start="0" data-duration="600">
+      <div id="pt"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      (function () {
+        var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
+var V = T.vars({at:0,dur:3,x:960,y:540,kind:"arrow",from:"down",size:150,scale:1,label:"Look here",color:"#2997ff"}, window.__hyperframes);
+        var pt = document.getElementById("pt"), sz = +V.size || 150, c = V.color, s = +V.scale || 1;
+        pt.style.setProperty("--s", s); pt.style.left = V.x + "px"; pt.style.top = V.y + "px";
+        var from = /^(up|down|left|right)$/.test(V.from) ? V.from : "down", html = "", lab = "";
+        if (V.kind === "ring") {
+          html = '<svg width="' + sz + '" height="' + sz + '" viewBox="-50 -50 100 100" style="left:' + (-sz/2) + 'px;top:' + (-sz/2) + 'px"><circle id="r1" r="44" fill="none" stroke="' + c + '" stroke-width="5"/><circle id="r2" r="44" fill="none" stroke="' + c + '" stroke-width="3" opacity="0"/></svg>';
+        } else {
+          // arrow tip at (0,0); the body extends away from the target toward `from`
+          var dx = from === "left" ? -1 : from === "right" ? 1 : 0, dy = from === "up" ? -1 : from === "down" ? 1 : 0, rot = {down:0, up:180, left:90, right:-90}[from];
+          html = '<svg id="ar" width="' + (sz*0.55) + '" height="' + sz + '" viewBox="-27 0 54 100" style="left:' + (-sz*0.275 + dx*0) + 'px;top:0;transform-origin:50% 0;transform:rotate(' + rot + 'deg)"><path d="M0 0 L-26 34 L-9 34 L-9 98 L9 98 L9 34 L26 34 Z" fill="' + c + '" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>';
+        }
+        if (V.label) {
+          var off = V.kind === "ring" ? sz/2 + 18 : sz + 14;
+          var pos = from === "up" && V.kind !== "ring" ? "bottom" : V.kind === "ring" ? (V.from === "up" ? "top" : "bottom") : (from === "down" ? "bottom" : from === "up" ? "top" : from);
+          lab = '<div id="lb" style="font-size:' + Math.round(24*s) + 'px;' +
+            (pos === "bottom" ? 'top:' + off + 'px;transform:translateX(-50%);' : pos === "top" ? 'bottom:' + off + 'px;transform:translateX(-50%);' : pos === "left" ? 'right:' + off + 'px;top:' + (-14*s) + 'px;' : 'left:' + off + 'px;top:' + (-14*s) + 'px;') + '">' + esc(V.label) + '</div>';
+        }
+        pt.innerHTML = html + lab;
+        var D = V.dur, tl = gsap.timeline({paused:true}); window.__timelines["pointer"] = tl;
+        tl.fromTo(pt, {opacity:0, scale:0.6}, {opacity:1, scale:1, duration:0.5, ease:E.bouncy}, 0);
+        if (V.kind === "ring") {
+          var r2 = document.getElementById("r2");
+          for (var k = 0; k < 3; k++) { var t0 = 0.5 + k*0.9; if (t0 + 0.9 <= D - 0.4) tl.fromTo(r2, {attr:{r:44}, opacity:0.8}, {attr:{r:62}, opacity:0, duration:0.9, ease:"power2.out", immediateRender: k === 0}, t0); }
+        } else {
+          var ar = document.getElementById("ar"), nudge = {down:[0,-18], up:[0,18], left:[18,0], right:[-18,0]}[from];
+          // a gentle push toward the target, repeated while it holds (finite, computed from the duration)
+          for (var j = 0; j < 4; j++) { var t1 = 0.55 + j*0.7; if (t1 + 0.7 <= D - 0.4) { tl.fromTo(pt, {x:0, y:0}, {x:nudge[0], y:nudge[1], duration:0.35, ease:"sine.out", immediateRender:false}, t1); tl.fromTo(pt, {x:nudge[0], y:nudge[1]}, {x:0, y:0, duration:0.35, ease:"sine.in", immediateRender:false}, t1 + 0.35); } }
+        }
+        tl.fromTo(pt, {opacity:1}, {opacity:0, duration:0.3, ease:"power2.in", immediateRender:false}, D - 0.3);
+      })();
+    </script>
+  </body>
+</html>

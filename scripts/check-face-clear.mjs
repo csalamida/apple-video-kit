@@ -36,10 +36,18 @@ const FOOT = {
   'before-after': (v) => ({ w: v.width, h: Math.round((v.width - 20) / v.aspect + 20) }),
   'link-chip': (v) => ({ w: 420 * v.scale, h: 70 * v.scale }),
   'fast-forward': (v) => ({ w: 300 * v.scale, h: 60 * v.scale }),
+  'progress-bar': () => null,   // a thin strip on an edge
   'title-behind': () => null,   // sits BEHIND the speaker on purpose (z-index 30 under the cutout)
   'title-card': (v) => v.mode === 'outro' ? ({ w: v.width, h: 475 * v.scale }) : null,   // intro is a full-frame scrim on purpose
   'transition': () => null,   // full-frame wipe / chapter slate
   'spotlight': () => null     // full-frame dim with a hole
+};
+// Templates placed at an exact spot (x, y) or on an edge: a rectangle on the frame instead of place().
+const ABS = {
+  pointer: (v) => v.kind === 'ring' ? { x0: v.x - v.size / 2, y0: v.y - v.size / 2, x1: v.x + v.size / 2, y1: v.y + v.size / 2 }
+    : { x0: v.x - v.size * 0.28, y0: v.from === 'up' ? v.y - v.size : v.y, x1: v.x + v.size * 0.28, y1: v.from === 'up' ? v.y : v.y + v.size },   // the arrow body (a left/right arrow is measured as a vertical one: close enough for a clearance check)
+  sticker: (v) => ({ x0: v.x - 150 * v.scale, y0: v.y - 40 * v.scale, x1: v.x + 150 * v.scale, y1: v.y + 40 * v.scale }),
+  'media-panel': (v) => { const h = v.height > 0 ? v.height : Math.round(T.H * 0.42); return v.edge === 'bottom' ? { x0: 0, y0: T.H - h, x1: T.W, y1: T.H } : { x0: 0, y0: 0, x1: T.W, y1: h }; }
 };
 // Chrome that is allowed to sit near the head but is reported (warn only)
 const LAND_CHROME = {
@@ -77,6 +85,18 @@ for (const h of templateHosts(file)) {
     }
     rows.push([id, h.template, worst > 2 ? `WARN overlaps ${T.mode === 'pip' ? 'PiP' : 'head'} by ${Math.round(worst)}px (chrome)` : 'clear (chrome)']);
     if (worst > 2) warn++;
+    continue;
+  }
+  if (ABS[h.template]) {
+    const r = ABS[h.template](v);
+    let worst = 0, at = 0;
+    for (let t = t0; t <= t1 + 1e-6; t += 0.1) {
+      const f = T.keepClearAt(t); if (!f) continue;
+      const ox = Math.min(r.x1, f.x1) - Math.max(r.x0, f.x0), oy = Math.min(r.y1, f.y1) - Math.max(r.y0, f.y0);
+      if (ox > 0 && oy > 0 && Math.min(ox, oy) > worst) { worst = Math.min(ox, oy); at = t; }
+    }
+    if (worst > 2) { overlap++; rows.push([id, h.template, `FAIL covers ${T.mode === 'pip' ? 'PiP' : 'head'} by ${Math.round(worst)}px at ${at.toFixed(1)}s (x ${Math.round(r.x0)}-${Math.round(r.x1)}, y ${Math.round(r.y0)}-${Math.round(r.y1)})`]); }
+    else rows.push([id, h.template, `ok   x ${Math.round(r.x0)}-${Math.round(r.x1)}, y ${Math.round(r.y0)}-${Math.round(r.y1)}`]);
     continue;
   }
   const foot = FOOT[h.template];

@@ -58,6 +58,15 @@ for (const h of templateHosts(file)) {
       if (c.start < h.start - 1e-6 || c.end > h.start + h.dur + 1e-6) fail(`${tag}: outside its host window ${h.start}-${(h.start + h.dur).toFixed(2)}s`);
       if (prev && c.start < prev.end - 1e-6) fail(`${tag}: overlaps the previous cue (${prev.end}s)`);
       const words = String(c.text).replace(/\*/g, '').split(/\s+/).filter(Boolean).length;
+      if (c.times !== undefined) {
+        if (!Array.isArray(c.times) || c.times.length !== words || !c.times.every(Number.isFinite)) fail(`${tag}: times needs one number per word (${words} words)`);
+        else {
+          if (c.times.some((t, j) => j && t < c.times[j - 1])) fail(`${tag}: word times must not go backwards`);
+          if (c.times[0] < c.start - 0.05 || c.times[words - 1] > c.end) fail(`${tag}: word times fall outside the cue ${c.start}-${c.end}s`);
+          if (c.times[words - 1] > c.end - 0.9 + 1e-6 && v.mode === 'cumulative') warn(`${tag}: the last word is spoken at ${c.times[words - 1]}s, too close to the cue end (${c.end}s) to land and hold; it is shown early (at ${(c.end - 0.9).toFixed(2)}s). Lengthen the cue`);
+          if (c.timing === 'interpolated' && v.mode === 'cumulative') warn(`${tag}: word times are estimated (no --audio in polish), good to about half a second`);
+        }
+      }
       if (words > 7) warn(`${tag}: ${words} words; keep a cue to about 6 so it reads at a glance`);
       if (words / Math.max(0.01, c.end - c.start) > 4.5) warn(`${tag}: ${words} words in ${(c.end - c.start).toFixed(1)}s is faster than most people read`);
       prev = c;
@@ -73,6 +82,13 @@ for (const h of templateHosts(file)) {
     'quote': () => ({ w: v.width, h: 340 * v.scale }), 'link-chip': () => ({ w: 420 * v.scale, h: 70 * v.scale }),
     'fast-forward': () => ({ w: 300 * v.scale, h: 60 * v.scale })
   };
+  // templates placed at an exact spot: sticker must sit inside the safe zones; a pointer may point anywhere the footage needs, so it only warns
+  if (h.template === 'sticker' || h.template === 'pointer') {
+    const r = h.template === 'sticker' ? { x0: v.x - 150 * v.scale, x1: v.x + 150 * v.scale, y0: v.y - 40 * v.scale, y1: v.y + 40 * v.scale }
+      : { x0: v.x - v.size / 2, x1: v.x + v.size / 2, y0: v.y - v.size / 2, y1: v.y + v.size / 2 };
+    if (r.y0 < S.top || r.y1 > C.h - S.bottom || r.x0 < S.left || r.x1 > C.w - S.right) (h.template === 'sticker' ? fail : warn)(`${h.id}: ${h.template} at (${v.x}, ${v.y}) reaches into a platform zone (safe area x ${S.left}-${C.w - S.right}, y ${S.top}-${C.h - S.bottom})`);
+    continue;
+  }
   const f = FOOT[h.template] && FOOT[h.template]();
   if (!f) continue;
   const top = Math.max(S.top, v.top + (v.offsetY || 0));

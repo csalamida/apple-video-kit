@@ -13,6 +13,18 @@ polish, grade, qa).
 4. Which platform first. The safe zones below fit all three; if only one platform matters you can relax them.
 5. Any private data on screen (emails, keys, client names) or logos that need clearing.
 
+## 0.5 Before filming: the script
+
+A script that is written to be heard is half the edit. Run it through the planner before anyone films:
+
+```bash
+npm run script -- inputs/script.txt      # --wps 2.2 for a slower, tutorial pace; --max 45 for a shorter limit
+```
+
+It estimates the length from the word count (2.6 words a second by default), splits the script into beats, and writes `*.beats.md` (the sheet), `*.teleprompter.txt`, and `*.script.srt` (estimated times you can feed to `npm run plan`). It says **fix** when the reel opens with a greeting, the first beat takes more than 3.5 s, there is no ending action in the last two beats, or the length is over the limit; **watch** for a beat over 4.5 s or a stretch over 6 s with no visual change; **note** for things to read aloud and for emails or credentials that would need blurring. Lines in the script that start with `#`, `//` or `[` are notes and are not timed.
+
+Hook patterns that work: the problem the viewer already has, a number they would not guess, a belief you are about to challenge, the result first and the how second. Endings that work: one specific ask (follow for X, comment Y, link in the description). Times are estimates; after filming, `npm run polish` gives the real ones.
+
 ## 1. The canvas and the safe zones
 
 `npm run short:dev` syncs `projects/short-form/` with `--canvas vertical`, which writes `components/canvas.js`:
@@ -50,7 +62,8 @@ The reading rules matter more than the style.
 - **Colours are the owner's choice.** Ask for them; never pick a brand look for someone. `color` (text), `accent` (the `*star*` words), `bg` + `bgAlpha` (pill) or `"pill": false` (plain text with a soft shadow), all hex values on the `kinetic-subtitle` host. `npm run reel` fails text under 4.5:1 and highlight under 3:1 against the pill colour, and warns on a see-through pill or no pill (the footage decides the contrast then; look at the lightest frames).
 - **Emphasis:** wrap 1 to 3 punch words per cue in `*stars*`. They take the accent colour and a small pulse.
 - **Position and motion never share a transform.** If you add your own caption animation, put the layout anchor (where it sits) on one wrapper and the entrance motion on an inner one. Two writers on the same `y` make captions jump on seek. Single writer per property is already the kit rule; this is where captions break it.
-- **No clipping of glyphs.** Never put `overflow: hidden`, `clip-path` or a `mask` on a cue or its words: it cuts descenders (g, j, p, q, y), italic overhangs and gradient edges. A bounding box that fits is not proof the letters are whole. `npm run reel` fails on a clipping rule in the page or the template, and warns on `background-clip: text` (gradient paint boxes crop). Always look at the encoded frames of the longest and most descender-heavy cues.
+- **No clipping of glyphs.** Never put `overflow: hidden`, `clip-path` or a `mask` on a cue or its words: it cuts descenders (g, j, p, q, y), italic overhangs and gradient edges. A bounding box that fits is not proof the letters are whole. `npm run reel` fails on a clipping rule in the page or the template, and warns on `background-clip: text` (gradient paint boxes crop). **`npm run check:glyphs` is the real test:** it renders every cue (and the regression words good, Believe, video, typography, gypsy quickly) in headless Chrome at five moments (just after entry, mid-entry, peak, hold, exit), renders each moment again with every clip, overflow and mask switched off, and fails if the two pictures differ. It runs inside `short:check`. It does not cover gradient text fills, and it tests the font the browser resolves (it prints it): pass `--font-css` with your web font's `@font-face` rules to test that one. Still look at the encoded frames of the longest, most descender-heavy cues.
+- Word times: `npm run polish ... --audio` writes per-word `times` into `*.cues.json`. With them, `mode: "cumulative"` lands each word on the beat it is spoken.
 - Captions come from the polished transcript: `npm run polish -- inputs/capcut.srt --audio inputs/reel.mp4`, then paste `*.cues.json` into the host's `cues`. The CapCut export is already edited, so its timings belong to that file.
 
 ## 4. Which block for which job (vertical)
@@ -69,6 +82,10 @@ Match the block to the job the beat is doing, never to "it would look cool here"
 | `fast-forward` | Skipping a wait on a screen recording | Talking-head footage |
 | `transition` | A real change of topic or scene. Prefer `blur` or `dip`; `flash` counts toward the flash-safety check (at most 3 big flashes per second) | Between every caption |
 | `title-behind` | Speaker cutout with a clear head and shoulders | No cutout: the text would sit on the face |
+| `progress-bar` | The video is a countdown, a list or a step sequence and the viewer should feel the end coming. Mount it for the whole reel; it sits just inside the top safe zone | The reel is over about 90 s, or a card already sits at that edge (start cards below it, about 270 px) |
+| `pointer` | The speaker says "look at this" and the thing is on the frame: arrow or ring at exact x, y | There is no real target |
+| `sticker` | One or two words that add attitude or status (NEW, FREE, TIP). Beside the face, inside the safe zones | A sentence, or two stickers at once |
+| `media-panel` | Proof or an example (a screenshot, a result) while the speaker stays in the other part of the frame. Slides from an edge and returns the same way | It would cover the face: `npm run check:face` measures it. Videos in the panel are not supported, use an image |
 | `spotlight`, `before-after`, `app-window`, `keys` | Screen content is shown; give it room above the caption zone | The frame is only a face |
 
 Blocks that need a wide frame (`app-window` split, `before-after`) work in portrait only at the narrower width; check the snapshot.
@@ -78,7 +95,7 @@ Blocks that need a wide frame (`app-window` split, `before-after`) work in portr
 ```bash
 npm run short:dev      # preview (demo with a faceless silhouette, no footage needed)
 npm run face -- inputs/reel.mp4        # portrait footage writes inputs/face-track.vertical.json + .js (git-ignored)
-npm run short:check    # face clear + reel rules + HyperFrames lint, layout, motion, contrast
+npm run short:check    # face clear + reel rules + glyph clipping + HyperFrames lint, layout, motion, contrast
 npm run short:render   # blocks on the reel rules, then renders 1080x1920 @ 30 fps
 npm run qa -- renders/<file>.mp4 --page projects/short-form/index.html
 ```
@@ -94,5 +111,6 @@ npm run qa -- renders/<file>.mp4 --page projects/short-form/index.html
 - Safe zones are estimates. Check the first export on a real phone in the target app before posting.
 - The demo uses a silhouette. Face-safe placement on real footage needs `npm run face` to find the face; if the track misses (hand over face, turned head) cards can land on it, so look at the frames.
 - Landscape-only blocks and the screen-share stage are not made for 9:16.
+- `check:glyphs` needs Chrome (`npx hyperframes browser ensure`) and a connection the first time (GSAP loads from a CDN).
 - The cumulative reveal is the kit's own generic version, not a copy of any named style. Fonts and gradient fills are not settings yet. There is no ink-level glyph detector: the only proof letters are whole is a focused render of the real phrases (plus the words with the tallest descenders and italics) compared with plain unclipped text, looked at before entry, mid-entry, at peak, in the hold and at exit.
 - Nothing that shows the speaker or contains their voice goes in git: it lives in `inputs/`, `renders/` and `qa/`.

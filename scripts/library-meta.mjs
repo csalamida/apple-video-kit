@@ -167,6 +167,50 @@ export const META = {
     use: { when: 'The one line the video hangs on: the hook, the thesis, a big number or promise. Hold 3-4 s while the speaker keeps talking in front of it.', cues: ['"here is the thing"', '"the one idea"', '"the secret is"', '"say less, show more"', 'the hook line'], pairs: ['kinetic-subtitle (captions bottom-centre)', 'a scene or gradient background (projects/speaker-cutout)'], avoid: 'Without the cutout (the title would sit on top of your face), or more than one per minute.' },
     examples: [{ name: 'Two lines', vars: {} }, { name: 'Big number', vars: { text: '3x|*faster*', size: 300, dur: 3.5 } }]
   },
+  'progress-bar': {
+    title: 'Progress Bar', category: 'Overlays', t: 1.5, vars: { dur: 3 },
+    desc: 'A thin glass track with a fill that is exactly as wide as the elapsed part of its duration. Mount it for the whole video.',
+    use: {
+      when: 'A reel or a step-by-step video where the viewer should feel how far along they are, or a countdown to the ending ask. Mount for the full length.',
+      cues: ['"in 60 seconds"', '"three steps"', '"stay to the end"', 'a numbered list'],
+      pairs: ['kinetic-subtitle', 'chapter-pill (long-form) or a step card'],
+      avoid: 'Videos over about 90 s (the fill barely moves), or on top of the platform header: keep it inside the top safe zone line.'
+    },
+    examples: [{ name: 'Top (default)', vars: {} }, { name: 'Bottom, own colour', vars: { edge: 'bottom', color: '#30d158', thickness: 12 } }]
+  },
+  'pointer': {
+    title: 'Pointer', category: 'Overlays', t: 1.4, vars: { dur: 3.4, x: 960, y: 540 },
+    desc: 'An arrow or a ring that points at ONE exact spot on the frame, with an optional label. The arrow pushes toward the target; the ring pulses.',
+    use: {
+      when: 'The speaker says "look at this", "right here", "this button" and the thing is on the footage or a screen. Set x and y to the spot. 2-4 s.',
+      cues: ['"look at this"', '"right here"', '"see this button"', '"notice the number"'],
+      pairs: ['kinetic-subtitle', 'spotlight (dim everything else)'],
+      avoid: 'No real target (an arrow at empty space reads as noise), or more than one on screen.'
+    },
+    examples: [{ name: 'Arrow from below', vars: { x: 960, y: 420, from: 'down', label: 'Look here' } }, { name: 'Ring', vars: { kind: 'ring', x: 960, y: 540, label: 'This one', from: 'down' } }]
+  },
+  'sticker': {
+    title: 'Sticker', category: 'Overlays', t: 1.6, vars: { dur: 3, x: 960, y: 400 },
+    desc: 'A bold tilted sticker with an icon and a short word. Bouncy pop, one small wobble.',
+    use: {
+      when: 'A short label that adds attitude or a status: NEW, FREE, WARNING, STEP 2, TIP. 2-3 s, placed beside the face, not on it.',
+      cues: ['"brand new"', '"for free"', '"careful"', '"pro tip"', '"step two"'],
+      pairs: ['kinetic-subtitle', 'metric-counter'],
+      avoid: 'Sentences. Two words at most. Do not stack stickers.'
+    },
+    examples: [{ name: 'New', vars: {} }, { name: 'Tip', vars: { text: 'Pro tip', icon: 'bolt', color: '#30d158', rotate: 5 } }]
+  },
+  'media-panel': {
+    title: 'Media Panel', category: 'Cards & Panels', t: 1.6, vars: { dur: 3.4 },
+    desc: 'A full-width panel that slides in from the top or bottom edge and returns the same way. An image, or a colour panel with a title and a caption.',
+    use: {
+      when: 'Show proof or an example without leaving the speaker: a screenshot, a chart, a result. The speaker stays in the other part of the frame. 3-4 s with a readable hold.',
+      cues: ['"here is the result"', '"look at the numbers"', '"for example"', '"this is what it looks like"'],
+      pairs: ['kinetic-subtitle (keep captions in the part that stays free)', 'pointer'],
+      avoid: 'On a face: check with npm run check:face (the panel covers a whole edge strip). Videos in the panel are not supported, use an image.'
+    },
+    examples: [{ name: 'Top, colour', vars: {} }, { name: 'Bottom, own colours', vars: { edge: 'bottom', title: 'Before and after', caption: 'Same video, new framing', from: '#30d158', to: '#0a3d1c' } }]
+  },
 };
 
 // The animation library: when to reach for which MOTION (camera, spring, preset). Rows render as a cheat-sheet.

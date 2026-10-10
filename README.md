@@ -33,7 +33,7 @@ The **short-form reel** mode is 9:16 (1080x1920). Captions and cards stay out of
 
 ## What is in the box
 
-- **19 ready-made blocks** you place by time: info cards, an app window, a contact card, a checklist, a quote, a before/after slider, keyboard shortcut keys, a "link in the description" chip, a fast-forward badge, a lower-third, captions, a chapter pill, an intro or end card, a title that sits behind your head, an iMessage phone, and a transition pack (fade, flash, blur, glass wipe, iris, light sweep, chapter break).
+- **23 ready-made blocks** you place by time: info cards, an app window, a contact card, a checklist, a quote, a before/after slider, keyboard shortcut keys, a "link in the description" chip, a fast-forward badge, a lower-third, captions, a chapter pill, an intro or end card, a title that sits behind your head, an iMessage phone, and a transition pack (fade, flash, blur, glass wipe, iris, light sweep, chapter break), and for reels a progress bar, a pointer (arrow or ring), a sticker and a slide-in media panel.
 - **Screen-share moves:** zooms with a slow drift, callout rings, "look here" dimming, blur boxes for private info (emails, keys, client names), your webcam going full screen or hiding, and a small punch-in at every cut.
 - **Tools** to prepare and finish: cut pauses, clean up a CapCut transcript, colour grade, frame-by-frame review (see [The tools](#the-tools)).
 - **A library page** where you browse every block and animation, play it, change its text and copy the code. It also has a storyboard to plan a video and a frame-by-frame review page.
@@ -95,6 +95,7 @@ Every tool is one command. Inputs and results live in `inputs/`.
 
 | Command | What it does |
 |---|---|
+| `npm run script -- inputs/script.txt` | Plans a reel BEFORE you film it: estimated length, whether the hook lands in 3 seconds, stretches where nothing changes, whether it ends on an ask, and which block fits each line. Also writes a teleprompter file. |
 | `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4` | Cleans up a CapCut transcript: fixes names and punctuation, collapses repeats, finds filler words, makes clean captions and word timings, and writes a report of every change. |
 | `npm run plan -- inputs/transcript.srt --mode screen` | Reads a transcript and suggests what to add where (zooms, callouts, blurs, cards). It flags emails and keys it hears. |
 
@@ -107,7 +108,7 @@ Every tool is one command. Inputs and results live in `inputs/`.
 
 **Check**
 
-`npm run check:all` runs everything. The individual ones are `check` (talking head), `share:check`, `speaker:check`, `short:check` (vertical reel), `reel` (captions hold long enough, nothing inside the phone's buttons, letters never clipped), `check:face` (nothing covers your face) and `check:privacy` (nothing private is about to be committed).
+`npm run check:all` runs everything. The individual ones are `check` (talking head), `share:check`, `speaker:check`, `short:check` (vertical reel), `reel` (captions hold long enough and are readable, nothing inside the phone's buttons), `check:glyphs` (renders every caption with and without clips and fails if any lettering is cut), `check:face` (nothing covers your face) and `check:privacy` (nothing private is about to be committed).
 
 ## Working with an AI editor
 

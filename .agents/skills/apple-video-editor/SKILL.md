@@ -55,10 +55,11 @@ an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "a
 5. Nothing that shows the speaker goes in git: everything lives in `inputs/`.
 
 **Short-form reel** - read `references/short-form.md` first (safe zones, hook, caption hold rules, which block for which job).
-1. Ask: portrait footage, the one idea and the ending action, platform, private data on screen.
+0. Before filming (optional but best): write the script and run `npm run script -- inputs/script.txt` for a beat sheet: estimated length, hook inside 3 s, flat stretches, an ending action, block ideas per beat, a teleprompter file and an estimated SRT for `npm run plan`. Fix every `fix` item before they film.
+1. Ask: caption colours, portrait footage, the one idea and the ending action, platform, private data on screen.
 2. Footage into `inputs/`, `npm run face -- inputs/reel.mp4` (portrait writes `inputs/face-track.vertical.*`), point `#footage` at it.
-3. Polish the transcript (finishing playbook), paste `*.cues.json` into the `kinetic-subtitle` host; cues hold readable at least 0.5 s.
-4. `npm run short:check` (face clear + `npm run reel` rules + lint/layout/motion/contrast), snapshots, `npm run short:render`, then `npm run qa` with `--page projects/short-form/index.html`.
+3. Polish the transcript (finishing playbook), paste `*.cues.json` into the `kinetic-subtitle` host (it carries per-word `times` for `mode: "cumulative"`); cues hold readable at least 0.5 s.
+4. `npm run short:check` (face clear + `npm run reel` rules + `check:glyphs` + lint/layout/motion/contrast), snapshots, `npm run short:render`, then `npm run qa` with `--page projects/short-form/index.html`.
 5. Safe zones are estimates: ask the owner to check the first export on a phone.
 
 **Finishing (every mode)** - read `references/finishing.md` first.
@@ -112,7 +113,7 @@ Editorial guide, not an automated parser. The full, editable version is the cue 
 ```
 projects/screen-share/   index.html + share.js (zooms, cam, callouts, focus, redact, cuts) <- primary mode
 index.html               talking-head root; mounts templates, builds camera from camera.js
-compositions/tpl/        19 templates (variables = the API), incl. the transition library
+compositions/tpl/        23 templates (variables = the API), incl. the transition library
 components/
   tokens.css             ONLY place for colour, type, glass, corner values
   glass-components.js    __hfGlass: spring eases + stage engine + presets

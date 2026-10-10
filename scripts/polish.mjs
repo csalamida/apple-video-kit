@@ -790,7 +790,16 @@ function main() {
   const caps = o.mode === 'karaoke' ? phraseCues(kept, KARAOKE) : captionCues(kept);
   const kin = o.mode === 'karaoke' ? caps : phraseCues(kept, KINETIC);
   const srt = formatSrt(caps.map((c) => ({ start: c.start, end: c.end, text: c.lines ? c.lines.join('\n') : joinText(c.words) })));
-  const cuesJson = kin.map((c) => ({ start: r3(c.start), end: r3(c.end), text: punchText(c, gl, lang) }));
+  // `times`: the start of every word (absolute seconds). A kinetic-subtitle host with mode "cumulative" lands each word on its time,
+  // so the caption builds as it is spoken. Written only when the text still has one token per word; `timing` says how good the times are.
+  const cuesJson = kin.map((c) => {
+    const text = punchText(c, gl, lang), row = { start: r3(c.start), end: r3(c.end), text };
+    if (text.replace(/\*/g, '').split(/\s+/).filter(Boolean).length === c.words.length) {
+      row.times = c.words.map((w) => r3(w.start));
+      row.timing = c.words.every((w) => w.source === 'aligned') ? 'aligned' : 'interpolated';
+    }
+    return row;
+  });
 
   // ---- fillers.json
   const { ranges, tooShort } = o.fillers === 'keep' ? { ranges: [], tooShort: [] } : fillerRanges(ws, o.fillers);
