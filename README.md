@@ -29,7 +29,7 @@ It is built on [HyperFrames](https://hyperframes.heygen.com), a tool that turns 
 
 <img src="assets/demo/shot-short-form.jpg" alt="A vertical reel with a lower-third at the top and a caption above the platform buttons" width="200" align="right">
 
-The **short-form reel** mode is 9:16 (1080x1920). Captions and cards stay out of the top 230 px, the bottom 430 px and the right 150 px, where the phone's interface covers the picture, and `npm run reel` fails a caption that flashes by too fast to read. The playbook is in `.agents/skills/apple-video-editor/references/short-form.md`.
+The **short-form reel** mode is 9:16 (1080x1920). Captions and cards stay out of the top 230 px, the bottom 430 px and the right 150 px, where the phone's interface covers the picture, and `npm run reel` fails a caption that flashes by too fast to read or whose colours are hard to read. You choose the caption colours, and captions can build up word by word as you speak. The playbook is in `.agents/skills/apple-video-editor/references/short-form.md`.
 
 ## What is in the box
 

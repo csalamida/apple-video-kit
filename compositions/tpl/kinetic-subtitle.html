@@ -5,6 +5,13 @@
   {"id":"safe","type":"boolean","label":"Keep clear of the face","default":true},
   {"id":"bottom","type":"number","label":"Bottom (px)","default":46},
   {"id":"size","type":"number","label":"Font size (px)","default":38},
+  {"id":"mode","type":"string","label":"Reveal (whole | cumulative: words build up as they are spoken)","default":"whole"},
+  {"id":"entrance","type":"string","label":"Cumulative entrance (rise | edge-fly: words fly in from alternating sides, *star* words travel farther)","default":"rise"},
+  {"id":"color","type":"color","label":"Text colour","default":"#ffffff"},
+  {"id":"accent","type":"color","label":"Highlight (*star*) word colour","default":"#78bdff"},
+  {"id":"bg","type":"color","label":"Pill background colour","default":"#1c1c20"},
+  {"id":"bgAlpha","type":"number","label":"Pill background opacity (0-1)","default":0.62},
+  {"id":"pill","type":"boolean","label":"Show the pill (off = plain text with a soft shadow)","default":true},
   {"id":"cues","type":"string","label":"Cues [{start,end,text}] - wrap punch words in *stars* (JSON)","default":"[{\"start\":1.8,\"end\":2.5,\"text\":\"In this video,\"},{\"start\":2.5,\"end\":3.4,\"text\":\"I&#39;ll show you\"},{\"start\":3.4,\"end\":4.4,\"text\":\"Three *ways*\"},{\"start\":4.4,\"end\":5.0,\"text\":\"to add contacts\"},{\"start\":5.0,\"end\":5.8,\"text\":\"to *Acme CRM.*\"},{\"start\":5.8,\"end\":6.6,\"text\":\"You can add\"},{\"start\":6.6,\"end\":7.9,\"text\":\"someone *manually,*\"},{\"start\":8.8,\"end\":10.2,\"text\":\"from a *spreadsheet,*\"},{\"start\":10.2,\"end\":11.6,\"text\":\"or collect their details\"},{\"start\":11.6,\"end\":13.5,\"text\":\"through a *form.*\"},{\"start\":14.5,\"end\":15.6,\"text\":\"And after each *one,*\"},{\"start\":15.6,\"end\":17.0,\"text\":\"we&#39;ll open the *contact*\"},{\"start\":17.0,\"end\":18.2,\"text\":\"and make *sure*\"},{\"start\":18.2,\"end\":20.8,\"text\":\"the *details* are there.\"}]"}
 ]'>
   <head>
@@ -22,11 +29,13 @@
     <script src="components/tpl-parts.js"></script>
     <style>
       #dock { position:absolute; left:50%; transform: translateX(-50%); text-align:center; }
-      .cue { display:none; font-weight:600; letter-spacing: var(--track-display); line-height:1.2; color:#fff; background: rgba(28,28,32,.62);
+      /* colours are settings (host variables): --cap-color, --cap-accent, --cap-bg, set on #dock */
+      .cue { display:none; font-weight:600; letter-spacing: var(--track-display); line-height:1.2; color:var(--cap-color,#fff); background: var(--cap-bg, rgba(28,28,32,.62));
              border: 1px solid rgba(255,255,255,.28); -webkit-backdrop-filter: var(--glass-filter-thin); backdrop-filter: var(--glass-filter-thin);
              border-radius:100px; padding:12px 38px; box-shadow: inset 0 1px 1.5px rgba(255,255,255,.5), 0 16px 40px rgba(0,0,0,.8); white-space:nowrap; }
       .cue .w { display:inline-block; margin:0 .16em; transform-origin:50% 80%; }
-      .cue .kw { color: var(--accent-text); font-weight:700; }
+      .cue .kw { color: var(--cap-accent, var(--accent-text)); font-weight:700; }
+      .nopill .cue { background:none; border:0; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; text-shadow: 0 2px 16px rgba(0,0,0,.75), 0 0 2px rgba(0,0,0,.6); }
       /* vertical canvas: wrap inside the side safe zones and keep the pill shape generous */
       .vertical #dock { width: max-content; max-width: calc(var(--cw) - 300px); }
       .vertical .cue { white-space: normal; text-wrap: balance; padding: 18px 44px; border-radius: 56px; }
@@ -41,9 +50,13 @@
       window.__timelines = window.__timelines || {};
       (function () {
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
-var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:1.1,bottom:46,size:38,cues:"[{\"start\":1.8,\"end\":2.5,\"text\":\"In this video,\"},{\"start\":2.5,\"end\":3.4,\"text\":\"I'll show you\"},{\"start\":3.4,\"end\":4.4,\"text\":\"Three *ways*\"},{\"start\":4.4,\"end\":5.0,\"text\":\"to add contacts\"},{\"start\":5.0,\"end\":5.8,\"text\":\"to *Acme CRM.*\"},{\"start\":5.8,\"end\":6.6,\"text\":\"You can add\"},{\"start\":6.6,\"end\":7.9,\"text\":\"someone *manually,*\"},{\"start\":8.8,\"end\":10.2,\"text\":\"from a *spreadsheet,*\"},{\"start\":10.2,\"end\":11.6,\"text\":\"or collect their details\"},{\"start\":11.6,\"end\":13.5,\"text\":\"through a *form.*\"},{\"start\":14.5,\"end\":15.6,\"text\":\"And after each *one,*\"},{\"start\":15.6,\"end\":17.0,\"text\":\"we'll open the *contact*\"},{\"start\":17.0,\"end\":18.2,\"text\":\"and make *sure*\"},{\"start\":18.2,\"end\":20.8,\"text\":\"the *details* are there.\"}]"}, window.__hyperframes);
+var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,scale:1.1,bottom:46,size:38,mode:"whole",entrance:"rise",color:"#ffffff",accent:"#78bdff",bg:"#1c1c20",bgAlpha:0.62,pill:true,cues:"[{\"start\":1.8,\"end\":2.5,\"text\":\"In this video,\"},{\"start\":2.5,\"end\":3.4,\"text\":\"I'll show you\"},{\"start\":3.4,\"end\":4.4,\"text\":\"Three *ways*\"},{\"start\":4.4,\"end\":5.0,\"text\":\"to add contacts\"},{\"start\":5.0,\"end\":5.8,\"text\":\"to *Acme CRM.*\"},{\"start\":5.8,\"end\":6.6,\"text\":\"You can add\"},{\"start\":6.6,\"end\":7.9,\"text\":\"someone *manually,*\"},{\"start\":8.8,\"end\":10.2,\"text\":\"from a *spreadsheet,*\"},{\"start\":10.2,\"end\":11.6,\"text\":\"or collect their details\"},{\"start\":11.6,\"end\":13.5,\"text\":\"through a *form.*\"},{\"start\":14.5,\"end\":15.6,\"text\":\"And after each *one,*\"},{\"start\":15.6,\"end\":17.0,\"text\":\"we'll open the *contact*\"},{\"start\":17.0,\"end\":18.2,\"text\":\"and make *sure*\"},{\"start\":18.2,\"end\":20.8,\"text\":\"the *details* are there.\"}]"}, window.__hyperframes);
         V.cues = T.json(V.cues, []);
         var dock = document.getElementById("dock"); dock.style.bottom = V.bottom+"px";
+        function rgba(hex, a) { var h = String(hex).replace("#",""); if (h.length === 3) h = h.replace(/./g, function(c){ return c+c; }); var n = parseInt(h, 16); if (!/^[0-9a-f]{6}$/i.test(h)) return hex; return "rgba("+(n>>16&255)+","+(n>>8&255)+","+(n&255)+","+Math.max(0,Math.min(1,+V.bgAlpha))+")"; }
+        dock.style.setProperty("--cap-color", V.color); dock.style.setProperty("--cap-accent", V.accent); dock.style.setProperty("--cap-bg", rgba(V.bg));
+        if (!V.pill) dock.classList.add("nopill");
+        var cumulative = V.mode === "cumulative";
         var tl = gsap.timeline({paused:true}); window.__timelines["kinetic-subtitle"] = tl;
         V.cues.forEach(function(c,i){
           var el = document.createElement("div"); el.className = "cue"; el.style.fontSize = V.size+"px";
@@ -54,10 +67,32 @@ var V = T.vars({at:0,dur:3,safe:true,side:"left",top:140,offsetX:0,offsetY:0,sca
           dock.appendChild(el);
           var s = c.start - V.at, e = c.end - V.at, words = el.querySelectorAll(".w"), kw = el.querySelector(".kw"), ki = Array.prototype.indexOf.call(words, kw);
           tl.set(el,{display:"inline-block"},s);
-          tl.fromTo(el,{opacity:0,scale:0.92,y:10},{opacity:1,scale:1,y:0,duration:0.24,ease:E.snappy,immediateRender:false},s);
-          if (words.length) tl.fromTo(words,{opacity:0,scale:0.8,y:6},{opacity:1,scale:1,y:0,duration:0.2,stagger:0.045,ease:E.snappy},s+0.02);
+          var landAt = s + 0.02 + ki*0.045, flyDur = 0.2;   // when the punch word starts to enter
+          if (cumulative) {
+            // the line has its final size from the start (no reflow); words appear one by one and stay. Times: c.times (absolute, one per word, from polish words.json) or spread over the first part of the cue, leaving 0.5 s to read.
+            tl.fromTo(el,{opacity:0,y:10},{opacity:1,y:0,duration:0.18,ease:E.snappy,immediateRender:false},s);
+            var n = words.length, span = Math.max(0.2, (e - s) - 0.16 - 0.5 - 0.22), lastOk = Math.max(s, e - 0.9);
+            var times = Array.isArray(c.times) && c.times.length === n ? c.times : null;
+            Array.prototype.forEach.call(words, function(wd, k){
+              var t = times ? Math.max(s, Math.min(lastOk, times[k] - V.at)) : s + 0.04 + (n > 1 ? span * k / (n - 1) : 0);
+              if (k === ki) landAt = t;
+              // first tween on this word: renders its hidden state immediately, so it is invisible until its time (also when seeking)
+              if (V.entrance === "edge-fly") {
+                // alternating sides; *star* (hero) words travel farther, rotate more and settle slower. Travel shrinks on a narrow canvas.
+                var hero = wd.classList.contains("kw"), side = k % 2 ? 1 : -1, fit = Math.min(1, T.W * 0.3 / 360);
+                var dur = hero ? 0.32 : 0.22;
+                tl.fromTo(wd,{opacity:0,x:side*(hero?360:170)*fit,rotation:side*(hero?9:4),scale:hero?1.18:1},{opacity:1,x:0,rotation:0,scale:1,duration:dur,ease:"expo.out"},t);
+                if (k === ki) flyDur = dur;
+              } else {
+                tl.fromTo(wd,{opacity:0,y:16,scale:0.9},{opacity:1,y:0,scale:1,duration:0.22,ease:E.snappy},t);
+              }
+            });
+          } else {
+            tl.fromTo(el,{opacity:0,scale:0.92,y:10},{opacity:1,scale:1,y:0,duration:0.24,ease:E.snappy,immediateRender:false},s);
+            if (words.length) tl.fromTo(words,{opacity:0,scale:0.8,y:6},{opacity:1,scale:1,y:0,duration:0.2,stagger:0.045,ease:E.snappy},s+0.02);
+          }
           // punch pulse on an inner span (the .w itself is owned by the entrance), once that word has landed
-          var kp = kw && kw.querySelector(".kp"), pt = s + 0.02 + ki*0.045 + 0.2;
+          var kp = kw && kw.querySelector(".kp"), pt = landAt + (cumulative ? flyDur + 0.02 : 0.2);
           if (kp && pt + 0.32 <= Math.max(s+0.25,e-0.16)) tl.fromTo(kp,{scale:1},{scale:1.1,duration:0.16,yoyo:true,repeat:1,ease:"sine.inOut",immediateRender:false},pt);
           tl.fromTo(el,{opacity:1,scale:1,y:0},{opacity:0,scale:0.96,y:-6,duration:0.16,ease:"power2.in",immediateRender:false},Math.max(s+0.25,e-0.16));
           tl.set(el,{display:"none"},e);

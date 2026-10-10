@@ -34,6 +34,18 @@ for (const h of templateHosts(file)) {
     const cues = T.json(v.cues, []);
     if (!cues.length) warn(`${h.id}: no caption cues`);
     if (v.bottom < S.bottom) fail(`${h.id}: captions bottom=${v.bottom}px sit inside the bottom platform zone (${S.bottom}px). Raise them`);
+    const lum = (hex) => { const h = String(hex).replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'); if (!/^[0-9a-f]{6}$/i.test(h)) return null; const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255].map((c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }).reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0); };
+    const ratio = (a, b) => { const x = lum(a), y = lum(b); return x == null || y == null ? null : (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    if (v.mode && !['whole', 'cumulative'].includes(v.mode)) fail(`${h.id}: mode "${v.mode}" must be whole or cumulative`);
+    if (v.entrance && !['rise', 'edge-fly'].includes(v.entrance)) fail(`${h.id}: entrance "${v.entrance}" must be rise or edge-fly`);
+    if (v.entrance === 'edge-fly' && v.mode !== 'cumulative') warn(`${h.id}: entrance edge-fly only applies with mode cumulative`);
+    if (v.pill !== false) {
+      // the pill is mostly opaque, so its colour decides the contrast
+      const r = ratio(v.color, v.bg), ra = ratio(v.accent, v.bg);
+      if (r != null && r < 4.5) fail(`${h.id}: caption text ${v.color} on the pill ${v.bg} is ${r.toFixed(1)}:1 (needs 4.5:1). Pick a lighter text or a darker pill`);
+      if (ra != null && ra < 3) fail(`${h.id}: highlight ${v.accent} on the pill ${v.bg} is ${ra.toFixed(1)}:1 (needs 3:1 for large text)`);
+      if (+v.bgAlpha < 0.45) warn(`${h.id}: pill opacity ${v.bgAlpha} lets busy footage through; contrast can drop below the ratio above`);
+    } else warn(`${h.id}: captions without a pill sit straight on the footage; check contrast on the lightest frames (a soft shadow is added)`);
     if (v.size < 44) warn(`${h.id}: caption size ${v.size}px is small for a phone (use 52-72px)`);
     let prev = null;
     cues.forEach((c, i) => {

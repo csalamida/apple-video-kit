@@ -6,6 +6,7 @@ polish, grade, qa).
 
 ## 0. Ask first (one message)
 
+0. Their caption colours: text, highlight word, pill (or no pill). If they have none, offer 2 or 3 readable pairs and let them pick.
 1. The footage: portrait 1080x1920 (shot vertically), or landscape that must be cropped? Ask for portrait; do not stretch a landscape clip.
 2. The transcript: a CapCut export is fine (`npm run polish`, see `finishing.md`). Short-form wants shorter cues than long-form.
 3. The one idea of the reel and the action at the end (follow, comment, a link). One reel, one idea, one action.
@@ -45,6 +46,8 @@ The reading rules matter more than the style.
 - **Settled hold.** A cue is on screen `entrance 0.24 s + readable hold + exit 0.16 s`. The readable hold must be at least 0.5 s (`--min-hold` to change it). A short word timestamp must never become a flash: merge it with its neighbour or lengthen the cue. `npm run reel` fails on this.
 - **About 6 words per cue, at most 4 words per second.** Warnings, not failures.
 - **Cues never overlap.** One caption on screen at a time.
+- **Cumulative reveal:** `"mode": "cumulative"` makes the line build word by word as it is spoken. The pill keeps its final size from the first word, so nothing jumps. Without word times the words spread over the first part of the cue and the last 0.5 s is left to read. With real times, pass `"times": [s1, s2, ...]` (absolute seconds, one per word, from `*.words.json` after `npm run polish --audio`) on the cue. `"mode": "whole"` (default) shows the whole cue at once. With cumulative, `"entrance": "edge-fly"` makes each word fly in from alternating sides and settle (words wrapped in `*stars*` travel farther, rotate more and settle slower); the default `rise` is a short lift. Travel shrinks on a narrow canvas so words do not leave the frame. Earlier words stay; the finished phrase holds still.
+- **Colours are the owner's choice.** Ask for them; never pick a brand look for someone. `color` (text), `accent` (the `*star*` words), `bg` + `bgAlpha` (pill) or `"pill": false` (plain text with a soft shadow), all hex values on the `kinetic-subtitle` host. `npm run reel` fails text under 4.5:1 and highlight under 3:1 against the pill colour, and warns on a see-through pill or no pill (the footage decides the contrast then; look at the lightest frames).
 - **Emphasis:** wrap 1 to 3 punch words per cue in `*stars*`. They take the accent colour and a small pulse.
 - **Position and motion never share a transform.** If you add your own caption animation, put the layout anchor (where it sits) on one wrapper and the entrance motion on an inner one. Two writers on the same `y` make captions jump on seek. Single writer per property is already the kit rule; this is where captions break it.
 - **No clipping of glyphs.** Never put `overflow: hidden`, `clip-path` or a `mask` on a cue or its words: it cuts descenders (g, j, p, q, y), italic overhangs and gradient edges. A bounding box that fits is not proof the letters are whole. `npm run reel` fails on a clipping rule in the page or the template, and warns on `background-clip: text` (gradient paint boxes crop). Always look at the encoded frames of the longest and most descender-heavy cues.
@@ -91,5 +94,5 @@ npm run qa -- renders/<file>.mp4 --page projects/short-form/index.html
 - Safe zones are estimates. Check the first export on a real phone in the target app before posting.
 - The demo uses a silhouette. Face-safe placement on real footage needs `npm run face` to find the face; if the track misses (hand over face, turned head) cards can land on it, so look at the frames.
 - Landscape-only blocks and the screen-share stage are not made for 9:16.
-- There is no cumulative caption reveal (phrase building up cue by cue) yet; `kinetic-subtitle` reveals each cue as a whole.
+- The cumulative reveal is the kit's own generic version, not a copy of any named style. Fonts and gradient fills are not settings yet. There is no ink-level glyph detector: the only proof letters are whole is a focused render of the real phrases (plus the words with the tallest descenders and italics) compared with plain unclipped text, looked at before entry, mid-entry, at peak, in the hold and at exit.
 - Nothing that shows the speaker or contains their voice goes in git: it lives in `inputs/`, `renders/` and `qa/`.

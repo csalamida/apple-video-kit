@@ -1462,6 +1462,48 @@
      "default": 38
     },
     {
+     "id": "mode",
+     "type": "string",
+     "label": "Reveal (whole | cumulative: words build up as they are spoken)",
+     "default": "whole"
+    },
+    {
+     "id": "entrance",
+     "type": "string",
+     "label": "Cumulative entrance (rise | edge-fly: words fly in from alternating sides, *star* words travel farther)",
+     "default": "rise"
+    },
+    {
+     "id": "color",
+     "type": "color",
+     "label": "Text colour",
+     "default": "#ffffff"
+    },
+    {
+     "id": "accent",
+     "type": "color",
+     "label": "Highlight (*star*) word colour",
+     "default": "#78bdff"
+    },
+    {
+     "id": "bg",
+     "type": "color",
+     "label": "Pill background colour",
+     "default": "#1c1c20"
+    },
+    {
+     "id": "bgAlpha",
+     "type": "number",
+     "label": "Pill background opacity (0-1)",
+     "default": 0.62
+    },
+    {
+     "id": "pill",
+     "type": "boolean",
+     "label": "Show the pill (off = plain text with a soft shadow)",
+     "default": true
+    },
+    {
      "id": "cues",
      "type": "string",
      "label": "Cues [{start,end,text}] - wrap punch words in *stars* (JSON)",
