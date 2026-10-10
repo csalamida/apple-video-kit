@@ -4,6 +4,31 @@ How to take, prepare and manage the pieces of a speaker-cutout video: the transp
 props in front of them, and the titles in between. Read this before running `npm run cutout`, `backdrop`, `plate` or
 `prop`. Commands and keys are in `SKILL.md` section 4; this file is the knowledge around them.
 
+## 0. Intake: ask before you run anything
+
+A cutout job depends on choices only the person can make, and the slow steps (matting) are expensive to redo. Ask these in
+ONE message, with a default for each, then wait:
+
+1. **Which place?** "An office (default), a studio, a living room, a cafe, a library, a conference room, or describe your own.
+   Do you already have an image of it?"
+2. **Which parts of the video need the cutout?** The hook? A topic change? Give time ranges; matting runs at about 1 frame per
+   second, so only those stretches get matted.
+3. **Is anything in front of you that has to stay?** A microphone, a mug. If yes: at which time is it clearly visible?
+4. **A title behind your head?** What does it say, and when?
+5. **Who generates the room?** You give them the prompt (`npm run backdrop`); they generate it with their own tool, or say so
+   if you may use a connected tool. Some tools charge per image: never spend someone's credits without a clear yes.
+
+Then the handoff:
+- Run `npm run backdrop -- <video> --scene <place>` and hand over **prompt A** (an empty room). Offer prompt B (image edit,
+  with the reference frame) only if the generator cannot match the angle from text.
+- Ask them to **paste the finished image in a message by itself**, or save it as `inputs/<scene>.png`. An image pasted in
+  the middle of a task is visible to you but is not saved as a file, so you cannot use its pixels; only a normal message's
+  attachment is saved. Say this up front so the round trip works the first time.
+- If the image still has a person in it, `npm run plate`. If they decline a background altogether, use a gradient or their own
+  blurred room and carry on: never block the video on the plate.
+- Check the image with the section 4 checklist and tell them plainly what is wrong ("the horizon is too high", "there is a
+  chair in the middle") instead of silently compositing a bad plate.
+
 ## 1. What it is, and when to use it
 
 The speaker is cut out of the footage and layered between a background (a room, a colour, their own blurred room) and

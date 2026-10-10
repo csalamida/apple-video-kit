@@ -6,11 +6,12 @@ description: >
   webcam PiP with auto-style zooms as data) and TALKING HEAD (face-safe graphics over footage).
   Everything on screen is a parameterized template mounted with a host tag; camera moves, zooms and PiP are data.
   Includes a generated library with when-to-use cues, a stage engine (window + pan, no re-crop), spring easing,
-  a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request.
+  a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request, and
+  for "change my background", "put me in an office / studio", "HeyGen-style background", "text behind me", "keep my mic".
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.4.0"
+  version: "5.5.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -25,7 +26,8 @@ Turn raw footage into Apple-grade broadcast video without hand-animating each sc
 | **Talking head** | Webcam/interview footage with graphic cards | `index.html` | `components/camera.js` moves; templates stay off the face |
 | **Speaker cutout** | You, with the background replaced by a room or colour; title behind your head | `projects/speaker-cutout/` | `cutout.js` backgrounds, moves, parallax |
 
-Trigger on: an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "add overlays/captions",
+Trigger on: "change / replace my background", "put me in an office", "HeyGen-style background", "text behind my head", "remove the background";
+an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "add overlays/captions",
 "make it look like a polished screen recording / Apple keynote", "screen share with a PiP", "edit this talking head".
 
 ---
@@ -42,6 +44,7 @@ Trigger on: an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package thi
 7. The cursor is baked into the screen recording; do not synthesise one. Redact anything private you see (emails, keys, client names) even if it is not spoken.
 
 **Speaker cutout (scenes)** - read `references/speaker-cutout.md` first (how to shoot, matte, generate the room, bring props back, verify, troubleshoot).
+0. ASK FIRST, in one message, before running anything: which place (office by default; studio, living room, cafe, library, conference room, or their own description; or an image they already have), which stretches of the video need the cutout (matting is about 1 frame per second), whether something in front of them must stay (a mic), and whether they want a title behind their head and what it says. Then give them the prompt from `npm run backdrop`, and ask them to paste the finished image in a message by itself or save it as `inputs/<scene>.png` (an image pasted mid-task is visible but not saved as a file). Never generate the room on their account without a yes: some tools charge credits. If they skip the background, use a gradient or their own blurred room and carry on.
 1. Matte only the stretches that use it: `npm run cutout -- inputs/me.mp4 --from 10 --to 25` (about 1 frame/s).
 2. `npm run backdrop -- inputs/me.mp4 --scene office` writes the image prompt from the measured angle and light; generate an EMPTY room (prompt A). If you only have an image with the person in it, `npm run plate -- <image>` removes the person.
 3. Mic or other gear in front of the speaker: `npm run prop -- inputs/me.mp4 --at 8 --box x,y,w,h --name mic --keep dark`, then `foreground` in `cutout.js`.

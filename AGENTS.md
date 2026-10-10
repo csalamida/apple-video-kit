@@ -39,7 +39,7 @@ The cursor is baked into the screen recording: never synthesise or restyle one.
 
 ### Speaker cutout (scenes)
 
-Read `.agents/skills/apple-video-editor/references/speaker-cutout.md` before running the cutout commands (shooting, plates, props, verification, troubleshooting).
+Read `.agents/skills/apple-video-editor/references/speaker-cutout.md` before running the cutout commands (shooting, plates, props, verification, troubleshooting). Start by asking the person which place they want (office by default), which stretches need the cutout, and whether a mic must stay in front of them; hand over the `npm run backdrop` prompt and ask for the image in a message by itself or saved as `inputs/<scene>.png`.
 
 Layers bottom to top: `#orig` (your video, voice) z5, `#bgs` backgrounds z10, `title-behind` hosts z30, `#cut` (transparent cutout) z50, your overlays z55+. Engine: `components/cutout-stage.js`.
 
