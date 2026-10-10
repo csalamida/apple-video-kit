@@ -1,7 +1,7 @@
 /* Shared reset + stage for every compositions/tpl/*.html template. */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: transparent; font-family: var(--font-ui); color: var(--label); overflow: hidden; }
-#root { position: relative; width: 1920px; height: 1080px; overflow: hidden; pointer-events: none; }
+#root { position: relative; width: var(--cw, 1920px); height: var(--ch, 1080px); overflow: hidden; pointer-events: none; }
 .hf-glass {
   position: absolute; background: var(--glass-bg);
   -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);

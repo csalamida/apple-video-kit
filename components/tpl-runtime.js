@@ -14,7 +14,9 @@
 (function (root) {
   'use strict';
   var T = {};
-  var W = 1920, H = 1080;
+  var CV = root.__hfCanvas || { w: 1920, h: 1080, safe: { top: 0, bottom: 0, left: 0, right: 0 } };
+  var W = CV.w, H = CV.h, SAFE = CV.safe || { top: 0, bottom: 0, left: 0, right: 0 };
+  T.W = W; T.H = H; T.canvas = CV; T.safeZone = SAFE;
 
   // Critically damped spring (same curve as __hfGlass.ease.smooth); kept local so Node needs no GSAP.
   function smooth(p) { return p <= 0 ? 0 : p >= 1 ? 1 : 1 - (1 + 8 * p) * Math.exp(-8 * p); }
@@ -41,7 +43,7 @@
   };
 
   // ---- camera ------------------------------------------------------------
-  var FULL = { x: 0, y: 0, w: 1920, h: 1080, r: 0 };
+  var FULL = { x: 0, y: 0, w: W, h: H, r: 0 };
   function winOf(m) { return m.win && m.win !== 'full' ? { x: m.win.x, y: m.win.y, w: m.win.w, h: m.win.h, r: m.win.r || 0 } : FULL; }
 
   function rawCenter(t0, t1) {
@@ -171,10 +173,13 @@
    */
   T.place = function (o) {
     var margin = o.margin !== undefined ? o.margin : 72;
+    var mL = Math.max(margin, SAFE.left), mR = Math.max(margin, SAFE.right);
     var gap = o.gap !== undefined ? o.gap : 40;
     var minW = o.minWidth || 360;
     var width = o.width, height = o.height || 0, top = o.top !== undefined ? o.top : 140;
     var side = o.side || 'left';
+    width = Math.min(width, W - mL - mR);
+    if (SAFE.top || SAFE.bottom) top = Math.max(SAFE.top, Math.min(top, H - SAFE.bottom - height));
     var ox = o.offsetX || 0, oy = o.offsetY || 0;
     var settle = o.settle !== undefined ? o.settle : 0.5, tail = 0.35;
     var w0 = (o.start || 0) + settle, w1 = Math.max(w0, (o.start || 0) + (o.dur || 0) - tail);
@@ -182,17 +187,17 @@
     var blocks = u && !(top + oy + height < u.y0 || top + oy > u.y1);   // vertical overlap with the head band
 
     function rect(sd, w) {
-      var left = sd === 'right' ? W - margin - w : sd === 'center' ? (W - w) / 2 : margin;
+      var left = sd === 'right' ? W - mR - w : sd === 'center' ? (mL + (W - mR - mL - w) / 2) : mL;
       return { side: sd, left: left + ox, top: top + oy, width: w, height: height };
     }
     var r = rect(side, width);
     if (blocks && side !== 'center') {
-      var avail = side === 'left' ? (u.x0 - gap) - margin : (W - margin) - (u.x1 + gap);
+      var avail = side === 'left' ? (u.x0 - gap) - mL : (W - mR) - (u.x1 + gap);
       if (avail < width) {
         if (avail >= minW) r = rect(side, avail);
         else {
           var other = side === 'left' ? 'right' : 'left';
-          var avail2 = other === 'left' ? (u.x0 - gap) - margin : (W - margin) - (u.x1 + gap);
+          var avail2 = other === 'left' ? (u.x0 - gap) - mL : (W - mR) - (u.x1 + gap);
           r = avail2 >= minW ? rect(other, Math.min(width, avail2)) : rect(side, Math.max(avail, 0));
         }
       }

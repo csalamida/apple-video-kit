@@ -19,6 +19,7 @@
     <script src="components/glass-components.js"></script>
     <script src="components/camera.js"></script>
     <script src="inputs/face-track.js"></script>
+    <script src="components/canvas.js"></script>
     <script src="components/tpl-runtime.js"></script>
     <script src="components/tpl-parts.js"></script>
     <style>
@@ -72,7 +73,7 @@
         var T = __hfTpl, P = __hfParts, E = __hfGlass.ease, esc = P.esc;
 var V = T.vars({at:0,dur:0.8,kind:"dip",color:"#000000",direction:"right",eyebrow:"Chapter 2",title:"Import your contacts",scale:1}, window.__hyperframes);
         var root = document.getElementById("root");
-        var D = Math.max(0.2, +V.dur || 0.8), M = D / 2, W = 1920, H = 1080;
+        var D = Math.max(0.2, +V.dur || 0.8), M = D / 2, W = __hfTpl.W, H = __hfTpl.H;
         var dir = /^(left|right|up|down)$/.test(V.direction) ? V.direction : "right";
         var tl = gsap.timeline({paused:true}); window.__timelines["transition"] = tl;
         function el(cls, parent) { var d = document.createElement("div"); d.className = cls; (parent || root).appendChild(d); return d; }

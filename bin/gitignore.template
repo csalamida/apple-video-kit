@@ -24,6 +24,10 @@ projects/speaker-cutout/components/
 projects/speaker-cutout/compositions/
 projects/speaker-cutout/inputs
 projects/speaker-cutout/assets
+projects/short-form/components/
+projects/short-form/compositions/
+projects/short-form/inputs
+projects/short-form/assets
 snapshots/
 
 # frame-by-frame QA runs (JPEGs of your renders): npm run qa

@@ -14,7 +14,7 @@ import json, subprocess, sys, tempfile, os, glob
 import cv2, numpy as np
 
 src = sys.argv[1] if len(sys.argv) > 1 else "inputs/speaker.mp4"
-dst = sys.argv[2] if len(sys.argv) > 2 else "inputs/face-track.json"
+dst = sys.argv[2] if len(sys.argv) > 2 else None   # default depends on the source shape (below)
 FPS = 10
 DETECT_W = 960        # frames are scaled to this width for detection (height keeps the aspect ratio)
 MAX_GAP = 1.0         # s; longer gaps without a face are held, not interpolated
@@ -36,6 +36,9 @@ stream = (json.loads(probe.stdout or "{}").get("streams") or [{}])[0]
 W, H = int(stream.get("width") or 0), int(stream.get("height") or 0)
 if not W or not H:
     sys.exit("detect-face: no video stream in " + src)
+if dst is None:
+    # portrait footage (a short-form reel) gets its own track: projects/short-form loads face-track.vertical.js
+    dst = "inputs/face-track.vertical.json" if H > W else "inputs/face-track.json"
 
 with tempfile.TemporaryDirectory(prefix="hf-face-") as tmp:
     try:
@@ -115,5 +118,5 @@ print(f"detected {detected}/{len(raw)} frames ({W}x{H}) -> {dst} + {js}")
 if long_gaps:
     print("warning: no face for more than %.1f s at %s; the last box is held there (cards keep clear of where the face was)"
           % (MAX_GAP, ", ".join("%.1f-%.1fs" % g for g in long_gaps)))
-if (W, H) != (1920, 1080):
-    print(f"note: source is {W}x{H}; boxes are in source pixels, the 1920x1080 stage assumes the footage is scaled to fill it")
+if (W, H) not in ((1920, 1080), (1080, 1920)):
+    print(f"note: source is {W}x{H}; boxes are in source pixels, the 1920x1080 (or 1080x1920) stage assumes the footage is scaled to fill it")

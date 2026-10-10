@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadRuntime, templateDefaults, templateHosts, ROOT } from './lib/load-runtime.mjs';
-import { ensureFaceTrack } from './demo-media.mjs';
+import { ensureFaceTrack, VERTICAL } from './demo-media.mjs';
 
 const arg = process.argv[2] || 'index.html';
 const file = fs.existsSync(arg) ? path.resolve(arg) : path.join(ROOT, arg);
@@ -14,7 +14,8 @@ if (!fs.existsSync(file)) { console.error('check-face-clear: file not found: ' +
 const rel = (p) => path.relative(ROOT, p).replace(/\\/g, '/');
 const tplFile = (name) => path.join(ROOT, 'compositions/tpl', name + '.html');
 
-ensureFaceTrack();
+const pageHtml = fs.readFileSync(file, 'utf8');
+if (/face-track\.vertical/.test(pageHtml)) ensureFaceTrack(VERTICAL); else ensureFaceTrack();
 const T = loadRuntime(file);
 const MARGIN = 0;           // px of breathing room required beyond the head box
 const SETTLE = 0.5, TAIL = 0.35;
@@ -41,10 +42,16 @@ const FOOT = {
   'spotlight': () => null     // full-frame dim with a hole
 };
 // Chrome that is allowed to sit near the head but is reported (warn only)
-const CHROME = {
+const LAND_CHROME = {
   'chapter-pill': { x0: 680, x1: 1240, y0: 40, y1: 86 },
   'kinetic-subtitle': { x0: 560, x1: 1360, y0: 955, y1: 1036 }
 };
+// vertical: the caption band sits just above the bottom safe zone
+const CVS = T.canvas;
+const CHROME = CVS.h > CVS.w ? {
+  'chapter-pill': { x0: 200, x1: CVS.w - 200, y0: CVS.safe.top, y1: CVS.safe.top + 60 },
+  'kinetic-subtitle': { x0: 100, x1: CVS.w - 100, y0: CVS.h - CVS.caption.bottom - 200, y1: CVS.h - CVS.caption.bottom }
+} : LAND_CHROME;
 
 let contract = 0, overlap = 0, warn = 0;
 const rows = [];

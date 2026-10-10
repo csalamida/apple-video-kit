@@ -32,7 +32,8 @@ const USER_IN_KIT = new Set(['components/camera.js']);
 // Starter files copied by init only (yours afterwards).
 const STARTER = ['index.html', 'components/camera.js', 'projects/screen-share/index.html', 'projects/screen-share/share.js',
   'projects/screen-share/meta.json', 'projects/screen-share/hyperframes.json', 'hyperframes.json',
-  'projects/speaker-cutout/index.html', 'projects/speaker-cutout/cutout.js', 'projects/speaker-cutout/meta.json', 'projects/speaker-cutout/hyperframes.json'];
+  'projects/speaker-cutout/index.html', 'projects/speaker-cutout/cutout.js', 'projects/speaker-cutout/meta.json', 'projects/speaker-cutout/hyperframes.json',
+  'projects/short-form/index.html', 'projects/short-form/meta.json', 'projects/short-form/hyperframes.json'];
 const SKIP = /(^|\/)(node_modules|\.git|\.DS_Store|snapshots)(\/|$)/;
 
 const rel = (p) => p.split(path.sep).join('/');

@@ -20,12 +20,16 @@ It is built on [HyperFrames](https://hyperframes.heygen.com), a tool that turns 
 
 ## Pick your kind of video
 
-| | Screen share | Talking head | Speaker cutout |
-|---|---|---|---|
-| **Use it when** | You show an app or a website and talk over it | You talk to the camera and sometimes show something | You want to look like you are in an office or studio, or put big text behind your head |
-| **What you get** | Your screen floats on a wallpaper and zooms to what you talk about; your webcam sits in a small card that tucks away when the screen zooms | Glass cards, lower-thirds, captions and a small picture of you that moves out of the way of your face | A new room behind you, a title behind your head, your mic still in front of you |
-| **You edit** | `projects/screen-share/share.js` | `components/camera.js` and `index.html` | `projects/speaker-cutout/cutout.js` |
-| **Try the demo** | `npm run share:dev` | `npm run dev` | `npm run speaker:dev` |
+| | Screen share | Talking head | Speaker cutout | Short-form reel |
+|---|---|---|---|---|
+| **Use it when** | You show an app or a website and talk over it | You talk to the camera and sometimes show something | You want to look like you are in an office or studio, or put big text behind your head | You make vertical videos for Reels, TikTok or Shorts |
+| **What you get** | Your screen floats on a wallpaper and zooms to what you talk about; your webcam sits in a small card that tucks away when the screen zooms | Glass cards, lower-thirds, captions and a small picture of you that moves out of the way of your face | A new room behind you, a title behind your head, your mic still in front of you | A vertical 1080x1920 frame with captions and cards kept out of the phone's buttons and caption bar, and off your face |
+| **You edit** | `projects/screen-share/share.js` | `components/camera.js` and `index.html` | `projects/speaker-cutout/cutout.js` | `projects/short-form/index.html` |
+| **Try the demo** | `npm run share:dev` | `npm run dev` | `npm run speaker:dev` | `npm run short:dev` |
+
+<img src="assets/demo/shot-short-form.jpg" alt="A vertical reel with a lower-third at the top and a caption above the platform buttons" width="200" align="right">
+
+The **short-form reel** mode is 9:16 (1080x1920). Captions and cards stay out of the top 230 px, the bottom 430 px and the right 150 px, where the phone's interface covers the picture, and `npm run reel` fails a caption that flashes by too fast to read. The playbook is in `.agents/skills/apple-video-editor/references/short-form.md`.
 
 ## What is in the box
 
@@ -54,6 +58,7 @@ Then try a demo:
 npm run share:dev      # screen share
 npm run dev            # talking head
 npm run speaker:dev    # speaker cutout
+npm run short:dev      # vertical reel
 ```
 
 The demos need no footage. On first run the kit makes a faceless placeholder speaker and a test-pattern screen for you.
@@ -66,7 +71,7 @@ Prefer to clone? `git clone https://github.com/csalamida/apple-video-kit.git`, t
 2. **Point the page at your files.** Screen share: set `#screen` (your screen recording, no sound) and `#cam` (your webcam, with your voice) in `projects/screen-share/index.html`. Talking head: set `#footage` in `index.html`.
 3. **Describe the video.** Open the settings file for your kind of video (table above). Each line is a moment: a time, and what should happen. The library page shows the exact line for every block and move, so you can copy and paste.
 4. **Check it.** `npm run check:all` runs every check and tells you in plain words what is wrong.
-5. **Render.** `npm run share:render`, `npm run render` or `npm run speaker:render` writes an MP4 into `renders/`.
+5. **Render.** `npm run share:render`, `npm run render`, `npm run speaker:render` or `npm run short:render` writes an MP4 into `renders/`.
 6. **Review the render.** `npm run qa -- renders/<file>.mp4` then open the QA page and step through it.
 
 Not sure where to start? Ask an AI editor (next section) and say what kind of video you want.
@@ -102,7 +107,7 @@ Every tool is one command. Inputs and results live in `inputs/`.
 
 **Check**
 
-`npm run check:all` runs everything. The individual ones are `check` (talking head), `share:check`, `speaker:check`, `check:face` (nothing covers your face) and `check:privacy` (nothing private is about to be committed).
+`npm run check:all` runs everything. The individual ones are `check` (talking head), `share:check`, `speaker:check`, `short:check` (vertical reel), `reel` (captions hold long enough, nothing inside the phone's buttons, letters never clipped), `check:face` (nothing covers your face) and `check:privacy` (nothing private is about to be committed).
 
 ## Working with an AI editor
 

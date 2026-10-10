@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // What every template loads itself; loaded after the page's own scripts if the page did not.
-const BASE = ['components/glass-components.js', 'components/camera.js', 'inputs/face-track.js', 'components/tpl-runtime.js'];
+const BASE = ['components/glass-components.js', 'components/camera.js', 'components/canvas.js', 'inputs/face-track.js', 'components/tpl-runtime.js'];
 
 // Local <script src> of a page, in order (CDN scripts such as gsap are skipped; checks never animate).
 export function pageScripts(html) {
@@ -36,7 +36,11 @@ export function loadRuntime(pageFile = path.join(ROOT, 'index.html')) {
   const pageDir = path.dirname(path.resolve(pageFile));
   const own = fs.existsSync(pageFile) ? pageScripts(fs.readFileSync(pageFile, 'utf8')) : [];
   const done = new Set();
-  for (const src of [...own, ...BASE]) {
+  const hasOwnFace = own.some((o) => /face-track/.test(o));   // a vertical page loads face-track.vertical.js: do not overwrite it
+  const order = [...own, ...BASE.filter((b) => !(hasOwnFace && /face-track/.test(b)))];
+  // canvas.js must run before the runtime reads the canvas size
+  order.sort((a, b) => (/canvas\.js$/.test(b) ? 1 : 0) - (/canvas\.js$/.test(a) ? 1 : 0));
+  for (const src of order) {
     const key = src.replace(/\\/g, '/');
     if (done.has(key)) continue;
     done.add(key);

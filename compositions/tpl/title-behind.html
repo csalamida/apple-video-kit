@@ -17,6 +17,7 @@
     <script src="components/glass-components.js"></script>
     <script src="components/camera.js"></script>
     <script src="inputs/face-track.js"></script>
+    <script src="components/canvas.js"></script>
     <script src="components/tpl-runtime.js"></script>
     <style>
       /* Mount this host BELOW the cutout (z-index 30, the cutout is 50): the speaker stands in front of the type.
@@ -45,15 +46,16 @@
         }).join("");
         // shrink so the widest line fits the frame
         var widest = 0; tb.querySelectorAll(".ln span").forEach(function (s) { widest = Math.max(widest, s.offsetWidth); });
-        if (widest > 1760) tb.style.fontSize = (V.size * 1760 / widest) + "px";
+        var maxW = T.W - 160;
+        if (widest > maxW) tb.style.fontSize = (V.size * maxW / widest) + "px";
         // vertical position: centred on the upper head (from the face track), or an explicit top
         var h = tb.offsetHeight, top;
         if (V.top >= 0) top = V.top;
         else {
           var u = T.faceUnion(V.at + 0.5, Math.max(0, V.dur - 0.9));
-          top = u ? u.y0 + (u.y1 - u.y0) * 0.32 - h / 2 : (1080 - h) / 2;
+          top = u ? u.y0 + (u.y1 - u.y0) * 0.32 - h / 2 : (__hfTpl.H - h) / 2;
         }
-        tb.style.top = Math.max(30, Math.min(1080 - h - 30, top)) + "px";
+        tb.style.top = Math.max(30, Math.min(__hfTpl.H - h - 30, top)) + "px";
 
         var tl = gsap.timeline({paused:true}); window.__timelines["title-behind"] = tl;
         tl.fromTo(tb.querySelectorAll(".ln span"), {yPercent:105, opacity:0}, {yPercent:0, opacity:1, duration:0.9, ease:E.smooth, stagger:V.stagger}, 0.1);

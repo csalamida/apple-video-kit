@@ -2,17 +2,18 @@
 name: apple-video-editor
 description: >
   Directs, packages and edits video to Apple design standards (Liquid Glass materials, continuous-curvature
-  squircles, SF type, spring physics) in HyperFrames. Three modes: SPEAKER CUTOUT (scenes behind you, title behind the head), SCREEN SHARE (primary: screen recording +
+  squircles, SF type, spring physics) in HyperFrames. Four modes: SHORT-FORM REEL (vertical 1080x1920 with platform safe zones), SPEAKER CUTOUT (scenes behind you, title behind the head), SCREEN SHARE (primary: screen recording +
   webcam PiP with auto-style zooms as data) and TALKING HEAD (face-safe graphics over footage).
   Everything on screen is a parameterized template mounted with a host tag; camera moves, zooms and PiP are data.
   Includes a generated library with when-to-use cues, a stage engine (window + pan, no re-crop), spring easing,
   a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request, and
   for "change my background", "put me in an office / studio", "HeyGen-style background", "text behind me", "keep my mic",
-  "clean up this CapCut transcript", "colour grade this", "QA the render frame by frame".
+  "clean up this CapCut transcript", "colour grade this", "QA the render frame by frame",
+  "make a reel / short / TikTok", "vertical video", "9:16".
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.6.0"
+  version: "5.7.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -26,6 +27,7 @@ Turn raw footage into Apple-grade broadcast video without hand-animating each sc
 | **Screen share (primary)** | Screen/window recording + webcam. Most videos. | `projects/screen-share/` | `share.js` zooms; tall webcam PiP bottom-left |
 | **Talking head** | Webcam/interview footage with graphic cards | `index.html` | `components/camera.js` moves; templates stay off the face |
 | **Speaker cutout** | You, with the background replaced by a room or colour; title behind your head | `projects/speaker-cutout/` | `cutout.js` backgrounds, moves, parallax |
+| **Short-form reel** | Vertical 1080x1920 for Reels / TikTok / Shorts: captions and cards inside the platform safe zones | `projects/short-form/` | host tags in its `index.html`; no camera |
 
 Trigger on: "change / replace my background", "put me in an office", "HeyGen-style background", "text behind my head", "remove the background";
 an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "add overlays/captions",
@@ -51,6 +53,13 @@ an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "a
 3. Mic or other gear in front of the speaker: `npm run prop -- inputs/me.mp4 --at 8 --box x,y,w,h --name mic --keep dark`, then `foreground` in `cutout.js`.
 4. Edit `projects/speaker-cutout/cutout.js` and the page, then `npm run speaker:check` and look at frames (edges, light match, props, plate seams).
 5. Nothing that shows the speaker goes in git: everything lives in `inputs/`.
+
+**Short-form reel** - read `references/short-form.md` first (safe zones, hook, caption hold rules, which block for which job).
+1. Ask: portrait footage, the one idea and the ending action, platform, private data on screen.
+2. Footage into `inputs/`, `npm run face -- inputs/reel.mp4` (portrait writes `inputs/face-track.vertical.*`), point `#footage` at it.
+3. Polish the transcript (finishing playbook), paste `*.cues.json` into the `kinetic-subtitle` host; cues hold readable at least 0.5 s.
+4. `npm run short:check` (face clear + `npm run reel` rules + lint/layout/motion/contrast), snapshots, `npm run short:render`, then `npm run qa` with `--page projects/short-form/index.html`.
+5. Safe zones are estimates: ask the owner to check the first export on a phone.
 
 **Finishing (every mode)** - read `references/finishing.md` first.
 1. CapCut transcript in: `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4 --glossary inputs/glossary.json`; read the report, fix what rules cannot hear, ask about new terms, then `npm run plan` from the polished SRT. Filler cuts: `npm run trim -- <voice file> --cut-list inputs/capcut.fillers.json` (the CapCut export is already edited: do not silence-trim it again).

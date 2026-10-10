@@ -29,12 +29,13 @@
     <script src="components/glass-components.js"></script>
     <script src="components/camera.js"></script>
     <script src="inputs/face-track.js"></script>
+    <script src="components/canvas.js"></script>
     <script src="components/tpl-runtime.js"></script>
     <script src="components/tpl-parts.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { background: transparent; font-family: var(--font-ui); color: var(--label); overflow: hidden; }
-      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; pointer-events: none; }
+      #root { position: relative; width: var(--cw, 1920px); height: var(--ch, 1080px); overflow: hidden; pointer-events: none; }
 
       #card {
         position: absolute; padding: 36px 36px 32px;

@@ -6,6 +6,7 @@ Your source media goes here. Everything in this folder except this README is git
 |---|---|
 | `speaker.mp4` (any name) | Talking-head video (`index.html`, `#footage`) and the webcam card in screen-share |
 | `screen.mp4` | Screen recording for `projects/screen-share` (silent; voice comes from the webcam file) |
+| `face-track.vertical.js` / `.json` | The same for portrait footage (`projects/short-form`). `npm run face` picks this name by itself when the video is taller than wide |
 | `face-track.js` / `.json` | Face boxes that keep cards off your face. Generated (git-ignored), see below |
 
 The demo files in `inputs/_demo/` are generated on first run (a faceless silhouette and a test pattern). Point the `<video>` `src` at your own file to replace them.

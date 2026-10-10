@@ -8,13 +8,14 @@ Apple-style motion graphics for tutorial videos: a screen-share stage (primary) 
 - HyperFrames framework skills (`/hyperframes`, `/hyperframes-core`, `/hyperframes-animation`, `/hyperframes-cli`): install with `npx hyperframes skills update`. Start at `/hyperframes` for framework questions.
 - Docs: `npx hyperframes docs <topic>` (offline), or discover pages via `https://hyperframes.heygen.com/llms.txt` (do not guess URLs).
 
-## Three modes
+## Four modes
 
 | Mode | Files | Per-video data |
 |---|---|---|
 | Screen share (primary) | `projects/screen-share/index.html` | `projects/screen-share/share.js` |
 | Talking head | `index.html` | `components/camera.js` + template host tags |
 | Speaker cutout (scenes) | `projects/speaker-cutout/index.html` | `projects/speaker-cutout/cutout.js` |
+| Short-form reel (1080x1920) | `projects/short-form/index.html` | host tags in that page |
 
 ### Screen share
 
@@ -36,6 +37,10 @@ The cursor is baked into the screen recording: never synthesise or restyle one.
 - Speaker PiP and split rail are WINDOW moves (`win`, `fit: 'frame' | 'cover'`, `front`, `chrome`) driven by `__hfGlass.stage`: the window morphs, the footage is only panned/scaled inside `#camera-pan` > `#punch`, so it never re-crops. Never animate width/height on a `<video>`.
 - Speaker PiP docks bottom-left on the page margin; `app-window` with `layout:"rail"` fills the column above it.
 - Face boxes: `inputs/face-track.js` (git-ignored). The demo track is generated; for your footage run `npm run face -- inputs/<video>.mp4` (installs OpenCV into `.cache/face-venv` on first run).
+
+### Short-form reel (vertical)
+
+Read `.agents/skills/apple-video-editor/references/short-form.md` first. `npm run short:dev | short:check | short:render` sync `projects/short-form/` with `--canvas vertical`: `components/canvas.js` sets 1080x1920 and the platform safe zones (top 230, bottom 430, right 150), every template lays itself out on that canvas, and the face track is `inputs/face-track.vertical.js` (`npm run face` writes it for portrait footage). `npm run reel` (part of `short:check` and `short:render`) fails a caption that does not hold readable for 0.5 s after entrance and before exit, overlapping cues, captions or cards inside the safe zones, and caption CSS that clips glyphs. Never put position and entrance motion on the same element.
 
 ### Speaker cutout (scenes)
 
@@ -104,6 +109,8 @@ npm run trim -- inputs/webcam.mp4 --also inputs/screen.mp4   # cut pauses; print
 npm run plan -- transcript.srt --mode screen                  # draft cue plan from a transcript (.srt / .vtt)
 npm run face -- inputs/speaker.mp4                            # face track for your talking-head footage (self-installing)
 npm run speaker:dev    # speaker-cutout demo (scenes, title behind you)
+npm run short:dev      # vertical 1080x1920 reel demo (safe zones, captions)
+npm run reel           # short-form rules: caption hold, safe zones, glyph clipping
 npm run cutout -- inputs/me.mp4 --from 10 --to 25      # transparent video of the speaker (slow, local)
 npm run backdrop -- inputs/me.mp4 --scene office       # prompt for a scene that matches the camera angle
 npm run render         # talking head to MP4
@@ -143,6 +150,7 @@ The CLI is pinned (`hyperframes` 0.8.120 in package.json) so renders stay identi
 index.html                talking-head demo (root composition)
 projects/screen-share/    screen-share demo: index.html + share.js
 projects/speaker-cutout/  speaker-cutout demo: index.html + cutout.js
+projects/short-form/      vertical reel demo: index.html (1080x1920)
 compositions/tpl/         the 19 templates
 components/               tokens.css, glass CSS, glass-components.js (__hfGlass), screen-stage.js,
                           tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js, cutout-stage.js

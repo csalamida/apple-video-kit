@@ -31,6 +31,7 @@
     <script src="components/glass-components.js"></script>
     <script src="components/camera.js"></script>
     <script src="inputs/face-track.js"></script>
+    <script src="components/canvas.js"></script>
     <script src="components/tpl-runtime.js"></script>
     <script src="components/tpl-parts.js"></script>
     <style>
@@ -70,14 +71,14 @@ var V = T.vars({at:0,dur:3,safe:true,side:"right",top:110,width:1250,height:840,
         var pl = T.place({start:V.at,dur:V.dur,side:V.side,width:V.width,height:V.height,top:V.top,safe:V.safe,offsetX:V.offsetX,offsetY:V.offsetY,minWidth:600});
         aw.style.cssText += ";left:"+pl.left+"px;top:"+pl.top+"px;width:"+pl.width+"px;height:"+V.height+"px";
         var rl = document.getElementById("rail");
-        var railW = pl.side === "right" ? pl.left - 72 - 48 : 1920 - 72 - (pl.left + pl.width) - 48;
+        var railW = pl.side === "right" ? pl.left - 72 - 48 : __hfTpl.W - 72 - (pl.left + pl.width) - 48;
         if (rail && railW < 240) {   // not enough free column: put the headline inside the window instead
           rail = false;
           aw.querySelector(".pn-grid").insertAdjacentHTML("beforebegin", '<div class="eb">'+esc(V.eyebrow)+'</div><div class="hd">'+esc(V.titlePre)+' <span>'+esc(V.titleAccent)+'</span></div>');
         }
         if (rail) {
           // Headline lives in the free column beside the window (landscape-friendly), speaker PiP sits under it
-          var rw = pl.side === "right" ? pl.left - 72 - 48 : 1920 - 72 - (pl.left + pl.width) - 48;
+          var rw = pl.side === "right" ? pl.left - 72 - 48 : __hfTpl.W - 72 - (pl.left + pl.width) - 48;
           rl.style.setProperty("--s", V.scale);
           rl.style.cssText += ";top:"+(pl.top+8)+"px;width:"+rw+"px;left:"+(pl.side === "right" ? 72 : pl.left + pl.width + 48)+"px";
           rl.innerHTML = '<div class="re">'+esc(V.eyebrow)+'</div><div class="rt">'+esc(V.titlePre)+'<span>'+esc(V.titleAccent)+'</span></div>'+(V.railNote?'<div class="rn">'+esc(V.railNote)+'</div>':'');

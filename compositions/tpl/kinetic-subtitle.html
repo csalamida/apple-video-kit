@@ -17,6 +17,7 @@
     <script src="components/glass-components.js"></script>
     <script src="components/camera.js"></script>
     <script src="inputs/face-track.js"></script>
+    <script src="components/canvas.js"></script>
     <script src="components/tpl-runtime.js"></script>
     <script src="components/tpl-parts.js"></script>
     <style>
@@ -26,6 +27,9 @@
              border-radius:100px; padding:12px 38px; box-shadow: inset 0 1px 1.5px rgba(255,255,255,.5), 0 16px 40px rgba(0,0,0,.8); white-space:nowrap; }
       .cue .w { display:inline-block; margin:0 .16em; transform-origin:50% 80%; }
       .cue .kw { color: var(--accent-text); font-weight:700; }
+      /* vertical canvas: wrap inside the side safe zones and keep the pill shape generous */
+      .vertical #dock { width: max-content; max-width: calc(var(--cw) - 300px); }
+      .vertical .cue { white-space: normal; text-wrap: balance; padding: 18px 44px; border-radius: 56px; }
       .cue .kp { display:inline-block; transform-origin:50% 80%; }
     </style>
   </head>
