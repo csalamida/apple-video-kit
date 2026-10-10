@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA - Apple Video Kit</title>
+<link rel="stylesheet" href="../components/tokens.css">
+<link rel="stylesheet" href="library.css">
+<style>
+/* page-specific styles; the look comes from tokens.css + library.css */
+.qa-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 20px 0 18px; }
+.qa-top label { font-size: 12px; font-weight: 600; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--label-tertiary); }
+select.sel { background: var(--fill-2); border: 1px solid var(--separator); color: var(--label); border-radius: 100px; padding: 8px 14px; font: inherit; font-size: 14px; max-width: 100%; }
+.qa-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 24px; align-items: start; }
+.qa-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.qa-stage { position: relative; width: min(100%, calc(70vh * var(--ar, 1.7778))); margin: 0 auto; aspect-ratio: var(--ar, 16 / 9); background: #000; border-radius: 14px; overflow: hidden; border: 1px solid var(--separator); }
+.qa-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.qa-stage .badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 100px; background: rgba(0,0,0,.6); font-size: 12px; font-weight: 600; }
+.qa-stage .missing { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--label-secondary); font-size: 14px; line-height: 1.5; background: #15151a; }
+.qa-stage.nofile .missing { display: flex; }
+.qa-stage.nofile img { visibility: hidden; }
+.readout { font-family: var(--font-mono); font-size: 16px; font-variant-numeric: tabular-nums; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.readout .dim { color: var(--label-tertiary); font-size: 13px; }
+.scrub { display: flex; flex-direction: column; gap: 4px; }
+input[type=range].slider { -webkit-appearance: none; appearance: none; width: 100%; height: 24px; background: transparent; margin: 0; cursor: pointer; }
+input[type=range].slider::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: var(--fill-1); }
+input[type=range].slider::-moz-range-track { height: 4px; border-radius: 4px; background: var(--fill-1); }
+input[type=range].slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 50%; background: var(--label); border: 0; }
+input[type=range].slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--label); border: 0; }
+input[type=range].slider:focus-visible, .qa :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.strip { position: relative; height: 30px; margin: 0 8px; }
+.strip .band { position: absolute; top: 12px; height: 6px; border-radius: 3px; opacity: .55; min-width: 2px; }
+.strip .band.black { background: var(--red); }
+.strip .band.frozen { background: var(--orange); }
+.strip .band.flash { background: var(--yellow); }
+.strip .range { position: absolute; top: 4px; height: 22px; background: var(--accent-subtle); border: 1px solid var(--accent); border-radius: 4px; pointer-events: none; }
+.strip .play { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--label); pointer-events: none; }
+.tick { position: absolute; top: 6px; width: 10px; height: 18px; margin-left: -5px; padding: 0; border: 0; background: none; cursor: pointer; }
+.tick::after { content: ""; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: var(--c); }
+.tick:hover::after { width: 4px; left: 3px; }
+.k-enter { --c: var(--green); } .k-exit { --c: var(--orange); } .k-camera { --c: var(--accent); } .k-check { --c: var(--red); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--label-tertiary); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
+.ctl2 { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.keys { font-size: 12px; color: var(--label-tertiary); line-height: 1.6; }
+kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border-radius: 5px; background: var(--fill-1); border: 1px solid var(--separator); color: var(--label-secondary); }
+.card { background: var(--fill-2); border: 1px solid var(--separator); border-radius: 20px; corner-shape: var(--corner); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.card h2 { font-size: 17px; }
+.card textarea, .card input[type=text] { width: 100%; background: rgba(0,0,0,.35); border: 1px solid var(--separator); color: var(--label); border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 13px; }
+.card textarea { min-height: 56px; resize: vertical; }
+.rangeinfo { font-family: var(--font-mono); font-size: 13px; color: var(--label-secondary); }
+.status { font-size: 12px; color: var(--green); min-height: 16px; }
+.pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: var(--track-label); text-transform: uppercase; padding: 2px 9px; border-radius: 100px; background: var(--fill-1); color: var(--label-secondary); flex: none; }
+.pill.pass { background: rgba(48,209,88,.18); color: var(--green); }
+.pill.warn { background: rgba(255,214,10,.16); color: var(--yellow); }
+.pill.fail { background: rgba(255,69,58,.2); color: var(--red); }
+.autorow { display: grid; grid-template-columns: 64px 1fr; gap: 4px 10px; font-size: 13px; padding: 8px 0; border-top: 1px solid var(--separator); color: var(--label-secondary); line-height: 1.4; }
+.autorow:first-of-type { border-top: 0; }
+.autorow .pill { align-self: start; justify-self: start; }
+.autorow b { color: var(--label); font-weight: 600; }
+.autorow .links { grid-column: 2; display: flex; gap: 6px; flex-wrap: wrap; }
+.lnk { appearance: none; border: 0; background: var(--accent-subtle); color: var(--accent-text); font: inherit; font-size: 12px; font-family: var(--font-mono); padding: 2px 8px; border-radius: 100px; cursor: pointer; }
+.cat { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 10px 0; border-top: 1px solid var(--separator); align-items: center; }
+.cat:first-of-type { border-top: 0; }
+.cat .nm { font-size: 13px; font-weight: 600; }
+.cat .hint { grid-column: 1 / -1; font-size: 12px; color: var(--label-tertiary); margin-top: -4px; }
+.cat input[type=text] { grid-column: 1 / -1; }
+.segs { display: inline-flex; gap: 2px; padding: 2px; background: rgba(0,0,0,.35); border-radius: 100px; }
+.seg { appearance: none; border: 0; background: none; color: var(--label-secondary); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 5px 10px; border-radius: 100px; cursor: pointer; }
+.seg[aria-pressed="true"] { background: var(--label); color: #111; }
+.seg.p[aria-pressed="true"] { background: var(--green); }
+.seg.f[aria-pressed="true"] { background: var(--red); color: #fff; }
+.verdict { font-size: 15px; font-weight: 700; padding: 10px 14px; border-radius: 14px; background: var(--fill-1); }
+.verdict.ready { background: rgba(48,209,88,.18); color: var(--green); }
+.verdict.fail { background: rgba(255,69,58,.2); color: var(--red); }
+.verdict small { display: block; font-weight: 400; font-size: 12px; color: var(--label-secondary); margin-top: 3px; }
+.cuelist { max-height: 300px; overflow: auto; display: flex; flex-direction: column; }
+.cuerow { display: grid; grid-template-columns: 64px 62px 1fr; gap: 8px; align-items: center; font-size: 13px; padding: 6px 4px; border-top: 1px solid var(--separator); text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; color: var(--label-secondary); font-family: inherit; cursor: pointer; width: 100%; }
+.cuerow:first-child { border-top: 0; }
+.cuerow:hover { background: var(--fill-2); }
+.cuerow .tm { font-family: var(--font-mono); color: var(--label); }
+.cuerow .kd { font-size: 10px; font-weight: 700; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--c); }
+.issue { display: grid; grid-template-columns: 1fr auto; gap: 6px; font-size: 12px; padding: 6px 0; border-top: 1px solid var(--separator); color: var(--label-secondary); }
+.issue button { appearance: none; border: 0; background: none; color: var(--label-tertiary); font-size: 18px; cursor: pointer; line-height: 1; }
+.note-empty { color: var(--label-secondary); padding: 36px 0; line-height: 1.6; }
+.note-empty code { background: var(--fill-1); padding: 2px 7px; border-radius: 6px; font-size: 13px; }
+@media (max-width: 900px) { .qa-grid { grid-template-columns: 1fr; } .qa-stage { width: min(100%, calc(60vh * var(--ar, 1.7778))); } }
+@media (max-width: 640px) {
+  .bar { flex-wrap: wrap; gap: 10px 16px; padding: 12px 16px; }
+  .wrap { padding: 24px 16px 72px; }
+  h1 { font-size: 30px; }
+  .seg { padding: 7px 10px; }
+  .btn { padding: 9px 14px; }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">Apple Video Kit</div>
+  <nav class="nav" aria-label="Library"><a href="index.html">Components</a><a href="motion.html">Animations</a><a href="qa.html" aria-current="page">QA</a></nav>
+  <div class="spacer"></div>
+</header>
+
+<main class="wrap qa" id="app">
+  <h1>Frame QA</h1>
+  <p class="sub">Review the encoded video frame by frame. The automated checks run on the rendered file; the checklist below is yours. Nothing here approves a render: the best verdict is <b>ready for human sign-off</b>.</p>
+
+  <div class="qa-top" id="top" hidden>
+    <label for="run">Run</label><select class="sel" id="run" aria-label="QA run"></select>
+    <div class="modes" id="variants" role="group" aria-label="Variant"></div>
+  </div>
+
+  <div class="note-empty" id="empty" hidden></div>
+
+  <p class="note-empty" id="stale" role="status" hidden style="padding:0 0 16px;color:var(--yellow)"></p>
+  <div class="qa-grid" id="grid" hidden>
+    <div class="qa-col">
+      <div class="qa-stage" id="stage"><img id="frame" alt="Extracted video frame"><span class="badge" id="badge" hidden></span>
+        <div class="missing" id="missing"></div></div>
+      <div class="readout" id="readout" aria-live="off"></div>
+      <div class="scrub">
+        <input class="slider" id="slider" type="range" min="0" max="1" step="1" value="0" aria-label="Scrub across all frames">
+        <div class="strip" id="strip" aria-label="Cue strip"></div>
+        <div class="legend"><span style="--c:var(--green)"><i></i>enter</span><span style="--c:var(--orange)"><i></i>exit</span><span style="--c:var(--accent)"><i></i>camera / zoom</span><span style="--c:var(--red)"><i></i>check finding</span></div>
+      </div>
+      <div class="ctl2">
+        <button class="btn ghost" id="prev" aria-label="Previous frame">&larr;</button>
+        <button class="btn" id="playbtn" aria-label="Play or pause">Play</button>
+        <button class="btn ghost" id="next" aria-label="Next frame">&rarr;</button>
+        <button class="btn ghost" id="markA" aria-label="Mark A at this frame">Mark A</button>
+        <button class="btn ghost" id="markB" aria-label="Mark B at this frame">Mark B</button>
+      </div>
+      <div class="keys"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> one frame &middot; <kbd>Shift</kbd> ten &middot; <kbd>Space</kbd> play/pause &middot; mouse wheel steps &middot; <kbd>A</kbd> / <kbd>B</kbd> mark &middot; <kbd>V</kbd> switch variant</div>
+
+      <section class="card" aria-labelledby="h-range">
+        <h2 id="h-range">Feedback range</h2>
+        <div class="rangeinfo" id="rangeinfo">Mark A and B to select a range.</div>
+        <textarea id="note" placeholder="What is wrong in this range? (optional)" aria-label="Feedback note"></textarea>
+        <div class="row"><button class="btn" id="copycue">Copy feedback cue</button><button class="btn ghost" id="addissue">Add to issues</button><button class="btn ghost" id="clearmarks">Clear marks</button></div>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+        <div id="issues"></div>
+      </section>
+
+      <section class="card" aria-labelledby="h-cues">
+        <h2 id="h-cues">Cues</h2>
+        <div class="cuelist" id="cuelist"></div>
+      </section>
+    </div>
+
+    <div class="qa-col">
+      <section class="card" aria-labelledby="h-auto">
+        <h2 id="h-auto">Automated checks</h2>
+        <div id="auto"></div>
+      </section>
+      <section class="card" aria-labelledby="h-check">
+        <h2 id="h-check">Human checklist</h2>
+        <div class="rangeinfo" id="coverage"></div>
+        <div id="checklist"></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="row"><button class="btn" id="copyreport">Copy report JSON</button><button class="btn ghost" id="resetstate">Reset review</button></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+(() => {
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const QA = new URL('../qa/', location.href).href;
+
+const CATS = [
+  ['overlap_and_collisions', 'Cards, text and the face or webcam card do not overlap or collide.'],
+  ['clipping_and_bounds', 'Nothing is cut off or leaves the frame or its container.'],
+  ['blank_black_stale_frames', 'No blank, black or stale (leftover) frames.'],
+  ['caption_timing_and_persistence', 'Captions arrive with the words and do not linger or vanish early.'],
+  ['caption_safe_zones', 'Captions stay inside the safe area and clear of other UI.'],
+  ['transitions_and_cue_timing', 'Transitions and cues land on the spoken beat.'],
+  ['motion_easing_and_continuity', 'Motion eases, never pops, and the shot stays continuous.'],
+  ['stacking_masks_and_pip', 'Layer order, masks and the PiP card are right on every frame.'],
+  ['typography_contrast_and_readability', 'Text is legible: size, contrast, line breaks.'],
+  ['asset_fit_and_truth', 'Footage and images fit, are not stretched, and show what is claimed.'],
+  ['deterministic_seeking', 'Jumping to any frame shows the same picture as playing to it.']
+];
+const AUTO_LABEL = { black: 'Black frames', frozen: 'Frozen frames', duplicates: 'Duplicate frames', flash: 'Flash safety', loudness: 'Loudness' };
+
+let M = null, REPORT = null, S = null, variant = 0, cur = 0, playing = false, runName = '';
+const pad = (n, w) => String(n).padStart(w, '0');
+const fw = () => String(Math.max(0, M.frames - 1)).length < 4 ? 4 : String(M.frames - 1).length;
+const fmtF = (n) => pad(n, fw());
+const tOf = (f) => f / M.fps;
+const posPct = (f) => (M.frames > 1 ? (100 * f) / (M.frames - 1) : 0);
+const snap = (f) => { const st = M.step; return Math.max(0, Math.min(lastFrame(), Math.round(f / st) * st)); };
+const lastFrame = () => Math.floor((M.frames - 1) / M.step) * M.step;
+const vdef = () => M.variants[variant];
+const frameUrl = (v, f) => { const n = Math.min(Math.round(f / v.step) * v.step, Math.floor((v.frames - 1) / v.step) * v.step); return `${QA}${encodeURIComponent(v.name)}/f${pad(n, 5)}.jpg`; };
+
+// ---- state (localStorage, per run; always optional) ----
+const key = () => 'avk-qa:' + runName + ':' + (M && M.created ? M.created : '');
+function freshState() {
+  const checklist = {};
+  CATS.forEach(([c]) => { checklist[c] = { status: 'PENDING', notes: '' }; });
+  return { checklist, issues: [], markA: null, markB: null, note: '', visited: [], frame: 0, variant: 0 };
+}
+function loadState() {
+  const s = freshState();
+  try {
+    const raw = JSON.parse(localStorage.getItem(key()) || 'null');
+    if (raw) {
+      CATS.forEach(([c]) => { if (raw.checklist && raw.checklist[c]) s.checklist[c] = { status: ['PASS', 'FAIL'].includes(raw.checklist[c].status) ? raw.checklist[c].status : 'PENDING', notes: String(raw.checklist[c].notes || '') }; });
+      if (Array.isArray(raw.issues)) s.issues = raw.issues;
+      s.markA = Number.isInteger(raw.markA) ? raw.markA : null; s.markB = Number.isInteger(raw.markB) ? raw.markB : null;
+      s.note = String(raw.note || ''); s.visited = Array.isArray(raw.visited) ? raw.visited : [];
+      s.frame = Number.isInteger(raw.frame) ? raw.frame : 0; s.variant = Number.isInteger(raw.variant) ? raw.variant : 0;
+    }
+  } catch (e) { /* storage unavailable: the page still works for this visit */ }
+  return s;
+}
+// An older review of a run with this name (a previous render) is never applied to the new frames.
+function showStale() {
+  let n = 0;
+  try { const mine = key(); for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k !== mine && (k === 'avk-qa:' + runName || k.startsWith('avk-qa:' + runName + ':'))) n++; } } catch (e) { /* storage unavailable */ }
+  const el = $('#stale');
+  el.hidden = !n;
+  el.textContent = n ? `An earlier review saved for the run name "${runName}" belongs to a previous render and was ignored: this run starts PENDING. (${n} older review${n === 1 ? '' : 's'} kept in this browser.)` : '';
+}
+let saveTimer = 0;
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(key(), JSON.stringify({ ...S, visited: [...visited] })); } catch (e) { /* ignore */ } }, 200); }
+let visited = new Set();
+
+// ---- boot ----
+async function getJson(url) { const r = await fetch(url, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); }
+function showEmpty(html) { $('#empty').innerHTML = html; $('#empty').hidden = false; $('#grid').hidden = true; }
+
+async function boot() {
+  let index = [];
+  try { index = await getJson(QA + 'index.json'); } catch (e) { /* none yet */ }
+  if (!Array.isArray(index) || !index.length) {
+    $('#top').hidden = true;
+    showEmpty(`No QA run yet. Render a video, then run <code>npm run qa -- renders/&lt;video&gt;.mp4 --page index.html</code>, then reload this page.<br>This page has to be opened from the kit server (<code>npm run library</code>), not from a file.`);
+    return;
+  }
+  index.sort((a, b) => String(b.created).localeCompare(String(a.created)));
+  const wanted = new URLSearchParams(location.search).get('run');
+  const first = (index.find((r) => r.name === wanted) || index[0]).name;
+  $('#run').innerHTML = index.map((r) => `<option value="${esc(r.name)}">${esc(r.name)} (${r.frames} frames)</option>`).join('');
+  $('#top').hidden = false;
+  $('#run').onchange = () => { const u = new URL(location.href); u.searchParams.set('run', $('#run').value); history.replaceState(null, '', u); openRun($('#run').value); };
+  $('#run').value = first;
+  openRun(first);
+}
+
+async function openRun(name) {
+  stop();
+  runName = name;
+  try {
+    [M, REPORT] = await Promise.all([getJson(`${QA}${encodeURIComponent(name)}/manifest.json`), getJson(`${QA}${encodeURIComponent(name)}/report.json`).catch(() => null)]);
+  } catch (e) {
+    showEmpty(`Could not read <code>qa/${esc(name)}/manifest.json</code>. Run <code>npm run qa -- &lt;video&gt;.mp4 --name ${esc(name)}</code> to create it.`);
+    return;
+  }
+  $('#empty').hidden = true; $('#grid').hidden = false;
+  S = loadState();
+  showStale();
+  visited = new Set(S.visited);
+  variant = M.variants[S.variant] ? S.variant : 0;
+  cur = snap(S.frame);
+  $('#stage').style.setProperty('--ar', (M.width / M.height).toFixed(4));
+  $('#slider').max = String(M.frames - 1); $('#slider').step = String(M.step); $('#slider').value = String(cur);
+  buildVariants(); buildStrip(); buildCueList(); buildAuto(); buildChecklist(); renderIssues();
+  $('#note').value = S.note;
+  show(cur);
+  renderRange(); renderVerdict();
+}
+
+// ---- frame display ----
+function show(f) {
+  cur = snap(f);
+  $('#slider').value = String(cur);
+  const img = $('#frame'), v = vdef(), url = frameUrl(v, cur);
+  $('#stage').classList.remove('nofile');
+  img.onerror = () => {
+    $('#stage').classList.add('nofile');
+    $('#missing').innerHTML = `<div>Frame image missing:<br><code>qa/${esc(v.name)}/f${pad(Math.round(cur / v.step) * v.step, 5)}.jpg</code><br><br>Extract the frames again:<br><code>npm run qa -- ${esc(v.name === M.name && M.video ? M.video : '&lt;video&gt;.mp4')} --name ${esc(v.name)}</code></div>`;
+  };
+  img.onload = () => $('#stage').classList.remove('nofile');
+  img.src = url;
+  img.alt = `${v.name}, frame ${cur}`;
+  $('#readout').innerHTML = `<span>Frame ${fmtF(cur)} / ${fmtF(M.frames - 1)} &middot; ${tOf(cur).toFixed(4)} s</span><span class="dim">${esc(v.name)}${M.step > 1 ? ` &middot; every ${M.step} frames` : ''}</span>`;
+  $('#strip .play').style.left = posPct(cur) + '%';
+  visited.add(cur);
+  S.frame = cur;
+  coverage(); save();
+  // warm the cache for the next frames and for the other variant
+  for (const k of [1, 2]) { const n = snap(cur + k * M.step); if (n !== cur) new Image().src = frameUrl(v, n); }
+  M.variants.forEach((o, i) => { if (i !== variant) new Image().src = frameUrl(o, cur); });
+}
+const go = (f) => show(f);
+const stepBy = (n) => show(cur + n * M.step);
+
+// ---- play ----
+let raf = 0, t0 = 0, f0 = 0;
+function play() {
+  if (cur >= lastFrame()) cur = 0;
+  playing = true; $('#playbtn').textContent = 'Pause'; t0 = performance.now(); f0 = cur;
+  const tick = (now) => { if (!playing) return; const f = snap(f0 + ((now - t0) / 1000) * M.fps); if (f !== cur) show(f); if (f >= lastFrame()) { stop(); return; } raf = requestAnimationFrame(tick); };
+  raf = requestAnimationFrame(tick);
+}
+function stop() { playing = false; cancelAnimationFrame(raf); const b = $('#playbtn'); if (b) b.textContent = 'Play'; }
+const toggle = () => (playing ? stop() : play());
+
+// ---- variants ----
+function buildVariants() {
+  const box = $('#variants');
+  box.innerHTML = M.variants.length > 1 ? M.variants.map((v, i) => `<button class="tab" type="button" data-i="${i}" aria-pressed="${i === variant}">${i === 0 ? 'A' : 'B'}: ${esc(v.name)}</button>`).join('') : '';
+  $('#badge').hidden = M.variants.length < 2;
+  box.onclick = (e) => { const b = e.target.closest('[data-i]'); if (b) setVariant(+b.dataset.i); };
+}
+function setVariant(i) {
+  if (!M.variants[i]) return;
+  variant = i; S.variant = i;
+  document.querySelectorAll('#variants [data-i]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
+  $('#badge').textContent = M.variants[i].name;
+  show(cur);
+}
+
+// strobe blacks are the flash finding, not separate black findings
+const inFlash = (b) => (((M.checks || {}).flash || {}).windows || []).some((w) => b.start >= w.start - 0.1 && b.end <= w.end + 0.1);
+
+// ---- cue strip ----
+function buildStrip() {
+  const st = $('#strip');
+  const bands = [];
+  const add = (cls, a, b) => bands.push(`<div class="band ${cls}" style="left:${posPct(a * M.fps)}%;width:${Math.max(0, posPct(b * M.fps) - posPct(a * M.fps))}%"></div>`);
+  ((M.checks.black || {}).ranges || []).filter((r) => !inFlash(r)).forEach((r) => add('black', r.start, r.end));
+  ((M.checks.frozen || {}).ranges || []).filter((r) => r.dur >= 1.5).forEach((r) => add('frozen', r.start, r.end));
+  ((M.checks.flash || {}).windows || []).forEach((r) => add('flash', r.start, r.end));
+  st.innerHTML = `<div class="range" id="rangeband" hidden></div>${bands.join('')}<div class="play"></div>` +
+    M.cues.map((c, i) => `<button class="tick k-${esc(c.kind)}" type="button" tabindex="-1" data-i="${i}" style="left:${posPct(c.t * M.fps)}%" title="${esc(c.t.toFixed(2))} s ${esc(c.label)}" aria-label="Jump to ${esc(c.label)} at ${esc(c.t.toFixed(2))} seconds"></button>`).join('');
+  st.onclick = (e) => { const b = e.target.closest('.tick'); if (b) go(M.cues[+b.dataset.i].t * M.fps); };
+  $('#badge').textContent = vdef().name;
+}
+function buildCueList() {
+  const box = $('#cuelist');
+  if (!M.cues.length) { box.innerHTML = `<p class="desc" style="padding:6px 0">No cues. Run the check with <code>--page index.html</code> to read cue times from the composition.</p>`; return; }
+  box.innerHTML = M.cues.map((c, i) => `<button class="cuerow k-${esc(c.kind)}" type="button" data-i="${i}" aria-label="Jump to ${esc(c.label)} at ${esc(c.t.toFixed(2))} seconds"><span class="tm">${c.t.toFixed(2)} s</span><span class="kd">${esc(c.kind)}</span><span>${esc(c.label)}</span></button>`).join('');
+  box.onclick = (e) => { const b = e.target.closest('.cuerow'); if (b) go(M.cues[+b.dataset.i].t * M.fps); };
+}
+
+// ---- automated results ----
+function buildAuto() {
+  const A = (REPORT && REPORT.autoChecks) || {};
+  const order = [...Object.keys(A).filter((k) => k.startsWith('gate:')), 'black', 'frozen', 'duplicates', 'flash', 'loudness'].filter((k) => A[k]);
+  const jumps = (k) => {
+    const C = M.checks || {};
+    const r = k === 'black' ? ((C.black || {}).ranges || []).filter((x) => !inFlash(x)) : k === 'frozen' ? ((C.frozen || {}).ranges || []).filter((x) => x.dur >= 1.5) : k === 'flash' ? (C.flash || {}).windows : null;
+    if (!r || !r.length) return '';
+    const shown = r.slice(0, 6).map((x) => `<button class="lnk" type="button" data-t="${x.start}">${x.start.toFixed(2)} s</button>`).join('');
+    return `<div class="links">${shown}${r.length > 6 ? `<span class="desc">+${r.length - 6} more in the cue list</span>` : ''}</div>`;
+  };
+  $('#auto').innerHTML = order.length ? order.map((k) => {
+    const a = A[k], label = k.startsWith('gate:') ? ((M.gates.find((g) => 'gate:' + g.id === k) || {}).label || k) : AUTO_LABEL[k] || k;
+    return `<div class="autorow"><span class="pill ${esc(a.status)}">${esc(a.status)}</span><span><b>${esc(label)}</b><br>${esc(a.summary)}</span>${jumps(k)}</div>`;
+  }).join('') : '<p class="desc">No automated results in report.json.</p>';
+  $('#auto').onclick = (e) => { const b = e.target.closest('.lnk'); if (b) go(+b.dataset.t * M.fps); };
+}
+
+// ---- marks, copy ----
+function rangeSorted() { if (S.markA === null || S.markB === null) return null; return S.markA <= S.markB ? [S.markA, S.markB] : [S.markB, S.markA]; }
+function renderRange() {
+  const r = rangeSorted(), band = $('#rangeband');
+  const a = S.markA === null ? 'A -' : `A ${fmtF(S.markA)} (${tOf(S.markA).toFixed(3)} s)`, b = S.markB === null ? 'B -' : `B ${fmtF(S.markB)} (${tOf(S.markB).toFixed(3)} s)`;
+  $('#rangeinfo').textContent = r ? `${a}  ->  ${b}  ·  ${r[1] - r[0] + 1} frames, ${(tOf(r[1]) - tOf(r[0])).toFixed(3)} s` : `${a}  ${b}${S.markA === null && S.markB === null ? '  ·  mark A and B to select a range' : ''}`;
+  if (r) { band.hidden = false; band.style.left = posPct(r[0]) + '%'; band.style.width = Math.max(0.3, posPct(r[1]) - posPct(r[0])) + '%'; } else band.hidden = true;
+}
+function cuesIn(r) { return M.cues.filter((c) => c.t * M.fps >= r[0] - 0.5 && c.t * M.fps <= r[1] + 0.5); }
+function cueText() {
+  const r = rangeSorted() || [cur, cur];
+  const name = vdef().name;
+  let s = `${name} - frames ${fmtF(r[0])} to ${fmtF(r[1])} (${tOf(r[0]).toFixed(3)} s to ${tOf(r[1]).toFixed(3)} s)`;
+  const cs = cuesIn(r);
+  if (cs.length) s += '\nCues in range: ' + cs.map((c) => `${c.label} @ ${c.t.toFixed(2)} s`).join('; ');
+  if (S.note.trim()) s += '\nNote: ' + S.note.trim();
+  return s;
+}
+function say(msg) { const el = $('#status'); el.textContent = msg; clearTimeout(say.t); say.t = setTimeout(() => { el.textContent = ''; }, 2500); }
+async function copy(text, msg) {
+  try { await navigator.clipboard.writeText(text); say(msg); return; } catch (e) { /* fall through */ }
+  const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); say(msg); } catch (e) { say('Copy failed: select the text and copy it by hand.'); }
+  ta.remove();
+}
+function renderIssues() {
+  $('#issues').innerHTML = S.issues.map((it, i) => `<div class="issue"><span>${esc(it.text)}</span><button type="button" data-i="${i}" aria-label="Remove issue ${i + 1}">&times;</button></div>`).join('');
+}
+
+// ---- checklist + verdict ----
+function buildChecklist() {
+  $('#checklist').innerHTML = CATS.map(([c, hint]) => {
+    const st = S.checklist[c].status;
+    const seg = (v, cls) => `<button class="seg ${cls}" type="button" data-c="${c}" data-v="${v}" aria-pressed="${st === v}" aria-label="${esc(c.replace(/_/g, ' '))}: ${v}">${v}</button>`;
+    return `<div class="cat"><div class="nm">${esc(c.replace(/_/g, ' '))}</div><div class="segs" role="group" aria-label="${esc(c.replace(/_/g, ' '))}">${seg('PASS', 'p')}${seg('FAIL', 'f')}${seg('PENDING', 'n')}</div><div class="hint">${esc(hint)}</div><input type="text" data-n="${c}" value="${esc(S.checklist[c].notes)}" placeholder="Notes" aria-label="Notes: ${esc(c.replace(/_/g, ' '))}"></div>`;
+  }).join('');
+}
+function autoFails() { const A = (REPORT && REPORT.autoChecks) || {}; return Object.keys(A).filter((k) => A[k].status === 'fail'); }
+function verdict() {
+  const st = CATS.map(([c]) => S.checklist[c].status);
+  if (st.includes('FAIL')) return 'FAIL';
+  if (st.every((x) => x === 'PASS') && autoFails().length === 0) return 'READY FOR HUMAN SIGN-OFF';
+  return 'PENDING';
+}
+function renderVerdict() {
+  const v = verdict(), el = $('#verdict'), fails = autoFails();
+  el.className = 'verdict' + (v === 'FAIL' ? ' fail' : v.startsWith('READY') ? ' ready' : '');
+  const pend = CATS.filter(([c]) => S.checklist[c].status === 'PENDING').length;
+  el.innerHTML = `Verdict: ${esc(v)}<small>${v === 'PENDING' ? `${pend} categor${pend === 1 ? 'y' : 'ies'} still pending${fails.length ? `; failing automated check: ${esc(fails.join(', '))}` : ''}.` : ''} Owner approval stays PENDING: it is never set from this page.</small>`;
+}
+function coverage() {
+  const total = Math.floor((M.frames - 1) / M.step) + 1;
+  const pct = total ? Math.round((100 * visited.size) / total) : 0;
+  $('#coverage').textContent = `Coverage: ${visited.size} / ${total} extracted frames viewed (${pct}%)${M.step > 1 ? ` · every ${M.step} of ${M.frames} frames` : ''}`;
+}
+function reportJson() {
+  const checklist = {};
+  CATS.forEach(([c]) => { checklist[c] = { status: S.checklist[c].status, notes: S.checklist[c].notes }; });
+  return {
+    generated: REPORT ? REPORT.generated : null, reviewed: new Date().toISOString(), run: runName, checklist,
+    coverage: { framesReviewed: visited.size, framesTotal: M.frames, step: M.step, extractedTotal: Math.floor((M.frames - 1) / M.step) + 1 },
+    issues: S.issues, autoChecks: REPORT ? REPORT.autoChecks : {}, verdict: verdict(), render_approval: 'PENDING'
+  };
+}
+
+// ---- events ----
+$('#slider').addEventListener('input', (e) => { stop(); show(+e.target.value); });
+$('#prev').onclick = () => { stop(); stepBy(-1); };
+$('#next').onclick = () => { stop(); stepBy(1); };
+$('#playbtn').onclick = toggle;
+$('#markA').onclick = () => { S.markA = cur; renderRange(); save(); };
+$('#markB').onclick = () => { S.markB = cur; renderRange(); save(); };
+$('#clearmarks').onclick = () => { S.markA = S.markB = null; renderRange(); save(); };
+$('#note').oninput = (e) => { S.note = e.target.value; save(); };
+$('#copycue').onclick = () => copy(cueText(), 'Feedback cue copied.');
+$('#addissue').onclick = () => { S.issues.push({ text: cueText().replace(/\n/g, ' | '), frames: rangeSorted() || [cur, cur], variant: vdef().name, note: S.note.trim() }); renderIssues(); save(); say('Added to issues.'); };
+$('#issues').onclick = (e) => { const b = e.target.closest('button[data-i]'); if (b) { S.issues.splice(+b.dataset.i, 1); renderIssues(); save(); } };
+$('#checklist').addEventListener('click', (e) => {
+  const b = e.target.closest('.seg'); if (!b) return;
+  S.checklist[b.dataset.c].status = b.dataset.v;
+  b.parentElement.querySelectorAll('.seg').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  renderVerdict(); save();
+});
+$('#checklist').addEventListener('input', (e) => { const n = e.target.dataset && e.target.dataset.n; if (n) { S.checklist[n].notes = e.target.value; save(); } });
+$('#copyreport').onclick = () => copy(JSON.stringify(reportJson(), null, 2), 'Report JSON copied.');
+$('#resetstate').onclick = () => { if (!confirm('Clear the checklist, issues, marks and coverage for this run?')) return; try { localStorage.removeItem(key()); } catch (e) { /* ignore */ } openRun(runName); };
+
+const typing = (el) => el && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || (el.tagName === 'INPUT' && el.type !== 'range' && el.type !== 'checkbox'));
+document.addEventListener('keydown', (e) => {
+  if (!M || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
+  const k = e.key;
+  if (k === 'ArrowLeft' || k === 'ArrowRight') { e.preventDefault(); stop(); stepBy((k === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 10 : 1)); }
+  else if (k === ' ' || k === 'Spacebar') { if (e.target.closest && e.target.closest('button')) return; e.preventDefault(); toggle(); }
+  else if (k === 'a' || k === 'A') { S.markA = cur; renderRange(); save(); }
+  else if (k === 'b' || k === 'B') { S.markB = cur; renderRange(); save(); }
+  else if (k === 'v' || k === 'V') { if (M.variants.length > 1) setVariant((variant + 1) % M.variants.length); }
+  else if (k === 'Home') { e.preventDefault(); stop(); show(0); }
+  else if (k === 'End') { e.preventDefault(); stop(); show(lastFrame()); }
+});
+let wheelAcc = 0;
+$('#stage').addEventListener('wheel', (e) => {
+  if (!M) return; e.preventDefault(); stop();
+  wheelAcc += e.deltaY;
+  const n = Math.trunc(wheelAcc / 40);
+  if (n) { wheelAcc -= n * 40; stepBy(n * (e.shiftKey ? 10 : 1)); }
+}, { passive: false });
+
+boot();
+})();
+</script>
+</body>
+</html>

@@ -1,132 +1,148 @@
 # Apple Video Kit
 
-Apple-style motion graphics for tutorial videos, built on [HyperFrames](https://hyperframes.heygen.com) (videos written as HTML + GSAP, rendered to MP4).
+**Make polished tutorial videos by writing a few lines of settings, not by dragging clips around a timeline.**
 
-Two formats:
+<p>
+  <img src="assets/demo/shot-talking-head.jpg" alt="A talking-head video with a title, an app window, a captions pill and the speaker in a small card" width="49%">
+  <img src="assets/demo/shot-speaker-cutout.jpg" alt="A speaker placed in an office with a big title behind their head" width="49%">
+</p>
+<sub>Both frames come from the demos that ship with the kit. The speaker is a faceless placeholder.</sub>
 
-- **Screen share**: your screen recording floats on a wallpaper, zooms in on what you are talking about, and your webcam sits in a tall card bottom-left that tucks away while the screen zooms.
-- **Talking head**: your camera full frame, with glass cards, lower-thirds, subtitles and a speaker picture-in-picture that keep clear of your face automatically.
+## What is this?
 
-Everything is data. You describe a video as times and settings ("at 3.2 s zoom to the form", "at 9 s put a callout on the submit button"); the kit does the motion.
+You record yourself, and usually your screen. This kit turns that footage into a clean, professional video with smooth zooms, captions, titles, cards and transitions, all in an Apple-style look (soft glass, rounded corners, gentle spring motion).
 
-> Not affiliated with Apple Inc. "Apple-style" describes the design language (springs, glass, squircles, system type). No Apple assets are included: icons are original, fonts are your system's.
+You do not edit by hand. You describe the video in a short settings file, for example "at 3 seconds zoom into the form" or "at 9 seconds put a ring around the Submit button", and the kit does the motion. It is free, it runs on your own computer, and nothing is uploaded.
+
+It is built on [HyperFrames](https://hyperframes.heygen.com), a tool that turns web pages into video files. You do not need to know how that works.
+
+> Not affiliated with Apple Inc. "Apple-style" only describes the look. No Apple assets are included: the icons are original and the fonts are your computer's own.
+
+## Pick your kind of video
+
+| | Screen share | Talking head | Speaker cutout |
+|---|---|---|---|
+| **Use it when** | You show an app or a website and talk over it | You talk to the camera and sometimes show something | You want to look like you are in an office or studio, or put big text behind your head |
+| **What you get** | Your screen floats on a wallpaper and zooms to what you talk about; your webcam sits in a small card that tucks away when the screen zooms | Glass cards, lower-thirds, captions and a small picture of you that moves out of the way of your face | A new room behind you, a title behind your head, your mic still in front of you |
+| **You edit** | `projects/screen-share/share.js` | `components/camera.js` and `index.html` | `projects/speaker-cutout/cutout.js` |
+| **Try the demo** | `npm run share:dev` | `npm run dev` | `npm run speaker:dev` |
+
+## What is in the box
+
+- **19 ready-made blocks** you place by time: info cards, an app window, a contact card, a checklist, a quote, a before/after slider, keyboard shortcut keys, a "link in the description" chip, a fast-forward badge, a lower-third, captions, a chapter pill, an intro or end card, a title that sits behind your head, an iMessage phone, and a transition pack (fade, flash, blur, glass wipe, iris, light sweep, chapter break).
+- **Screen-share moves:** zooms with a slow drift, callout rings, "look here" dimming, blur boxes for private info (emails, keys, client names), your webcam going full screen or hiding, and a small punch-in at every cut.
+- **Tools** to prepare and finish: cut pauses, clean up a CapCut transcript, colour grade, frame-by-frame review (see [The tools](#the-tools)).
+- **A library page** where you browse every block and animation, play it, change its text and copy the code. It also has a storyboard to plan a video and a frame-by-frame review page.
+- **Checks** that catch mistakes before you render: text unreadable, a card covering your face, a missing audio track, private data in a commit.
 
 ## Quick start
 
-Needs Node 22+ and ffmpeg. Python 3.9+ only for face detection on your own talking-head footage (its OpenCV dependency installs itself on first use).
-
-Start a new project:
+You need [Node.js 22+](https://nodejs.org) and [ffmpeg](https://ffmpeg.org). The face and cutout tools also need Python 3.9+; they install what they need by themselves the first time.
 
 ```bash
 npx github:csalamida/apple-video-kit init my-video
 cd my-video
 npm install
-npm run library        # browse the components and animations at http://localhost:4173/library/
-npm run share:dev      # screen-share demo
-npm run dev            # talking-head demo
+npm run library
 ```
 
-Or clone this repo and run `npm install` in it.
+Open <http://localhost:4173/library/>. You will see every block, with a Play button and editable text. The **Animations** page shows every move, and the **QA** page is the frame-by-frame reviewer.
 
-The demos ship with no real footage. On first run the kit generates a faceless placeholder speaker, a test-pattern screen and a matching demo face track (all git-ignored).
+Then try a demo:
 
-## Updating
+```bash
+npm run share:dev      # screen share
+npm run dev            # talking head
+npm run speaker:dev    # speaker cutout
+```
 
-Get the latest templates, moves, tools and docs without losing your work. Run inside your project:
+The demos need no footage. On first run the kit makes a faceless placeholder speaker and a test-pattern screen for you.
+
+Prefer to clone? `git clone https://github.com/csalamida/apple-video-kit.git`, then `npm install`.
+
+## Make your own video
+
+1. **Put your footage in `inputs/`.** That folder is never uploaded or committed, so your face and voice stay on your computer.
+2. **Point the page at your files.** Screen share: set `#screen` (your screen recording, no sound) and `#cam` (your webcam, with your voice) in `projects/screen-share/index.html`. Talking head: set `#footage` in `index.html`.
+3. **Describe the video.** Open the settings file for your kind of video (table above). Each line is a moment: a time, and what should happen. The library page shows the exact line for every block and move, so you can copy and paste.
+4. **Check it.** `npm run check:all` runs every check and tells you in plain words what is wrong.
+5. **Render.** `npm run share:render`, `npm run render` or `npm run speaker:render` writes an MP4 into `renders/`.
+6. **Review the render.** `npm run qa -- renders/<file>.mp4` then open the QA page and step through it.
+
+Not sure where to start? Ask an AI editor (next section) and say what kind of video you want.
+
+## The tools
+
+Every tool is one command. Inputs and results live in `inputs/`.
+
+**Prepare**
+
+| Command | What it does |
+|---|---|
+| `npm run trim -- inputs/webcam.mp4 --also inputs/screen.mp4` | Cuts the pauses and keeps screen and webcam in sync. Prints the clips and the jump-cut times. |
+| `npm run face -- inputs/me.mp4` | Finds your face once, so cards know to stay off it. |
+| `npm run cutout -- inputs/me.mp4 --from 10 --to 25` | Makes a transparent video of you for the cutout mode. Slow (about 1 frame per second), so only do the stretches that need it. Optional light wrap (`--plate`), `--erase` for leftovers like a chair back, `--scale 0.5` to go faster. |
+| `npm run backdrop -- inputs/me.mp4 --scene office` | Measures your camera angle and light and writes the prompt for an image generator, so the room it makes matches you. Scenes: office, studio, living-room, cafe, library, conference-room. |
+| `npm run plate -- inputs/room-with-me.png` | If your generated image has you in it, this removes you and gives a clean room. |
+| `npm run prop -- inputs/me.mp4 --box x,y,w,h --name mic --keep dark` | Cuts something in front of you (a mic, a mug) so it stays in front of you after the cutout. |
+
+**Plan**
+
+| Command | What it does |
+|---|---|
+| `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4` | Cleans up a CapCut transcript: fixes names and punctuation, collapses repeats, finds filler words, makes clean captions and word timings, and writes a report of every change. |
+| `npm run plan -- inputs/transcript.srt --mode screen` | Reads a transcript and suggests what to add where (zooms, callouts, blurs, cards). It flags emails and keys it hears. |
+
+**Finish**
+
+| Command | What it does |
+|---|---|
+| `npm run grade -- inputs/me.mp4` | Fixes white balance and exposure from your face, then applies a look. A skin-tone guard refuses any grade that makes skin look wrong. Speaker only, never screen recordings. |
+| `npm run qa -- renders/video.mp4 --page index.html` | Reviews the finished file: size, length, sound, black frames, frozen stretches, flashing, loudness. Saves every frame for the QA page. It never approves a video; you do. |
+
+**Check**
+
+`npm run check:all` runs everything. The individual ones are `check` (talking head), `share:check`, `speaker:check`, `check:face` (nothing covers your face) and `check:privacy` (nothing private is about to be committed).
+
+## Working with an AI editor
+
+The kit includes instructions for AI coding assistants (Claude Code, Codex and others): `CLAUDE.md`, `AGENTS.md` and a skill in `.agents/skills/apple-video-editor/`. They hold the house rules (design, timing, what each block is for) and step-by-step playbooks for the speaker cutout and for finishing a video.
+
+A good way to work: send your CapCut transcript, say what kind of video it is, and ask for a first draft. The assistant polishes the transcript, drafts the cue plan, writes the settings, runs the checks and shows you frames. If you want a new background it will ask what place you want, give you the prompt, and wait for your image.
+
+## Keeping it up to date
 
 ```bash
 npx github:csalamida/apple-video-kit update --dry-run   # see what would change
 npx github:csalamida/apple-video-kit update
-npm install && npm run build:library && npm run check:all
+npm install
 ```
 
-- **Updated:** the kit's own files: `compositions/tpl/`, `components/` (except `camera.js`), `scripts/`, `library/`, `assets/demo/`, the docs and the skill. New `package.json` scripts and versions are merged in; your name, version and extra scripts stay.
-- **Never touched:** your files: `inputs/` (footage and face track), `index.html`, `components/camera.js`, everything in `projects/` (your `share.js` and pages), `meta.json`, `hyperframes.json` and `.privacy-denylist`.
-- **Your edits are safe:** if you changed a kit file (say you tweaked a template), your version is copied to `.kit/backup/<time>/` before it is replaced, and the update lists those files.
-- The kit records what it installed in `.kit/manifest.json`; commit it so the next update can tell your edits apart from old kit files. Cloned this repo instead? `git pull` works too, or run the update command in your clone.
+The update replaces the kit's own files and never touches yours: `inputs/`, `index.html`, `components/camera.js`, everything in `projects/` (your settings files) and your privacy list. If you edited a kit file, your version is saved to `.kit/backup/` first and the update tells you which files.
 
-## Use your own footage
+## Privacy
 
-1. Put your files in `inputs/` (git-ignored, so they never end up in the repo).
-2. Screen share: point `#screen` (silent screen recording) and `#cam` (webcam with your voice) in `projects/screen-share/index.html` at them. Talking head: point `#footage` in `index.html` at your video.
-3. Talking head only: `npm run face -- inputs/your-video.mp4` once so cards know where your face is. The first run sets up a private Python environment in `.cache/` and installs OpenCV (about 40 MB); it writes `inputs/face-track.js`, which stays out of git.
-4. Describe the video:
-   - screen share: `projects/screen-share/share.js` (zooms, webcam moments, callouts, focus, redaction, jump cuts)
-   - talking head: `components/camera.js` (camera moves) and template host tags in `index.html`
-5. `npm run share:render` or `npm run render`.
-
-## What is in the box
-
-**The library** (`npm run library`) has two pages:
-- **Components** (`/library/`): a gallery of every block. Hover to play, click to open it with a live preview over the speaker, editable props, a "when to use it" note and the copy-ready host tag. A storyboard drawer collects blocks with times and copies them out as host tags or as a plan for an AI editor.
-- **Animations** (`/library/motion.html`): every move, playable: screen-share moves, camera moves, the transition library, the three springs, and a "which motion when" cheat sheet.
-
-| Blocks (`compositions/tpl/`) | Use it when you say... |
-|---|---|
-| `glass-card`, `app-window`, `contact-card` | "here is how it works", "let me show you", "this record" |
-| `lower-third`, `title-card` | first seconds of the video, intro and end cards |
-| `chapter-pill`, `checklist` | "three ways", "step two", "to recap" |
-| `kinetic-subtitle`, `quote` | every sentence; "the key is" |
-| `metric-counter` | a number |
-| `notification-stack`, `imessage-phone` | "you get a text", "an alert fires" |
-| `keys` | "press Command K" |
-| `before-after` | "before", "after", "it used to look like" |
-| `link-chip` | "link in the description" |
-| `fast-forward` | a sped-up or skipped stretch |
-| `spotlight` | "look at this part" (talking head) |
-| `transition` | section changes: dip, flash, blur, glass wipe, iris, light sweep, chapter |
-| `title-behind` | the hook or the one idea, with the cutout (type behind your head) |
-
-**Speaker cutout and scenes** (`projects/speaker-cutout/`): remove the background behind you and put yourself in a place.
-- **Background:** a photoreal room (office, studio, living room, cafe, library, conference room) that matches your camera angle, a studio colour, your own room blurred, or your own image. Backgrounds crossfade, and the room drifts slightly when you move (parallax).
-- **Title behind you:** big type that sits behind your head while you talk in front of it (`title-behind`).
-- **Speaker aside:** you glide to one side and shrink to make room for a card or a number.
-
-```bash
-npm run cutout -- inputs/me.mp4 --from 10 --to 25     # transparent video of you (local AI, nothing uploaded)
-npm run backdrop -- inputs/me.mp4 --scene office       # measures your framing and light, writes the image prompt
-npm run prop -- inputs/me.mp4 --at 8 --box 230,770,560,310 --name mic --keep dark   # bring your mic back (see below)
-npm run speaker:dev                                    # the demo: faceless placeholder, stylised office
-```
-
-The matting model keeps people only, so a microphone or mug in front of you disappears. `npm run prop` cuts such an object out of one frame (OpenCV GrabCut inside the box you give it; the Python packages install themselves) into a transparent full-frame PNG, and `foreground: [{ src: 'inputs/mic.prop.png' }]` in `cutout.js` layers it back in front of you, exactly where it is in the footage. It writes a `.preview.png`; use `--exclude "x,y,w,h;..."` to clear leftovers. For things that do not move.
-
-`npm run cutout` uses HyperFrames' own background-removal model. It is slow (about 0.5 to 1 frame per second on a laptop, 10 s of 30 fps video is roughly 5 minutes), so cut only the stretches that use it with `--from` and `--to`. The first run downloads the model (about 170 MB). Hair and shoulders come out clean; a piece of a chair or object right behind you can survive (re-record against a plain background, or keep it out of frame).
-
-The full workflow, with the reasons and a troubleshooting table, is in `.agents/skills/apple-video-editor/references/speaker-cutout.md`.
-
-`npm run backdrop` makes the scene match you. It measures from a frame of your video (no upload): where your eyes sit (the horizon the room must share), how big your head is, which side the light comes from, how bright you are and how warm the room is. It writes two prompts: a text-only one for any image model, and an image-edit one to use with the reference frame it saves. Generate the image with the tool you prefer (ask for an empty room; if you only get an image with you in it, `npm run plate -- inputs/room-with-me.png --out inputs/office.png` removes you), save it as `inputs/office.png`, and add `{ kind: 'scene', src: 'inputs/office.png', blur: 3 }` to `cutout.js`. Not included: automatic light wrap on the edges (the matte edge is cleaned, not re-lit).
-
-**Screen-share moves** (`projects/screen-share/share.js`): zoom + slow drift, callout, focus dim, redact, webcam full / card / hidden, jump-cut punch.
-
-**Editing tools**
-
-```bash
-node scripts/auto-trim.mjs inputs/webcam.mp4 --also inputs/screen.mp4   # cut pauses; prints synced clips + jump-cut times
-node scripts/cue-plan.mjs inputs/transcript.srt --mode screen            # transcript -> suggested blocks and moves
-```
-
-**Checks**
-
-```bash
-npm run check:all      # everything below
-npm run check          # HyperFrames lint, layout, motion and contrast (talking head)
-npm run share:check    # same for screen share, plus cards vs the webcam card
-npm run speaker:check  # same for the speaker-cutout demo
-npm run check:face     # host contracts + no card covers the speaker's face
-npm run check:privacy  # no footage, images, big files or denylisted names in git
-```
-
-`check:privacy` reads an optional, git-ignored `.privacy-denylist` (one name per line) so you can block your own name, clients or emails from ever being committed. Hook it up as a pre-commit hook:
+- Everything that shows you or holds your voice (footage, cutouts, face data, transcripts, reference frames) stays in `inputs/`, `renders/` and `qa/`. All three are ignored by git.
+- `npm run check:privacy` blocks videos, photos, large files and any name on your own private list. To use the list, put one name per line in a file called `.privacy-denylist` (git ignores it). To run the check before every commit:
 
 ```bash
 printf '#!/bin/sh\nnode scripts/check-privacy.mjs || exit 1\n' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 ```
 
-## Working with an AI editor
+- Nothing is uploaded. The background removal and the transcriber run on your computer. If you use an image generator for rooms, that is your own tool and your own choice.
+- The demos use a faceless placeholder and made-up names (John Smith, Jane Doe, Acme).
 
-`CLAUDE.md` / `AGENTS.md` and `.agents/skills/apple-video-editor/SKILL.md` hold the house rules (design, timing, gates), so Claude Code, Codex and similar agents can direct and edit with the kit. A good loop: run `cue-plan` on your transcript, pick blocks in the library storyboard, paste the plan to the agent, review the render.
+## If something goes wrong
 
-## License
+- **`ffmpeg not found`**: install it (macOS: `brew install ffmpeg`, Windows: `winget install ffmpeg`).
+- **A check fails**: read its message; it names the file and the time. Fix that and run `npm run check:all` again.
+- **The cutout takes forever**: it matches about 1 frame per second. Use `--from` and `--to` for only the parts that need it, and try `--scale 0.5`.
+- **A piece of your chair is left beside your neck**: use `--erase "x,y,w,h"` on that spot, or record without the chair in frame. The cutout playbook explains how to find the coordinates.
+- **Your mic disappeared after the cutout**: that is expected (the model keeps people only). Bring it back with `npm run prop`.
+- **The library page is blank**: it needs to be served. Use `npm run library`, not a double-click on the file.
+
+More detail is in `.agents/skills/apple-video-editor/` (`SKILL.md` and the two playbooks in `references/`).
+
+## Licence
 
 MIT. See `LICENSE`.

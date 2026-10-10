@@ -7,11 +7,12 @@ description: >
   Everything on screen is a parameterized template mounted with a host tag; camera moves, zooms and PiP are data.
   Includes a generated library with when-to-use cues, a stage engine (window + pan, no re-crop), spring easing,
   a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request, and
-  for "change my background", "put me in an office / studio", "HeyGen-style background", "text behind me", "keep my mic".
+  for "change my background", "put me in an office / studio", "HeyGen-style background", "text behind me", "keep my mic",
+  "clean up this CapCut transcript", "colour grade this", "QA the render frame by frame".
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.5.0"
+  version: "5.6.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -50,6 +51,11 @@ an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "a
 3. Mic or other gear in front of the speaker: `npm run prop -- inputs/me.mp4 --at 8 --box x,y,w,h --name mic --keep dark`, then `foreground` in `cutout.js`.
 4. Edit `projects/speaker-cutout/cutout.js` and the page, then `npm run speaker:check` and look at frames (edges, light match, props, plate seams).
 5. Nothing that shows the speaker goes in git: everything lives in `inputs/`.
+
+**Finishing (every mode)** - read `references/finishing.md` first.
+1. CapCut transcript in: `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4 --glossary inputs/glossary.json`; read the report, fix what rules cannot hear, ask about new terms, then `npm run plan` from the polished SRT. Filler cuts: `npm run trim -- <voice file> --cut-list inputs/capcut.fillers.json` (the CapCut export is already edited: do not silence-trim it again).
+2. Grade the SPEAKER only, never a screen recording: `npm run grade -- <video or cutout.webm> --dry-run`, then `--look clean --strength 0.7 [--match <plate>]`. The skin guard rejects a grade that moves skin hue more than 8 degrees or clips the face; look at `*.grade.jpg`.
+3. `npm run render`, then `npm run qa -- renders/<file>.mp4 --page <composition>` and review in `/library/qa.html`: automatic checks (gates, black, frozen, flash, loudness) never approve a video; the viewer's best verdict is "ready for human sign-off".
 
 **Talking head**
 1. Footage -> `index.html` (`#footage` inside `#punch`); `npm run plan -- transcript.srt --mode talking` for cues. Camera moves and jump `cuts` go in `components/camera.js`, never inline tweens.
@@ -108,8 +114,10 @@ components/
 inputs/face-track.js     face boxes, git-ignored: generated for the placeholder; `npm run face -- <video>` writes yours (installs OpenCV into .cache/face-venv on first run)
 inputs/_demo/            generated placeholder media (scripts/demo-media.mjs); your footage in inputs/ is git-ignored
 library/                 generated: index.html (Components gallery + detail + storyboard), motion.html (Animations)
-scripts/cutout.mjs, backdrop.mjs, plate.mjs, prop.mjs  speaker cutout prep, scene prompt, plate from a person-in-it image, foreground props
+scripts/cutout.mjs (+ cutout-post.py), backdrop.mjs, plate.mjs, prop.mjs  speaker cutout prep, scene prompt, plate from a person-in-it image, foreground props
+scripts/polish.mjs (+ lib/transcript.mjs)  CapCut transcript polisher; scripts/grade.mjs (+ lib/looks.mjs)  colour grade with a skin guard; scripts/qa.mjs  frame-by-frame QA of the render
 .agents/skills/apple-video-editor/references/speaker-cutout.md  the playbook for the cutout workflow
+.agents/skills/apple-video-editor/references/finishing.md  transcript polish, colour grading, frame-by-frame QA
 bin/apple-video-kit.mjs  CLI: npx github:csalamida/apple-video-kit init <dir> | update [--dry-run]
 scripts/                 auto-trim, cue-plan (+ cue-rules), check-face-clear (+ lib/load-runtime), check-privacy, build-library, library-meta, library/ (page sources), sync-share, demo-media, serve, face-track (+ detect-face.py)
 ```

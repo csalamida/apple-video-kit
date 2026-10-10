@@ -357,7 +357,7 @@
      "id": "panels",
      "type": "string",
      "label": "Panels [{kind: pipeline|contact|table|list|stats|chat|text|terminal|image, span?, ...cfg}] (JSON)",
-     "default": "[{\"title\":\"Active Deals\",\"subtitle\":\"Last updated: 5m ago\",\"columns\":[{\"name\":\"Qualified\",\"count\":16,\"cards\":[{\"title\":\"Tech Solutions\",\"tag\":\"Qualified\"},{\"title\":\"Globex Inc\",\"tag\":\"Qualified\"}]},{\"name\":\"Proposal\",\"count\":8,\"cards\":[{\"title\":\"Globex Enterprise Deal\",\"value\":\"$45k\",\"tag\":\"Proposal Sent\"}]},{\"name\":\"Negotiation\",\"count\":5,\"cards\":[]}],\"kind\":\"pipeline\"},{\"name\":\"John Smith\",\"initials\":\"JS\",\"verifiedText\":\"Verified Contact\",\"fields\":[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}],\"kind\":\"contact\"}]"
+     "default": "[{\"title\":\"Active Deals\",\"subtitle\":\"Last updated: 5m ago\",\"columns\":[{\"name\":\"Qualified\",\"count\":16,\"cards\":[{\"title\":\"Acme Labs\",\"tag\":\"Qualified\"},{\"title\":\"Lorem Studio\",\"tag\":\"Qualified\"}]},{\"name\":\"Proposal\",\"count\":8,\"cards\":[{\"title\":\"Acme Enterprise Deal\",\"value\":\"$45k\",\"tag\":\"Proposal Sent\"}]},{\"name\":\"Negotiation\",\"count\":5,\"cards\":[]}],\"kind\":\"pipeline\"},{\"name\":\"John Smith\",\"initials\":\"JS\",\"verifiedText\":\"Verified Contact\",\"fields\":[{\"label\":\"Email\",\"value\":\"john@example.com\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}],\"kind\":\"contact\"}]"
     },
     {
      "id": "cols",
@@ -882,7 +882,7 @@
      "id": "fields",
      "type": "string",
      "label": "Fields [{label,value,tone}] (JSON)",
-     "default": "[{\"label\":\"Email\",\"value\":\"john@growth.io\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}]"
+     "default": "[{\"label\":\"Email\",\"value\":\"john@example.com\"},{\"label\":\"Phone\",\"value\":\"+1 (555) 019-8234\"},{\"label\":\"Source\",\"value\":\"Opt-in Form\"},{\"label\":\"Status\",\"value\":\"Active Lead\",\"tone\":\"good\"}]"
     },
     {
      "id": "stagger",

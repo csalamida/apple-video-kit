@@ -2,7 +2,7 @@
 // Cut the pauses. Finds the silent gaps in the voice track and builds a jump-cut edit that keeps only the speech.
 //
 //   node scripts/auto-trim.mjs <media> [--also <second-media>] [--noise -35] [--min-pause 0.45] [--handle 0.04]
-//                                      [--apply] [--out <dir>] [--id cam]
+//                                      [--apply] [--out <dir>] [--id cam] [--cut-list <fillers.json>]
 //
 //   <media>        the file that carries the voice (talking-head video, or the webcam file in a screen share)
 //   --also         a second file recorded at the same time (the silent screen recording); gets the same cuts
@@ -12,9 +12,11 @@
 //   --apply        also write <basename>.trimmed.mp4 (re-encoded h264/aac) for people who want one clean file
 //   --out          where to write; default = the folder of <media>
 //   --id           id of the first printed <video> clip (default: cam with --also, else footage)
+//   --cut-list     extra ranges to cut (from `npm run polish`: <name>.fillers.json, { ranges: [{ start, end, text }] } in seconds on
+//                  the timeline of <media>). Unioned with the silence cuts; the 40 ms handles are already in the ranges.
 //
 // Writes <out>/<basename>.cuts.json:
-//   { source, duration, removed, segments: [{ start, end }], cuts: [t, ...] }
+//   { source, duration, removed, segments: [{ start, end }], cuts: [t, ...] }   (+ extraCuts: [{ start, end, text }] with --cut-list)
 // `segments` are in SOURCE time, `cuts` are in OUTPUT time (where each jump cut lands): paste them into share.js `cuts`.
 // Prints HyperFrames <video> clips that play the segments back to back with no re-encode
 // (src paths are repo-relative, which is what index.html and projects/screen-share resolve).
@@ -32,7 +34,7 @@ function fail(msg) { console.error('auto-trim: ' + msg); process.exit(1); }
 
 // ---- args ----
 function parseArgs(argv) {
-  const o = { noise: -35, minPause: 0.45, handle: 0.04, apply: false, also: null, out: null, id: null, media: null };
+  const o = { noise: -35, minPause: 0.45, handle: 0.04, apply: false, also: null, out: null, id: null, media: null, cutList: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i], next = () => { if (i + 1 >= argv.length) fail('missing value for ' + a); return argv[++i]; };
     if (a === '--also') o.also = next();
@@ -41,13 +43,14 @@ function parseArgs(argv) {
     else if (a === '--handle') o.handle = Number(next());
     else if (a === '--out') o.out = next();
     else if (a === '--id') o.id = next();
+    else if (a === '--cut-list') o.cutList = next();
     else if (a === '--apply') o.apply = true;
     else if (a === '-h' || a === '--help') { console.log(fs.readFileSync(new URL(import.meta.url), 'utf8').split('\nimport ')[0].replace(/^#!.*\n/, '').replace(/^\/\/ ?/gm, '')); process.exit(0); }
     else if (a.startsWith('--')) fail('unknown option ' + a);
     else if (!o.media) o.media = a;
     else fail('unexpected argument ' + a);
   }
-  if (!o.media) fail('usage: node scripts/auto-trim.mjs <media> [--also <file>] [--noise -35] [--min-pause 0.45] [--handle 0.04] [--apply] [--out <dir>] [--id cam]');
+  if (!o.media) fail('usage: node scripts/auto-trim.mjs <media> [--also <file>] [--noise -35] [--min-pause 0.45] [--handle 0.04] [--apply] [--out <dir>] [--id cam] [--cut-list <fillers.json>]');
   for (const k of ['noise', 'minPause', 'handle']) if (!Number.isFinite(o[k])) fail('--' + k.replace(/[A-Z]/, (c) => '-' + c.toLowerCase()) + ' must be a number');
   if (o.minPause <= 2 * o.handle) fail('--min-pause must be more than twice --handle');
   return o;
@@ -130,6 +133,53 @@ export function keepSegments(silences, duration, handle, fps = 0) {
     .map((s) => ({ start: r3(s.start), end: r3(s.end) }));
 }
 
+const MIN_FRAGMENT = 0.1;   // a sliver left between two extra cuts is a glitch, not speech
+
+// Read the extra cut ranges ({ ranges: [{ start, end, text? }] } or a bare array), sorted and merged. Seconds, source timeline.
+export function readCutList(file, duration) {
+  if (!fs.existsSync(file)) fail('cut list not found: ' + file);
+  let j;
+  try { j = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { fail(file + ' is not valid JSON: ' + e.message); }
+  const list = Array.isArray(j) ? j : j && j.ranges;
+  if (!Array.isArray(list)) fail(file + ' needs a "ranges" array: [{ "start": 1.2, "end": 1.6 }, ...] (seconds)');
+  const ranges = [];
+  for (const r of list) {
+    if (!r || !Number.isFinite(r.start) || !Number.isFinite(r.end)) fail(file + ': every range needs numeric start and end (seconds)');
+    const start = Math.max(0, r.start), end = Math.min(duration, r.end);
+    if (end > start) ranges.push({ start, end, text: r.text || '', kind: r.kind || '' });
+  }
+  ranges.sort((a, b) => a.start - b.start);
+  const merged = [];
+  for (const r of ranges) {
+    const last = merged[merged.length - 1];
+    if (last && r.start <= last.end) { last.end = Math.max(last.end, r.end); if (r.text && r.text !== last.text) last.text = (last.text ? last.text + ' + ' : '') + r.text; }
+    else merged.push({ ...r });
+  }
+  return { ranges: merged, meta: Array.isArray(j) ? {} : j };
+}
+
+// Remove `cuts` from the keep segments. Edges snap to whole frames the keeping way (a little more is kept, never less).
+export function subtractCuts(segs, cuts, fps = 0) {
+  const snapDown = (t) => (fps > 0 ? Math.floor(t * fps + 1e-6) / fps : t);
+  const snapUp = (t) => (fps > 0 ? Math.ceil(t * fps - 1e-6) / fps : t);
+  const out = [];
+  for (const s of segs) {
+    let pieces = [{ start: s.start, end: s.end }];
+    for (const c of cuts) {
+      const next = [];
+      for (const p of pieces) {
+        if (c.end <= p.start || c.start >= p.end) { next.push(p); continue; }
+        if (c.start > p.start) next.push({ start: p.start, end: Math.min(p.end, snapUp(c.start)) });   // keep up to the cut
+        if (c.end < p.end) next.push({ start: Math.max(p.start, snapDown(c.end)), end: p.end });         // and again after it
+      }
+      pieces = next;
+    }
+    const cutAny = pieces.length !== 1 || pieces[0].start !== s.start || pieces[0].end !== s.end;
+    out.push(...pieces.filter((p) => p.end - p.start >= (cutAny ? MIN_FRAGMENT : 0) - 1e-9).map((p) => ({ start: r3(p.start), end: r3(p.end) })));
+  }
+  return out;
+}
+
 // Output-timeline position of each segment (rounded durations summed, so clips butt together exactly).
 function timeline(segs) {
   let t = 0;
@@ -204,23 +254,39 @@ function main() {
     process.exit(0);
   }
 
-  const segments = keepSegments(silences, info.duration, o.handle, info.fps);
+  let segments = keepSegments(silences, info.duration, o.handle, info.fps);
+  const pauses = segments.length - 1 + (segments[0].start > 0 ? 1 : 0) + (segments[segments.length - 1].end < info.duration - 0.001 ? 1 : 0);
+  let extra = null;
+  if (o.cutList) {
+    const cl = readCutList(o.cutList, info.duration);
+    const ref = cl.meta.duration || 0, end = cl.meta.transcriptEnd || 0;
+    if (ref && Math.abs(ref - info.duration) > 1) console.warn(`auto-trim: warning: the cut list was made for a ${ref.toFixed(2)} s file but ${o.media} is ${info.duration.toFixed(2)} s. The ranges only fit if both are the same export.`);
+    else if (!ref && end && (end > info.duration + 1 || info.duration - end > 1)) console.warn(`auto-trim: warning: the transcript timeline ends at ${end.toFixed(2)} s but ${o.media} is ${info.duration.toFixed(2)} s. ` +
+      'If the transcript is not from this exact file (CapCut timings are for the edited export), the cuts will land in the wrong places; trailing silence alone can also cause this.');
+    const before = segments.reduce((n, s) => n + s.end - s.start, 0);
+    segments = subtractCuts(segments, cl.ranges, info.fps);
+    extra = { ranges: cl.ranges, saved: r3(before - segments.reduce((n, s) => n + s.end - s.start, 0)) };
+    if (!segments.length) fail('the cut list removes everything');
+  }
   const rows = timeline(segments);
   const newLen = rows.length ? r3(rows[rows.length - 1].at + rows[rows.length - 1].len) : 0;
   const removed = r3(info.duration - newLen);
   const cuts = rows.slice(1).map((r) => r.at);
-  const pauses = cuts.length + (segments[0].start > 0 ? 1 : 0) + (segments[segments.length - 1].end < info.duration - 0.001 ? 1 : 0);
 
   const outDir = o.out || path.dirname(o.media);
   fs.mkdirSync(outDir, { recursive: true });
   const base = path.basename(o.media).replace(/\.[^.]+$/, '');
   const jsonFile = path.join(outDir, base + '.cuts.json');
-  fs.writeFileSync(jsonFile, JSON.stringify({ source: o.media, duration: r3(info.duration), removed, segments, cuts }, null, 2) + '\n');
+  fs.writeFileSync(jsonFile, JSON.stringify({ source: o.media, duration: r3(info.duration), removed, segments, cuts, ...(extra ? { extraCuts: extra.ranges.map((r) => ({ start: r3(r.start), end: r3(r.end), text: r.text })) } : {}) }, null, 2) + '\n');
 
   const pct = Math.round((removed / info.duration) * 100);
   console.log(`\n${o.media}: ${pauses} pause${pauses === 1 ? '' : 's'} removed, ${removed.toFixed(2)} s saved (${pct}%), ` +
     `${r3(info.duration).toFixed(2)} s -> ${newLen.toFixed(2)} s, ${segments.length} segment${segments.length === 1 ? '' : 's'}, ${cuts.length} jump cut${cuts.length === 1 ? '' : 's'}.`);
   console.log('wrote ' + jsonFile);
+  if (extra) {
+    console.log(`cut list ${o.cutList}: ${extra.ranges.length} range${extra.ranges.length === 1 ? '' : 's'}, ${extra.saved.toFixed(2)} s taken out of the kept speech (ranges inside pauses were already cut):`);
+    for (const r of extra.ranges) console.log(`  ${r3(r.start).toFixed(3)} - ${r3(r.end).toFixed(3)} s  ${r.text}`);
+  }
   if (!cuts.length) console.log('No pause longer than ' + o.minPause + ' s: nothing to cut.');
 
   const id = o.id || (also ? 'cam' : 'footage');

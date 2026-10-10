@@ -1,0 +1,10 @@
+{
+  "terms": ["Acme CRM", "HyperFrames", "Jane Doe"],
+  "fixes": {
+    "acne crm": "Acme CRM",
+    "acme see are em": "Acme CRM",
+    "hyper frames": "HyperFrames",
+    "jain dough": "Jane Doe"
+  },
+  "punch": ["free", "never"]
+}

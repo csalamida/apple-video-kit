@@ -24,8 +24,8 @@ fs.writeFileSync(path.join(ROOT, 'library/manifest.json'), JSON.stringify({ gene
 
 const SRC = path.join(ROOT, 'scripts/library');
 const data = JSON.stringify({ templates, motion: MOTION }).replace(/</g, '\\u003c');
-for (const f of ['index.html', 'motion.html']) {
+for (const f of ['index.html', 'motion.html', 'qa.html']) {
   fs.writeFileSync(path.join(ROOT, 'library', f), fs.readFileSync(path.join(SRC, f), 'utf8').replace('/*__MANIFEST__*/null', data));
 }
 for (const f of ['library.css', 'common.js']) fs.copyFileSync(path.join(SRC, f), path.join(ROOT, 'library', f));
-console.log(`library: ${templates.length} templates -> library/index.html (Components) + library/motion.html (Animations)`);
+console.log(`library: ${templates.length} templates -> library/index.html (Components) + motion.html (Animations) + qa.html (QA)`);

@@ -26,6 +26,9 @@ projects/speaker-cutout/inputs
 projects/speaker-cutout/assets
 snapshots/
 
+# frame-by-frame QA runs (JPEGs of your renders): npm run qa
+qa/
+
 # apple-video-kit update state and backups of files you edited
 .kit/backup/
 

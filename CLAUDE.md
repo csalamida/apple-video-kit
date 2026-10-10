@@ -50,6 +50,13 @@ Layers bottom to top: `#orig` (your video, voice) z5, `#bgs` backgrounds z10, `t
 - `npm run prop -- <video> --at s --box x,y,w,h --name mic --keep dark [--exclude "x,y,w,h;..."]`: the cutout model keeps people only, so a mic or mug in front of the speaker is dropped. This cuts it once from a frame (OpenCV GrabCut, installs itself) into `inputs/<name>.prop.png`, a full-frame transparent PNG for `foreground`. Static objects only; check the `.preview.png` it writes.
 - Face safety assumes the speaker does not move; with `moves`, mount cards with `safe:false` on the freed side. Never use `title-behind` without the cutout above it; the template marks its own text `data-layout-allow-occlusion` (the layout check reads that flag on the text, not on the cover).
 
+## Finishing (every mode)
+
+Read `.agents/skills/apple-video-editor/references/finishing.md` first. Three steps after the design is built:
+- `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4 --glossary inputs/glossary.json`: a CapCut transcript becomes clean captions (`.polished.srt`), kinetic-subtitle `cues` (`.cues.json`), word timings, a filler cut list (`.fillers.json`, use with `npm run trim -- <voice file> --cut-list ...`) and a report of every change. The CapCut export is already edited: its timings belong to that file, never silence-trim it again. Read the report, fix what rules cannot hear, ask about new names, keep a local `inputs/glossary.json`.
+- `npm run grade -- <speaker video or cutout.webm> [--look clean|warm-daylight|studio-cool|soft-film|none] [--strength 0.7] [--match <plate>]`: capped correction first (white balance, exposure from the face), then a look, then a skin guard that rejects the file if skin hue moves over 8 degrees or the face clips. Speaker only, never screen recordings. Look at the `.grade.jpg` sheet.
+- `npm run qa -- renders/<file>.mp4 --page <composition>`: gates (size, duration vs the page, audio), black, frozen, flash safety and loudness checks, every frame saved to `qa/<name>/`, reviewed in `/library/qa.html` (cue strip, Mark A/B feedback cues, the 11-category checklist). It never approves a video; the person signs off.
+
 ## Templates (compositions/tpl): use these, never copy-paste scenes
 
 Mount a template with a host tag and per-instance values:
@@ -101,6 +108,9 @@ npm run cutout -- inputs/me.mp4 --from 10 --to 25      # transparent video of th
 npm run backdrop -- inputs/me.mp4 --scene office       # prompt for a scene that matches the camera angle
 npm run render         # talking head to MP4
 npm run share:render   # screen share to MP4
+npm run polish -- inputs/capcut.srt --audio inputs/export.mp4   # clean a CapCut transcript
+npm run grade -- inputs/me.cutout.webm --dry-run               # colour grade the speaker with a skin guard
+npm run qa -- renders/video.mp4 --page index.html              # frame-by-frame QA of the render
 npm run check:all      # every gate below
 ```
 
@@ -136,7 +146,7 @@ projects/speaker-cutout/  speaker-cutout demo: index.html + cutout.js
 compositions/tpl/         the 19 templates
 components/               tokens.css, glass CSS, glass-components.js (__hfGlass), screen-stage.js,
                           tpl-runtime.js (vars, place, face/PiP safety), tpl-parts.js (icons, panels), camera.js, cutout-stage.js
-scripts/                  auto-trim, cue-plan + cue-rules, cutout, backdrop, plate, prop, checks, library generator, demo media, serve, face-track + detect-face.py
+scripts/                  auto-trim, cue-plan + cue-rules, cutout, backdrop, plate, prop, polish, grade, qa, checks, library generator, demo media, serve, face-track + detect-face.py
 library/                  generated template library (npm run build:library)
 assets/demo/              placeholder screens for demos
 inputs/                   your footage (git-ignored except README); demo media generated into inputs/_demo/

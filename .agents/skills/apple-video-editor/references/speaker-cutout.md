@@ -58,12 +58,14 @@ All outputs go to `inputs/`, which is git-ignored: your face never reaches git.
 | Step | Command | Produces | Check it |
 |---|---|---|---|
 | 1. Face track (optional, enables auto title placement) | `npm run face -- inputs/me.mp4` | `inputs/face-track.js` | `npm run check:face` |
-| 2. Transparent speaker | `npm run cutout -- inputs/me.mp4 --from 10 --to 25` | `inputs/me.cutout.webm` | composite over a bright flat colour; look at hair, glasses, shoulders |
+| 2. Transparent speaker | `npm run cutout -- inputs/me.mp4 --from 10 --to 25 [--plate inputs/office.png --wrap 0.3] [--erase "x,y,w,h"]` | `inputs/me.cutout.webm` | composite over a bright flat colour AND over the plate; look at hair, glasses, shoulders, neck |
 | 3. Scene prompt | `npm run backdrop -- inputs/me.mp4 --scene office` | `me.backdrop.txt`, `.json`, `.frame.png` | numbers sensible (eye-line, shot size, light side) |
 | 4. Generate the room | any image generator, with prompt A (or B) | an image | section 4 checklist |
 | 5. Plate (only if the image has a person in it) | `npm run plate -- inputs/room-with-me.png --out inputs/office.png` | `inputs/office.png` | no ghost of the person |
 | 6. Props | `npm run prop -- inputs/me.mp4 --at 8 --box x,y,w,h --name mic --keep dark` | `inputs/mic.prop.png` + `.preview.png` | open the preview |
 | 7. Compose | edit `projects/speaker-cutout/cutout.js`, `index.html` | | `npm run speaker:check`, snapshots |
+
+The finishing pass (OpenCV, one frame at a time) takes colour from your original footage, refines the edge against the full-resolution picture, drops stray islands (`--despeckle`, default 3% of the largest piece) and can bake a light wrap into the edge (`--plate` + `--wrap`). `--scale 0.5` mattes a half-size copy (about 1.4x faster here, near-identical edges; try it on long takes). Python 3.9+ is needed; OpenCV installs itself on first use.
 
 `--from/--to` give the cutout the same time offset as the source: the printed `<video>` tag already carries the matching
 `data-start`. Matte every stretch that uses the cutout, nothing else.
@@ -123,6 +125,7 @@ frame (OpenCV GrabCut inside `--box`) and `foreground: [{ src }]` layers it back
 `npm run speaker:check` (host contracts, lint, layout, motion, contrast), then snapshots at: the cutout's first frame, a hold,
 the title-behind peak, a scene change mid-crossfade, the speaker aside. Judge by eye:
 
+- Light wrap, if used: visible as a soft room-coloured rim, never a hard grey outline.
 - Edges: no dark halo on a light shirt, no light halo on dark hair (`--edge 2` for a stronger clean-up, `0` to disable).
 - The speaker's light matches the room's (side, warmth, brightness).
 - Props sit on the desk, not floating; the mic overlaps the shirt, not the face.
@@ -133,8 +136,9 @@ the title-behind peak, a scene change mid-crossfade, the speaker aside. Judge by
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Piece of the chair beside the neck | model keeps what touches the body | re-shoot with the chair away; or put a plate chair behind it; accept if small |
-| Dark fringe on a light shirt | matte edge | `npm run cutout ... --edge 2` |
+| Piece of the chair beside the neck | model keeps what touches the body; despeckle cannot remove what is connected to you | `--erase "x,y,w,h"` on a frame you looked at (find the coordinates on YOUR footage; boxes are rectangles, so keep them clear of the face and accept a thin sliver along a slanted jaw), or re-shoot without the chair |
+| Dark fringe on a light shirt | matte edge | the finishing pass already pulls colour from the original; `--edge 2` for more |
+| Light wrap looks like a grey rim | `--wrap` too high for this plate | 0.2 to 0.4 is the tasteful range; 1.0 is heavy |
 | Flickering matte edge | low-contrast edge or motion blur | `--quality best`, better light, avoid fast motion |
 | Ghost of the person at the edges | the plate has the person in it | `npm run plate`, or generate an empty room with prompt A |
 | Blurry patch behind the speaker when they glide | inpainted fill from `npm run plate` | use an empty plate (prompt A) |

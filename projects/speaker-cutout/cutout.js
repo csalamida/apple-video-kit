@@ -17,7 +17,7 @@ window.__hfCutout = {
   duration: 21.92,
   backgrounds: [
     { t: 0, kind: 'scene', src: 'assets/demo/office.svg', blur: 9, brightness: 0.96, tone: 'neutral' },   // a room (your own: npm run backdrop)
-    { t: 6, dur: 1, kind: 'gradient', preset: 'midnight' },      // then a clean studio colour
+    { t: 12, dur: 1, kind: 'gradient', preset: 'midnight' },     // then a clean studio colour
     { t: 14, dur: 1, kind: 'scene', src: 'assets/demo/office.svg', blur: 16, brightness: 0.7, tone: 'warm' }   // the same room, evening
   ],
   speaker: { shadow: true },

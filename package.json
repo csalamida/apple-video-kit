@@ -1,6 +1,6 @@
 {
   "name": "apple-video-kit",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
   "license": "MIT",
   "private": true,
@@ -37,7 +37,10 @@
     "speaker:check": "node scripts/sync-share.mjs projects/speaker-cutout --static-camera && node scripts/check-face-clear.mjs projects/speaker-cutout/index.html && hyperframes check projects/speaker-cutout",
     "speaker:render": "node scripts/sync-share.mjs projects/speaker-cutout --static-camera && hyperframes render projects/speaker-cutout",
     "trim": "node scripts/auto-trim.mjs",
-    "plan": "node scripts/cue-plan.mjs"
+    "plan": "node scripts/cue-plan.mjs",
+    "polish": "node scripts/polish.mjs",
+    "grade": "node scripts/grade.mjs",
+    "qa": "node scripts/qa.mjs"
   },
   "devDependencies": {
     "hyperframes": "0.8.120"

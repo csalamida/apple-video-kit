@@ -1,0 +1,83 @@
+1
+00:00:00,300 --> 00:00:03,100
+hey everyone um welcome back to the channel
+
+2
+00:00:03,350 --> 00:00:06,900
+today i want to show you how to uh set up acne crm in under five minutes
+
+3
+00:00:07,000 --> 00:00:10,200
+and this is is the exact setup that i use with my clients
+
+4
+00:00:10,900 --> 00:00:14,200
+my name is jain dough and i've been building with hyper frames for a while now
+
+5
+00:00:14,300 --> 00:00:17,800
+so there are three steps connect your account, build a form, and turn on alerts
+
+6
+00:00:18,600 --> 00:00:21,400
+step one, you know, connect your account
+
+7
+00:00:21,500 --> 00:00:25,000
+open the the settings page and click on integrations
+
+8
+00:00:25,100 --> 00:00:28,600
+now paste your workspace link into this field, like, right here
+
+9
+00:00:29,400 --> 00:00:32,800
+basically it takes about twenty seconds
+
+10
+00:00:32,900 --> 00:00:36,600
+and i- i actually think this is the biggest mistake people make
+
+11
+00:00:36,700 --> 00:00:40,200
+they skip this step and then nothing works
+
+12
+00:00:41,100 --> 00:00:44,600
+step two build a form that collects name email and phone
+
+13
+00:00:44,700 --> 00:00:48,300
+uh you can also connect it to Ipsum Sync if you want
+
+14
+00:00:48,400 --> 00:00:52,000
+so you can you can add john smith as a test contact
+
+15
+00:00:53,000 --> 00:00:56,600
+it's free and you never have to write any code
+
+16
+00:00:56,700 --> 00:01:00,400
+step three turn on alerts, um, so you hear about every new lead
+
+17
+00:01:00,500 --> 00:01:04,000
+this alone recovers about twenty percent of missed leads
+
+18
+00:01:04,900 --> 00:01:08,800
+one client was losing three hundred dollars a month, kind of, and fixed it in a day
+
+19
+00:01:08,900 --> 00:01:12,300
+i mean, it's that simple, acne crm does the heavy lifting
+
+20
+00:01:12,400 --> 00:01:15,800
+so go try it and let me know what you think
+
+21
+00:01:16,000 --> 00:01:19,200
+render it with hyper frames and thanks for watching
