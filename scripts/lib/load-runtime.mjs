@@ -52,6 +52,8 @@ export function loadRuntime(pageFile = path.join(ROOT, 'index.html')) {
   T.mode = ctx.__hfShare && ctx.__hfShareStage ? 'pip' : 'face';
   // Box the templates must keep clear of at time t: the PiP card at rest (screen share) or the head (camera applied).
   T.keepClearAt = (t) => T.mode === 'pip' ? T.faceUnion(t, 0) : T.faceAt(t);
+  // every box to keep clear at time t: the head / webcam card, then the screen regions marked keepClear in share.js
+  T.keepClearBoxes = (t) => [T.keepClearAt(t), ...(T.regionsAt ? T.regionsAt(t) : [])].filter(Boolean);
   return T;
 }
 

@@ -2,6 +2,19 @@
 
 Update an existing project with `npx github:csalamida/apple-video-kit update` (add `--dry-run` to preview).
 
+## 0.7.0
+
+**Long videos (10 to 30 minutes)**
+- `keepClear` regions in `share.js`: parts of the screen cards must never cover. Cards move off them; the check fails a card that still covers one. A self-test (`npm run selftest`, part of `check:all`) proves the guard fails a bad case.
+- `npm run chapters`: chapters from a transcript, YouTube timestamps, chapter-pill schedule, cold-open check, recap and pattern-interrupt slots.
+- `npm run activity`: screen activity tracker with zoom and idle-stretch drafts.
+- `npm run audio`: loudness to -14 LUFS, noise cleanup, music bed with ducking (verified by measuring the output).
+- `render:long` scripts: segmented, resumable renders.
+- `npm run cutout -- --ranges`: resumable cutouts for several stretches of a long video.
+- `npm run stress`: a synthetic long-project generator that times every step with peak memory.
+- `qa` samples at most about 3600 frames however long the video is.
+- Playbook: `references/long-form.md`.
+
 ## 0.6.0
 
 **Short-form reels (vertical 1080x1920)**

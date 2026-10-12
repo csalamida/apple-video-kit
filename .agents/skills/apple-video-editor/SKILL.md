@@ -9,11 +9,12 @@ description: >
   a face-safety check, and a design-token layer. Use for any "package / edit / add overlays / screen-share" request, and
   for "change my background", "put me in an office / studio", "HeyGen-style background", "text behind me", "keep my mic",
   "clean up this CapCut transcript", "colour grade this", "QA the render frame by frame",
-  "make a reel / short / TikTok", "vertical video", "9:16".
+  "make a reel / short / TikTok", "vertical video", "9:16",
+  "20 minute video", "long video", "chapters", "keep this part of the screen visible", "fix the audio / loudness / add music".
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.7.0"
+  version: "5.8.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -61,6 +62,13 @@ an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "a
 3. Polish the transcript (finishing playbook), paste `*.cues.json` into the `kinetic-subtitle` host (it carries per-word `times` for `mode: "cumulative"`); cues hold readable at least 0.5 s.
 4. `npm run short:check` (face clear + `npm run reel` rules + `check:glyphs` + lint/layout/motion/contrast), snapshots, `npm run short:render`, then `npm run qa` with `--page projects/short-form/index.html`.
 5. Safe zones are estimates: ask the owner to check the first export on a phone.
+
+**Long video (10 to 30 minutes)** - read `references/long-form.md` first (order of work, share-screen rules, pacing, measured render limits).
+1. Ask: share screen with a webcam card or centred talking head; already-edited master (never trim it again) or raw; chapters wanted on screen and in the description; music and audio state; what on the screen must never be covered; caption colours.
+2. `npm run chapters -- inputs/capcut.polished.srt` (chapters, YouTube timestamps, the pill schedule, cold open, recap and pattern-interrupt slots; rename every title marked review). Screen share: `npm run activity -- inputs/screen.mp4` drafts zooms and idle stretches.
+3. Share screen: mark `keepClear: [{ t, end, x, y, w, h }]` in `share.js` for the parts of the screen that must stay visible. Cards with `safe: true` move off them; `npm run share:check` fails a card that covers one.
+4. Render with `npm run share:render:long` (or `render:long`, `speaker:render:long`): segmented and resumable. Then `npm run audio -- renders/<file>.mp4` (-14 LUFS, optional `--denoise`, `--music bed.mp3` ducking under the voice) and `npm run qa` (about 3600 images at most). Cutout in a long video: `npm run cutout -- inputs/me.mp4 --ranges "0-25,310-330"` (resumable).
+5. `npm run stress -- --minutes 5 --render` measures this machine on a synthetic project; trust its numbers over any estimate.
 
 **Finishing (every mode)** - read `references/finishing.md` first.
 1. CapCut transcript in: `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4 --glossary inputs/glossary.json`; read the report, fix what rules cannot hear, ask about new terms, then `npm run plan` from the polished SRT. Filler cuts: `npm run trim -- <voice file> --cut-list inputs/capcut.fillers.json` (the CapCut export is already edited: do not silence-trim it again).

@@ -99,10 +99,22 @@ Every tool is one command. Inputs and results live in `inputs/`.
 | `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4` | Cleans up a CapCut transcript: fixes names and punctuation, collapses repeats, finds filler words, makes clean captions and word timings, and writes a report of every change. |
 | `npm run plan -- inputs/transcript.srt --mode screen` | Reads a transcript and suggests what to add where (zooms, callouts, blurs, cards). It flags emails and keys it hears. |
 
+**Long videos (10 to 30 minutes)**
+
+| Command | What it does |
+|---|---|
+| `npm run chapters -- inputs/capcut.polished.srt` | Finds chapters from spoken markers, pauses and topic changes. Writes YouTube timestamps, the chapter-pill schedule and a review sheet with a cold-open check, recap points and pattern-interrupt slots. |
+| `npm run activity -- inputs/screen.mp4` | Screen recordings: finds where things change and where nothing does. Drafts zooms and idle stretches for the fast-forward badge. |
+| `npm run share:render:long` | Renders in segments you can resume after a crash. Also `render:long` and `speaker:render:long`. |
+| `npm run stress -- --minutes 5 --render` | Times and measures a synthetic long project on your machine, so you know how long a 20 minute render will take. |
+
+In a screen-share video you can mark parts of the screen that must never be covered (`keepClear` in `share.js`); cards move off them and the check fails if one still covers it.
+
 **Finish**
 
 | Command | What it does |
 |---|---|
+| `npm run audio -- renders/video.mp4 --music bed.mp3` | Loudness to -14 LUFS, optional noise cleanup, and a music bed that ducks under your voice. The picture is copied untouched. |
 | `npm run grade -- inputs/me.mp4` | Fixes white balance and exposure from your face, then applies a look. A skin-tone guard refuses any grade that makes skin look wrong. Speaker only, never screen recordings. |
 | `npm run qa -- renders/video.mp4 --page index.html` | Reviews the finished file: size, length, sound, black frames, frozen stretches, flashing, loudness. Saves every frame for the QA page. It never approves a video; you do. |
 

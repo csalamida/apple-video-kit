@@ -162,6 +162,43 @@
     return u;
   };
 
+  // ---- keep-clear regions (screen share) ------------------------------------
+  // share.js `keepClear: [{ t?, end?, x, y, w, h }]` marks parts of the SCREEN that must stay visible (a button, a form field, the line being
+  // explained), in 0-1 screen coordinates, optionally only between t and end. They follow every zoom: this maps one to frame pixels at time t.
+  // Returns null while it is off (outside t..end) or while the webcam fills the whole frame (the screen is not on view).
+  function regionAt(S, d, r, t) {
+    if (r.t !== undefined && t < r.t) return null;
+    if (r.end !== undefined && t > r.end) return null;
+    var modes = S.camModesAt(d, t);
+    if (modes.length === 1 && modes[0] === 'full') return null;
+    var rect = S.windowRect(d), st = S.stateAt(d, t);
+    var x0 = rect.x + r.x * rect.w * st.scale + st.x, y0 = rect.y + r.y * rect.h * st.scale + st.y;
+    return { x0: x0, y0: y0, x1: x0 + r.w * rect.w * st.scale, y1: y0 + r.h * rect.h * st.scale, region: true };
+  }
+  // every keep-clear box on screen at time t (frame px); [] when the page has none
+  T.regionsAt = function (t) {
+    var d = root.__hfShare, S = root.__hfShareStage;
+    if (!d || !S || !d.keepClear) return [];
+    var out = [];
+    d.keepClear.forEach(function (r) { var b = regionAt(S, d, r, t); if (b) out.push(b); });
+    return out;
+  };
+  // the union over [start, start+dur] of each keep-clear region separately (zooms move them), as a list of boxes
+  T.regionUnions = function (start, dur) {
+    var d = root.__hfShare, S = root.__hfShareStage;
+    if (!d || !S || !d.keepClear) return [];
+    var out = [];
+    d.keepClear.forEach(function (r) {
+      var u = null;
+      for (var t = start; t <= start + dur + 1e-6; t += 0.1) {
+        var b = regionAt(S, d, r, t); if (!b) continue;
+        u = u ? { x0: Math.min(u.x0, b.x0), y0: Math.min(u.y0, b.y0), x1: Math.max(u.x1, b.x1), y1: Math.max(u.y1, b.y1), region: true } : b;
+      }
+      if (u) out.push(u);
+    });
+    return out;
+  };
+
   // ---- placement ---------------------------------------------------------
   /**
    * place({start, dur, side, width, height, top, margin, gap, minWidth, safe, offsetX, offsetY})
@@ -184,7 +221,15 @@
     var settle = o.settle !== undefined ? o.settle : 0.5, tail = 0.35;
     var w0 = (o.start || 0) + settle, w1 = Math.max(w0, (o.start || 0) + (o.dur || 0) - tail);
     var u = (o.safe !== false) ? T.faceUnion(w0, w1 - w0) : null;
-    var blocks = u && !(top + oy + height < u.y0 || top + oy > u.y1);   // vertical overlap with the head band
+    // everything the card must keep off: the head / webcam card, plus the screen regions marked keepClear (share.js)
+    var obs = [];
+    if (o.safe !== false) { if (u) obs.push(u); T.regionUnions(w0, w1 - w0).forEach(function (b) { obs.push(b); }); }
+    var inBand = function (b) { return !(top + oy + height < b.y0 || top + oy > b.y1); };
+    var band = obs.filter(inBand);
+    if (band.length > 1) { u = null; }   // several obstacles: the general path below
+    else if (band.length === 1) u = band[0];
+    else u = u && inBand(u) ? u : null;
+    var blocks = u && inBand(u);   // vertical overlap with the obstacle band (single obstacle: the original logic)
 
     function rect(sd, w) {
       var left = sd === 'right' ? W - mR - w : sd === 'center' ? (mL + (W - mR - mL - w) / 2) : mL;
@@ -202,7 +247,20 @@
         }
       }
     }
-    r.clear = !(u && blocks) || r.left + r.width <= u.x0 - 1 || r.left >= u.x1 + 1;
+    if (band.length > 1 && side !== 'center') {
+      // several obstacles in this band: merge them (plus the gap), take the free stretches between them, and use the first one wide enough on the preferred side
+      var blk = band.map(function (b) { return [Math.max(mL, b.x0 - gap), Math.min(W - mR, b.x1 + gap)]; }).sort(function (a, b) { return a[0] - b[0]; });
+      var merged = []; blk.forEach(function (b) { var l = merged[merged.length - 1]; if (l && b[0] <= l[1]) l[1] = Math.max(l[1], b[1]); else merged.push(b.slice()); });
+      var free = [], at = mL;
+      merged.forEach(function (b) { if (b[0] > at) free.push([at, b[0]]); at = Math.max(at, b[1]); });
+      if (at < W - mR) free.push([at, W - mR]);
+      var order = side === 'left' ? free : free.slice().reverse();
+      var fit = order.filter(function (g) { return g[1] - g[0] >= minW; })[0];
+      if (fit) { var w = Math.min(width, fit[1] - fit[0]), left = side === 'left' ? fit[0] : fit[1] - w; r = { side: side, left: left + ox, top: top + oy, width: w, height: height }; }
+      else { var big = free.slice().sort(function (a, b) { return (b[1] - b[0]) - (a[1] - a[0]); })[0]; r = big ? { side: side, left: big[0] + ox, top: top + oy, width: big[1] - big[0], height: height } : r; }
+    }
+    var cover = band.length > 1 ? band : (u && blocks ? [u] : []);
+    r.clear = cover.every(function (b) { return r.left + r.width <= b.x0 - 1 || r.left >= b.x1 + 1; });
     return r;
   };
 

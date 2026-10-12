@@ -138,8 +138,37 @@ function finish(o, cut, matte, out, size, matteSize, fps) {
   });
 }
 
+// --ranges "10-25,310-340": one cutout per stretch, resumable. A stretch whose file already exists (and is newer than the source) is skipped,
+// so an interrupted run continues where it stopped; `--force yes` redoes them. Writes <video>.cutouts.json with a host snippet per stretch.
+async function runRanges(o) {
+  const src = path.resolve(o.input);
+  if (!fs.existsSync(src)) fail(`${o.input} not found`);
+  if (o.out) fail('--ranges names each file itself (<video>.cutout-<from>-<to>.webm): drop --out');
+  if (o.from !== undefined || o.to !== undefined) fail('use --ranges or --from/--to, not both');
+  const info = probe(src);
+  const ranges = String(o.ranges).split(',').map((r) => r.trim()).filter(Boolean).map((r) => { const m = r.match(/^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/); if (!m) fail(`bad range "${r}": use from-to in seconds, separated by commas (example: --ranges "10-25,310-340")`); return [+m[1], Math.min(+m[2], info.duration)]; });
+  if (!ranges.length) fail('--ranges is empty');
+  ranges.forEach(([a, b], i) => { if (!(b > a)) fail(`range ${a}-${b} is empty (the video is ${info.duration.toFixed(1)} s)`); if (i && a < ranges[i - 1][1]) fail(`ranges must be in order and not overlap (${ranges[i - 1].join('-')} then ${a}-${b})`); });
+  const base = src.replace(/\.[^.]+$/, '');
+  const fileFor = ([a, b]) => `${base}.cutout-${a}-${b}.webm`;
+  const todo = ranges.filter((r) => o.force || !(fs.existsSync(fileFor(r)) && fs.statSync(fileFor(r)).mtimeMs > fs.statSync(src).mtimeMs));
+  const frames = todo.reduce((n, [a, b]) => n + Math.round((b - a) * info.fps), 0), mins = frames / 60;
+  console.log(`cutout: ${ranges.length} stretch(es), ${ranges.reduce((n, [a, b]) => n + (b - a), 0).toFixed(0)} s of ${info.duration.toFixed(0)} s matted; ${ranges.length - todo.length} already done, ${todo.length} to do (${frames} frames)`);
+  if (todo.length) console.log(`  estimate: roughly ${Math.max(1, Math.round(mins))}-${Math.max(2, Math.round(mins * 2))} min on a laptop. Safe to stop and run it again: finished stretches are kept.`);
+  const pass = ['edge', 'quality', 'device', 'despeckle', 'scale', 'erase', 'plate', 'wrap'].filter((k) => o[k] !== undefined && !(k === 'plate' && o.plate === undefined)).flatMap((k) => [`--${k}`, String(k === 'plate' ? o.plate : o[k])]);
+  for (const r of todo) {
+    const res = spawnSync(process.execPath, [fileURLToPath(import.meta.url), src, '--from', String(r[0]), '--to', String(r[1]), '--out', fileFor(r), ...pass], { stdio: 'inherit' });
+    if (res.status !== 0) fail(`stretch ${r[0]}-${r[1]} failed (finished stretches are kept: run the same command again to continue)`);
+  }
+  const rel = (p) => path.relative(ROOT, p).split(path.sep).join('/');
+  const manifest = { source: path.basename(src), stretches: ranges.map(([a, b]) => ({ from: a, to: b, file: rel(fileFor([a, b])), host: `<video id="cut-${a}" class="clip" src="${rel(fileFor([a, b]))}" data-start="${a}" data-duration="${(b - a).toFixed(2)}" muted playsinline></video>` })) };
+  fs.writeFileSync(base + '.cutouts.json', JSON.stringify(manifest, null, 2) + '\n');
+  console.log(`\ncutout: ${ranges.length} stretch(es) ready. Host tags for each are in ${rel(base + '.cutouts.json')}; between the stretches the page shows your original video.`);
+}
+
 async function main() {
   const o = parseArgs(process.argv.slice(2));
+  if (o.ranges !== undefined) return runRanges(o);
   if (!o.input) fail('usage: npm run cutout -- <video> [--from s --to s] [--edge 0-3] [--erase "x,y,w,h;..."] [--despeckle pct] [--plate img --wrap 0-1] [--scale 0.5] [--out file]');
   const src = path.resolve(o.input);
   if (!fs.existsSync(src)) fail(`${o.input} not found`);

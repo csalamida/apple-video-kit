@@ -76,26 +76,28 @@ for (const h of templateHosts(file)) {
   const t0 = h.start + SETTLE, t1 = Math.max(t0, h.start + h.dur - TAIL);
 
   if (CHROME[h.template]) {
-    let worst = 0;
+    let worst = 0, hit = '';
     for (let t = h.start; t <= h.start + h.dur; t += 0.1) {
-      const f = T.keepClearAt(t); if (!f) continue;
-      const c = CHROME[h.template];
-      const ox = Math.min(c.x1, f.x1) - Math.max(c.x0, f.x0), oy = Math.min(c.y1, f.y1) - Math.max(c.y0, f.y0);
-      if (ox > 0 && oy > 0) worst = Math.max(worst, Math.min(ox, oy));
+      for (const f of T.keepClearBoxes(t)) {
+        const c = CHROME[h.template];
+        const ox = Math.min(c.x1, f.x1) - Math.max(c.x0, f.x0), oy = Math.min(c.y1, f.y1) - Math.max(c.y0, f.y0);
+        if (ox > 0 && oy > 0) { if (Math.min(ox, oy) > worst) hit = f.region ? 'a keep-clear region' : (T.mode === 'pip' ? 'PiP' : 'head'); worst = Math.max(worst, Math.min(ox, oy)); }
+      }
     }
-    rows.push([id, h.template, worst > 2 ? `WARN overlaps ${T.mode === 'pip' ? 'PiP' : 'head'} by ${Math.round(worst)}px (chrome)` : 'clear (chrome)']);
+    rows.push([id, h.template, worst > 2 ? `WARN overlaps ${hit} by ${Math.round(worst)}px (chrome)` : 'clear (chrome)']);
     if (worst > 2) warn++;
     continue;
   }
   if (ABS[h.template]) {
     const r = ABS[h.template](v);
-    let worst = 0, at = 0;
+    let worst = 0, at = 0, hit = '';
     for (let t = t0; t <= t1 + 1e-6; t += 0.1) {
-      const f = T.keepClearAt(t); if (!f) continue;
-      const ox = Math.min(r.x1, f.x1) - Math.max(r.x0, f.x0), oy = Math.min(r.y1, f.y1) - Math.max(r.y0, f.y0);
-      if (ox > 0 && oy > 0 && Math.min(ox, oy) > worst) { worst = Math.min(ox, oy); at = t; }
+      for (const f of T.keepClearBoxes(t)) {
+        const ox = Math.min(r.x1, f.x1) - Math.max(r.x0, f.x0), oy = Math.min(r.y1, f.y1) - Math.max(r.y0, f.y0);
+        if (ox > 0 && oy > 0 && Math.min(ox, oy) > worst) { worst = Math.min(ox, oy); at = t; hit = f.region ? 'a keep-clear region' : (T.mode === 'pip' ? 'PiP' : 'head'); }
+      }
     }
-    if (worst > 2) { overlap++; rows.push([id, h.template, `FAIL covers ${T.mode === 'pip' ? 'PiP' : 'head'} by ${Math.round(worst)}px at ${at.toFixed(1)}s (x ${Math.round(r.x0)}-${Math.round(r.x1)}, y ${Math.round(r.y0)}-${Math.round(r.y1)})`]); }
+    if (worst > 2) { overlap++; rows.push([id, h.template, `FAIL covers ${hit} by ${Math.round(worst)}px at ${at.toFixed(1)}s (x ${Math.round(r.x0)}-${Math.round(r.x1)}, y ${Math.round(r.y0)}-${Math.round(r.y1)})`]); }
     else rows.push([id, h.template, `ok   x ${Math.round(r.x0)}-${Math.round(r.x1)}, y ${Math.round(r.y0)}-${Math.round(r.y1)}`]);
     continue;
   }
@@ -106,14 +108,15 @@ for (const h of templateHosts(file)) {
   const { w, h: hh } = fp;
   const pl = T.place({ start: h.start, dur: h.dur, side: v.side, width: w, height: hh, top: v.top, safe: v.safe, offsetX: v.offsetX, offsetY: v.offsetY, minWidth: 200 });
   const rect = { x0: pl.left - MARGIN, y0: pl.top - MARGIN, x1: pl.left + pl.width + MARGIN, y1: pl.top + hh + MARGIN };
-  let worst = 0, at = 0;
+  let worst = 0, at = 0, hit = '';
   for (let t = t0; t <= t1 + 1e-6; t += 0.1) {
-    const f = T.keepClearAt(t); if (!f) continue;
-    const ox = Math.min(rect.x1, f.x1) - Math.max(rect.x0, f.x0), oy = Math.min(rect.y1, f.y1) - Math.max(rect.y0, f.y0);
-    if (ox > 0 && oy > 0 && ox > worst) { worst = ox; at = t; }
+    for (const f of T.keepClearBoxes(t)) {
+      const ox = Math.min(rect.x1, f.x1) - Math.max(rect.x0, f.x0), oy = Math.min(rect.y1, f.y1) - Math.max(rect.y0, f.y0);
+      if (ox > 0 && oy > 0 && ox > worst) { worst = ox; at = t; hit = f.region ? 'a keep-clear region' : (T.mode === 'pip' ? 'PiP' : 'head'); }
+    }
   }
   const note = `${pl.side} x ${Math.round(pl.left)}-${Math.round(pl.left + pl.width)}${pl.width < w ? ` (auto-narrowed from ${w})` : ''}`;
-  if (worst > 2) { overlap++; rows.push([id, h.template, `FAIL ${note} covers ${T.mode === 'pip' ? 'PiP' : 'head'} by ${Math.round(worst)}px at ${at.toFixed(1)}s`]); }
+  if (worst > 2) { overlap++; rows.push([id, h.template, `FAIL ${note} covers ${hit} by ${Math.round(worst)}px at ${at.toFixed(1)}s`]); }
   else rows.push([id, h.template, `ok   ${note}`]);
 }
 

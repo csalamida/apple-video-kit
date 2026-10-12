@@ -5,7 +5,7 @@
 //   --name <run>        run name, the folder is qa/<run>/ (default: the video's file name without extension)
 //   --page <html>       the composition that produced the video (index.html, projects/screen-share/index.html ...):
 //                       reads the expected duration, the audio expectation and the cue times (templates, camera, zooms)
-//   --every N           extract every Nth frame (default 1 when the video has <= 3600 frames, else 5)
+//   --every N           extract every Nth frame (default 1 when the video has <= 3600 frames, else enough to stay near 3600 images: a 20 minute video gets every 10th)
 //   --width 960         JPEG width of the extracted frames (quality q 3)
 //   --compare <run>     adds another QA run as a second variant in the viewer (same frame number, e.g. before/after grading)
 //
@@ -291,7 +291,11 @@ function main() {
   const info = probe(video);
   let step;
   if (o.every) { step = parseInt(o.every, 10); if (!(step >= 1)) fail('--every must be a whole number, 1 or more'); }
-  else { step = info.frames <= 3600 ? 1 : 5; console.log(`qa: ${info.frames} frames -> extracting ${step === 1 ? 'every frame' : 'every ' + step + ' frames'} (default for ${info.frames <= 3600 ? 'up to 3600' : 'more than 3600'} frames; override with --every N)`); }
+  else {
+    // never more than about 3600 JPEGs, however long the video
+    step = info.frames <= 3600 ? 1 : Math.max(2, Math.ceil(info.frames / 3600));
+    console.log(`qa: ${info.frames} frames -> extracting ${step === 1 ? 'every frame' : 'every ' + step + ' frames'} (default: at most about 3600 images; override with --every N)`);
+    if (step > 1) console.log('qa: to inspect a stretch frame by frame, cut it out first (ffmpeg -ss A -to B -i file -c copy part.mp4) and run qa on the part'); }
   const gates = buildGates(info, page);
 
   const outDir = path.join(ROOT, 'qa', name);

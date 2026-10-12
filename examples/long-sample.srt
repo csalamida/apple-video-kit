@@ -1,0 +1,419 @@
+1
+00:00:00,000 --> 00:00:03,500
+Stop losing leads in the first minute.
+
+2
+00:00:03,650 --> 00:00:07,150
+In this video you will set up Acme CRM so every new contact gets a reply in under five minutes.
+
+3
+00:00:07,300 --> 00:00:10,800
+By the end you will have a working inbox, a pipeline and a follow up.
+
+4
+00:00:10,950 --> 00:00:15,150
+inbox notification lead then the reply and minute response
+
+5
+00:00:15,300 --> 00:00:19,500
+lead minute minute then the response and minute message
+
+6
+00:00:19,650 --> 00:00:23,850
+speed lead contact then the minute and minute inbox
+
+7
+00:00:24,000 --> 00:00:28,200
+minute response notification then the speed and reply response
+
+8
+00:00:28,350 --> 00:00:32,550
+notification minute message then the message and notification notification
+
+9
+00:00:32,700 --> 00:00:36,900
+contact contact speed then the lead and reply lead
+
+10
+00:00:37,050 --> 00:00:41,250
+contact lead notification then the message and minute speed
+
+11
+00:00:41,400 --> 00:00:45,600
+inbox lead message then the response and contact reply
+
+12
+00:00:45,750 --> 00:00:49,950
+notification inbox contact then the contact and message notification
+
+13
+00:00:50,100 --> 00:00:54,300
+response reply contact then the lead and contact contact
+
+14
+00:00:54,450 --> 00:00:58,650
+lead response message then the lead and notification response
+
+15
+00:00:58,800 --> 00:01:03,000
+speed message message then the response and response minute
+
+16
+00:01:03,150 --> 00:01:07,350
+notification contact minute then the lead and message contact
+
+17
+00:01:07,500 --> 00:01:11,700
+lead contact speed then the speed and inbox speed
+
+18
+00:01:11,850 --> 00:01:16,050
+inbox contact reply then the inbox and notification reply
+
+19
+00:01:16,200 --> 00:01:20,400
+message reply response then the message and reply notification
+
+20
+00:01:20,550 --> 00:01:24,750
+speed notification speed then the notification and minute lead
+
+21
+00:01:24,900 --> 00:01:29,100
+inbox lead inbox then the inbox and message lead
+
+22
+00:01:29,250 --> 00:01:33,450
+minute response minute then the lead and speed lead
+
+23
+00:01:35,800 --> 00:01:39,300
+Step one. Connect the inbox.
+
+24
+00:01:39,450 --> 00:01:42,950
+Open settings, choose integrations, and connect your email address.
+
+25
+00:01:43,100 --> 00:01:47,300
+connect inbox integrations then the address and settings inbox
+
+26
+00:01:47,450 --> 00:01:51,650
+password inbox settings then the inbox and integrations inbox
+
+27
+00:01:51,800 --> 00:01:56,000
+password sync email then the email and integrations password
+
+28
+00:01:56,150 --> 00:02:00,350
+settings sync sync then the sync and address settings
+
+29
+00:02:00,500 --> 00:02:04,700
+settings inbox integrations then the sync and inbox settings
+
+30
+00:02:04,850 --> 00:02:09,050
+account account inbox then the inbox and sync connect
+
+31
+00:02:09,200 --> 00:02:13,400
+email sync account then the connect and email connect
+
+32
+00:02:13,550 --> 00:02:17,750
+account password connect then the password and sync connect
+
+33
+00:02:17,900 --> 00:02:22,100
+sync connect integrations then the email and inbox inbox
+
+34
+00:02:22,250 --> 00:02:26,450
+password account inbox then the integrations and password integrations
+
+35
+00:02:26,600 --> 00:02:30,800
+address password sync then the inbox and address integrations
+
+36
+00:02:30,950 --> 00:02:35,150
+address integrations password then the address and password address
+
+37
+00:02:35,300 --> 00:02:39,500
+sync connect sync then the settings and email address
+
+38
+00:02:39,650 --> 00:02:43,850
+integrations sync email then the email and password connect
+
+39
+00:02:44,000 --> 00:02:48,200
+settings sync account then the inbox and inbox sync
+
+40
+00:02:48,350 --> 00:02:52,550
+inbox settings sync then the password and sync inbox
+
+41
+00:02:52,700 --> 00:02:56,900
+settings integrations settings then the settings and settings settings
+
+42
+00:02:57,050 --> 00:03:01,250
+password inbox integrations then the integrations and integrations sync
+
+43
+00:03:01,400 --> 00:03:05,600
+email address inbox then the connect and sync sync
+
+44
+00:03:07,950 --> 00:03:11,450
+Moving on. Build the pipeline.
+
+45
+00:03:11,600 --> 00:03:15,100
+Create a pipeline with four stages: new, qualified, proposal and won.
+
+46
+00:03:15,250 --> 00:03:19,450
+proposal won pipeline then the qualified and card drag
+
+47
+00:03:19,600 --> 00:03:23,800
+stage drag deal then the stage and qualified board
+
+48
+00:03:23,950 --> 00:03:28,150
+stage pipeline qualified then the board and deal won
+
+49
+00:03:28,300 --> 00:03:32,500
+drag pipeline won then the proposal and pipeline pipeline
+
+50
+00:03:32,650 --> 00:03:36,850
+won pipeline qualified then the drag and column column
+
+51
+00:03:37,000 --> 00:03:41,200
+won card drag then the card and board deal
+
+52
+00:03:41,350 --> 00:03:45,550
+proposal won won then the won and deal column
+
+53
+00:03:45,700 --> 00:03:49,900
+board board column then the card and card drag
+
+54
+00:03:50,050 --> 00:03:54,250
+won won drag then the drag and proposal pipeline
+
+55
+00:03:54,400 --> 00:03:58,600
+proposal card column then the column and drag column
+
+56
+00:03:58,750 --> 00:04:02,950
+qualified qualified column then the stage and drag card
+
+57
+00:04:03,100 --> 00:04:07,300
+board column deal then the won and card deal
+
+58
+00:04:07,450 --> 00:04:11,650
+card qualified board then the won and proposal stage
+
+59
+00:04:11,800 --> 00:04:16,000
+deal qualified card then the card and proposal board
+
+60
+00:04:16,150 --> 00:04:20,350
+card stage proposal then the drag and pipeline stage
+
+61
+00:04:20,500 --> 00:04:24,700
+proposal pipeline board then the card and stage qualified
+
+62
+00:04:24,850 --> 00:04:29,050
+drag board stage then the stage and board pipeline
+
+63
+00:04:29,200 --> 00:04:33,400
+card deal column then the stage and proposal column
+
+64
+00:04:33,550 --> 00:04:37,750
+drag deal deal then the column and column column
+
+65
+00:04:40,100 --> 00:04:43,600
+Step three. Automate the follow up.
+
+66
+00:04:43,750 --> 00:04:47,250
+Now let's add a workflow that sends a text when a contact enters the new stage.
+
+67
+00:04:47,400 --> 00:04:51,600
+delay automation workflow then the condition and trigger delay
+
+68
+00:04:51,750 --> 00:04:55,950
+trigger trigger condition then the condition and send trigger
+
+69
+00:04:56,100 --> 00:05:00,300
+schedule workflow condition then the template and action condition
+
+70
+00:05:00,450 --> 00:05:04,650
+send automation schedule then the delay and send template
+
+71
+00:05:04,800 --> 00:05:09,000
+send action action then the schedule and send automation
+
+72
+00:05:09,150 --> 00:05:13,350
+action automation automation then the schedule and schedule workflow
+
+73
+00:05:13,500 --> 00:05:17,700
+workflow trigger schedule then the send and schedule trigger
+
+74
+00:05:17,850 --> 00:05:22,050
+automation workflow template then the delay and automation text
+
+75
+00:05:22,200 --> 00:05:26,400
+template trigger workflow then the workflow and workflow condition
+
+76
+00:05:26,550 --> 00:05:30,750
+template send action then the delay and action text
+
+77
+00:05:30,900 --> 00:05:35,100
+condition schedule action then the schedule and action condition
+
+78
+00:05:35,250 --> 00:05:39,450
+send automation workflow then the action and condition template
+
+79
+00:05:39,600 --> 00:05:43,800
+delay text template then the automation and workflow workflow
+
+80
+00:05:43,950 --> 00:05:48,150
+text text trigger then the condition and automation workflow
+
+81
+00:05:48,300 --> 00:05:52,500
+workflow send send then the workflow and action text
+
+82
+00:05:52,650 --> 00:05:56,850
+template schedule action then the workflow and schedule trigger
+
+83
+00:05:57,000 --> 00:06:01,200
+condition template workflow then the automation and action action
+
+84
+00:06:01,350 --> 00:06:05,550
+trigger send send then the text and template trigger
+
+85
+00:06:05,700 --> 00:06:09,900
+trigger send send then the condition and template send
+
+86
+00:06:12,250 --> 00:06:15,750
+Finally, check the numbers.
+
+87
+00:06:15,900 --> 00:06:19,400
+Open the dashboard and look at response time, booked calls and revenue.
+
+88
+00:06:19,550 --> 00:06:23,750
+weekly weekly metric then the export and response revenue
+
+89
+00:06:23,900 --> 00:06:28,100
+metric booked weekly then the report and weekly response
+
+90
+00:06:28,250 --> 00:06:32,450
+weekly calls metric then the weekly and dashboard revenue
+
+91
+00:06:32,600 --> 00:06:36,800
+report dashboard chart then the weekly and response weekly
+
+92
+00:06:36,950 --> 00:06:41,150
+weekly weekly revenue then the chart and calls booked
+
+93
+00:06:41,300 --> 00:06:45,500
+chart metric chart then the booked and calls revenue
+
+94
+00:06:45,650 --> 00:06:49,850
+metric metric revenue then the revenue and response chart
+
+95
+00:06:50,000 --> 00:06:54,200
+export chart booked then the response and chart response
+
+96
+00:06:54,350 --> 00:06:58,550
+chart report revenue then the report and booked response
+
+97
+00:06:58,700 --> 00:07:02,900
+weekly response booked then the booked and booked report
+
+98
+00:07:03,050 --> 00:07:07,250
+report dashboard calls then the booked and dashboard response
+
+99
+00:07:07,400 --> 00:07:11,600
+calls calls dashboard then the weekly and revenue booked
+
+100
+00:07:11,750 --> 00:07:15,950
+report revenue calls then the report and response chart
+
+101
+00:07:16,100 --> 00:07:20,300
+metric metric calls then the weekly and response report
+
+102
+00:07:20,450 --> 00:07:24,650
+response metric weekly then the chart and export revenue
+
+103
+00:07:24,800 --> 00:07:29,000
+export dashboard report then the booked and weekly weekly
+
+104
+00:07:29,150 --> 00:07:33,350
+metric chart revenue then the chart and metric report
+
+105
+00:07:33,500 --> 00:07:37,500
+Follow for the checklist, and the link is in the description.

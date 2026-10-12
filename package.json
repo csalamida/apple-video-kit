@@ -1,6 +1,6 @@
 {
   "name": "apple-video-kit",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Apple-style motion templates, transitions and a screen-share stage for HyperFrames videos.",
   "license": "MIT",
   "private": true,
@@ -20,15 +20,17 @@
     "dev": "npm run -s media && hyperframes preview",
     "check": "npm run -s media && hyperframes check",
     "render": "npm run -s media && hyperframes render",
+    "render:long": "npm run -s media && node scripts/render-long.mjs .",
     "check:face": "node scripts/demo-media.mjs index.html && node scripts/check-face-clear.mjs",
     "face": "node scripts/face-track.mjs",
     "check:privacy": "node scripts/check-privacy.mjs",
-    "check:all": "npm run -s media && npm run -s check && npm run -s check:face && npm run -s share:check && npm run -s speaker:check && npm run -s short:check && npm run -s check:privacy",
+    "check:all": "npm run -s media && npm run -s check && npm run -s check:face && npm run -s share:check && npm run -s speaker:check && npm run -s short:check && npm run -s selftest && npm run -s check:privacy",
     "build:library": "node scripts/build-library.mjs",
     "library": "npm run -s media && npm run -s build:library && node scripts/serve.mjs 4173",
     "share:dev": "node scripts/sync-share.mjs && hyperframes preview projects/screen-share",
     "share:check": "node scripts/sync-share.mjs && node scripts/check-face-clear.mjs projects/screen-share/index.html && hyperframes check projects/screen-share",
     "share:render": "node scripts/sync-share.mjs && hyperframes render projects/screen-share",
+    "share:render:long": "node scripts/sync-share.mjs && node scripts/render-long.mjs projects/screen-share",
     "share:sync": "node scripts/sync-share.mjs",
     "cutout": "node scripts/cutout.mjs",
     "prop": "node scripts/prop.mjs",
@@ -36,6 +38,7 @@
     "speaker:dev": "node scripts/sync-share.mjs projects/speaker-cutout --static-camera && hyperframes preview projects/speaker-cutout",
     "speaker:check": "node scripts/sync-share.mjs projects/speaker-cutout --static-camera && node scripts/check-face-clear.mjs projects/speaker-cutout/index.html && hyperframes check projects/speaker-cutout",
     "speaker:render": "node scripts/sync-share.mjs projects/speaker-cutout --static-camera && hyperframes render projects/speaker-cutout",
+    "speaker:render:long": "node scripts/sync-share.mjs projects/speaker-cutout --static-camera && node scripts/render-long.mjs projects/speaker-cutout",
     "short:dev": "node scripts/sync-share.mjs projects/short-form --static-camera --canvas vertical && hyperframes preview projects/short-form",
     "short:check": "node scripts/sync-share.mjs projects/short-form --static-camera --canvas vertical && node scripts/check-face-clear.mjs projects/short-form/index.html && node scripts/check-reel.mjs projects/short-form/index.html && node scripts/check-glyphs.mjs projects/short-form/index.html && hyperframes check projects/short-form",
     "short:render": "node scripts/sync-share.mjs projects/short-form --static-camera --canvas vertical && node scripts/check-reel.mjs projects/short-form/index.html && hyperframes render projects/short-form",
@@ -46,7 +49,12 @@
     "plan": "node scripts/cue-plan.mjs",
     "polish": "node scripts/polish.mjs",
     "grade": "node scripts/grade.mjs",
-    "qa": "node scripts/qa.mjs"
+    "qa": "node scripts/qa.mjs",
+    "selftest": "node scripts/selftest.mjs",
+    "chapters": "node scripts/chapters.mjs",
+    "audio": "node scripts/audio.mjs",
+    "stress": "node scripts/stress-long.mjs",
+    "activity": "node scripts/activity.mjs"
   },
   "devDependencies": {
     "hyperframes": "0.8.120"

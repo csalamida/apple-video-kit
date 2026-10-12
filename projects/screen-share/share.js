@@ -9,6 +9,9 @@
    drift:    slow push-in while a zoom holds (true or { amount: 0.035, minHold: 1.5 }).
    cam:      webcam moments: { t, mode: 'full' } talk straight to the viewer, 'pip' back to the card, 'hide' tuck it away.
    cuts:     jump-cut times; the webcam alternates 1.0 / punch (1.06) framing at each so the jump reads as an edit.
+   keepClear: parts of the SCREEN that must stay visible: { t?, end?, x, y, w, h } in 0-1 coords (optional time window). They follow every zoom.
+              Cards with safe:true move off them (to the other side, or a free gap); `npm run share:check` FAILS a card that still covers one.
+              Mark the button, field or line the speaker is talking about. `npm run activity -- inputs/screen.mp4` drafts zooms and idle stretches.
    focus / callouts / redact: screen regions in 0-1 coords { x, y, w, h } that follow every zoom.
      focus    { t, end, ... dim }      darken everything else ("look at this section")
      callouts { t, end, ..., label, side: 'bottom' | 'top' | 'left' | 'right' }   ring + label ("click this")

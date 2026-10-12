@@ -38,6 +38,10 @@ The cursor is baked into the screen recording: never synthesise or restyle one.
 - Speaker PiP docks bottom-left on the page margin; `app-window` with `layout:"rail"` fills the column above it.
 - Face boxes: `inputs/face-track.js` (git-ignored). The demo track is generated; for your footage run `npm run face -- inputs/<video>.mp4` (installs OpenCV into `.cache/face-venv` on first run).
 
+### Long video (10 to 30 minutes)
+
+Read `.agents/skills/apple-video-editor/references/long-form.md` first. Share screen: mark `keepClear: [{ t?, end?, x, y, w, h }]` in `share.js` (0-1 screen coordinates, follows every zoom); `place()` moves `safe: true` cards off the webcam card AND those regions, and `share:check` fails a card that still covers one. Render with the `:render:long` scripts (segmented, resumable). `qa` samples at most about 3600 frames.
+
 ### Short-form reel (vertical)
 
 Read `.agents/skills/apple-video-editor/references/short-form.md` first. `npm run short:dev | short:check | short:render` sync `projects/short-form/` with `--canvas vertical`: `components/canvas.js` sets 1080x1920 and the platform safe zones (top 230, bottom 430, right 150), every template lays itself out on that canvas, and the face track is `inputs/face-track.vertical.js` (`npm run face` writes it for portrait footage). `npm run reel` (part of `short:check` and `short:render`) fails a caption that does not hold readable for 0.5 s after entrance and before exit, overlapping cues, captions or cards inside the safe zones, caption CSS that clips glyphs, and caption colours below 4.5:1 on the pill. Captions take the person's own colours (`color`, `accent`, `bg`, `bgAlpha`, `pill`) and `mode: "cumulative"` builds each line word by word; ask for the colours, do not choose them. Never put position and entrance motion on the same element.
@@ -113,6 +117,12 @@ npm run short:dev      # vertical 1080x1920 reel demo (safe zones, captions)
 npm run reel           # short-form rules: caption hold, safe zones, colour contrast
 npm run check:glyphs   # renders every caption cue with and without clips: fails if lettering is cut (needs Chrome + a connection once)
 npm run script -- inputs/script.txt   # plan a reel BEFORE filming: length, hook, flat stretches, ending, block ideas
+npm run chapters -- inputs/x.polished.srt   # chapters, YouTube timestamps, pill schedule, cold open, recap + pattern-interrupt slots (long video)
+npm run activity -- inputs/screen.mp4       # screen activity: zoom draft + idle stretches (share screen)
+npm run audio -- renders/x.mp4              # loudness to -14 LUFS, optional --denoise and a ducked --music bed
+npm run share:render:long                   # segmented, resumable render (also render:long, speaker:render:long)
+npm run stress -- --minutes 5 --render      # time and memory of a synthetic long project on this machine
+npm run selftest                            # every guard must fail a bad case (part of check:all)
 npm run cutout -- inputs/me.mp4 --from 10 --to 25      # transparent video of the speaker (slow, local)
 npm run backdrop -- inputs/me.mp4 --scene office       # prompt for a scene that matches the camera angle
 npm run render         # talking head to MP4
