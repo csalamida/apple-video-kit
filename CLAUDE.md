@@ -120,8 +120,10 @@ npm run script -- inputs/script.txt   # plan a reel BEFORE filming: length, hook
 npm run chapters -- inputs/x.polished.srt   # chapters, YouTube timestamps, pill schedule, cold open, recap + pattern-interrupt slots (long video)
 npm run activity -- inputs/screen.mp4       # screen activity: zoom draft + idle stretches (share screen)
 npm run audio -- renders/x.mp4              # loudness to -14 LUFS, optional --denoise and a ducked --music bed
+npm run sfx -- projects/short-form/index.html   # synthesized effects track from the page's cues (whoosh, pop, ticks); mix it with: npm run audio -- x.mp4 --music inputs/sfx.wav --music-db -6
 npm run share:render:long                   # segmented, resumable render (also render:long, speaker:render:long)
 npm run stress -- --minutes 5 --render      # time and memory of a synthetic long project on this machine
+npm run taste                               # the owner's rejections from earlier videos (add one: npm run taste -- add "..."); read before planning
 npm run selftest                            # every guard must fail a bad case (part of check:all)
 npm run cutout -- inputs/me.mp4 --from 10 --to 25      # transparent video of the speaker (slow, local)
 npm run backdrop -- inputs/me.mp4 --scene office       # prompt for a scene that matches the camera angle

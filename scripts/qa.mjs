@@ -325,6 +325,15 @@ function main() {
   auto.frozen = longFrozen.length ? { status: 'warn', summary: `${longFrozen.length} frozen stretch(es) of ${T.freezeMin} s or more: ${longFrozen.map((f) => `${fmtT(f.start)}-${fmtT(f.end)}`).join(', ')}` }
     : { status: 'pass', summary: `no frozen stretch of ${T.freezeMin} s or more` };
 
+  // End hold: how long the picture sits unchanged at the very end. A reel should not (viewers leave); a long video may, because a YouTube end screen needs 5 to 20 s.
+  {
+    const tail = A.frozen.filter((f) => !blackCover(f)).find((f) => f.end >= info.duration - 0.2), hold = tail ? tail.dur : 0;
+    const portrait = info.height > info.width, limit = portrait ? 1.5 : 20;
+    checks.endhold = { seconds: r3(hold), limit, portrait };
+    auto.endhold = hold > limit ? { status: 'warn', summary: `the picture sits unchanged for the last ${hold.toFixed(1)} s (limit ${limit} s for ${portrait ? 'a vertical reel' : 'a long video'}${portrait ? ': end on motion or cut earlier' : ': an end screen needs at most 20 s'})` }
+      : { status: 'pass', summary: hold >= T.freezeMin ? `ends on a ${hold.toFixed(1)} s hold (limit ${limit} s)` : 'no long hold at the end' };
+  }
+
   const dupes = A.ydif.reduce((c, d, i) => c + (i > 0 && d !== undefined && d < T.dupDiff ? 1 : 0), 0);
   const ratio = A.ydif.length > 1 ? dupes / (A.ydif.length - 1) : 0;
   checks.duplicates = { frames: dupes, ratio: r3(ratio), threshold: T.dupDiff };

@@ -68,6 +68,7 @@ Measured with `npm run stress` on a synthetic share-screen project (a test-patte
 ## 5. Finishing
 
 - **Audio:** `npm run audio -- renders/<file>.mp4 [--denoise] [--music bed.mp3 --music-db -24 --duck 8]`. Measures loudness, optional rumble and noise cleanup, a music bed that ducks under the voice (levelled first, so quiet and loud recordings duck the same), two-pass normalise to -14 LUFS, the picture copied untouched. Verified by measuring the written file. It cannot judge whether it sounds good: listen to it.
+- **Sound effects (optional):** `npm run sfx -- <page>` writes a quiet effects track from the cues; mix it with `npm run audio -- <render> --music inputs/sfx.wav --music-db -6`. A sound on every card is too much in a 20 minute video: keep transitions, chapter changes and chips, drop the rest.
 - **Review:** `npm run qa` samples at most about 3600 frames (every 10th frame on a 20 minute video). To inspect a stretch frame by frame, cut it out and run `qa` on the part. Read every cue, every transition and the longest caption in the viewer. The checks never approve a video; the owner does.
 - **YouTube:** `*.chapters.txt` pastes into the description (first line 0:00, three or more chapters, 10 s or more each). Upload a reviewed SRT, not the raw CapCut one.
 

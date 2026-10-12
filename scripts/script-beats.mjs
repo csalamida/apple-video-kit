@@ -92,6 +92,16 @@ for (const b of beats) {
   }
 }
 
+// ---------------------------------------------------------------- the job of every beat
+// Every beat should buy the viewer one belief. Roles: hook (opens), turn (a "but", a twist), proof (a number, a result, a demo, a before/after),
+// ask (the ending action), explain (everything else). A heuristic from the words, not a judgement: read it and overrule it.
+const ASK = /\b(follow|comment|save|share|subscribe|dm|message|link|click|tap|try|download|join|sign up|book|reply|send|check out|watch)\b/i;
+const TURN = /\b(but|however|instead|actually|the problem|the catch|here'?s the thing|the truth|turns out|except|yet|mistake|wrong)\b/i;
+const PROOF = /\d|\b(result|results|before|after|example|for example|look at|see how|you can see|proof|case study|percent|double|triple|faster|saved)\b/i;
+beats.forEach((b, i) => {
+  b.job = i === 0 ? 'hook' : i === beats.length - 1 && ASK.test(b.text) ? 'ask' : ASK.test(b.text) && i >= beats.length - 2 ? 'ask' : PROOF.test(b.text) ? 'proof' : TURN.test(b.text) ? 'turn' : 'explain';
+});
+
 // ---------------------------------------------------------------- the director's checks
 const flags = [];   // { level: 'fix' | 'watch' | 'note', at, msg }
 const add = (level, at, msg) => flags.push({ level, at, msg });
@@ -121,6 +131,14 @@ else if (total < 10) add('watch', 0, `Only about ${total.toFixed(0)} s. Fine for
 for (const b of beats) {
   if (/[\w.+-]+@[\w-]+\.[\w.]+/.test(b.text) || /\b(api[_ -]?key|password|token|secret key)\b/i.test(b.text)) add('note', b.start, `Beat ${b.n} mentions an email or a credential: blur it if it is ever shown on screen.`);
 }
+{
+  let run = 0;
+  for (const b of beats) {
+    run = b.job === 'explain' ? run + 1 : 0;
+    if (run === 4) add('watch', b.start, `Four explanation beats in a row (beats ${b.n - 3} to ${b.n}) with no proof or turn. Show it, then say it: put a number, a result or a demo in here.`);
+  }
+  if (total > 20 && !beats.some((b) => b.job === 'proof')) add('note', 0, 'No proof beat (a number, a result, an example, a before and after). The claim is only said, never shown.');
+}
 const lists = beats.filter((b) => /^\s*(first|second|third|number (one|two|three)|step \d|\d[.)])/i.test(b.text));
 if (lists.length >= 3) add('note', lists[0].start, `${lists.length} numbered beats: one card each (glass-card or checklist) keeps them readable.`);
 
@@ -144,9 +162,9 @@ L.push(`# Beat sheet: ${path.basename(file)}`, '',
   `- Verdict: **${verdict}** (${flags.filter((f) => f.level === 'fix').length} to fix, ${flags.filter((f) => f.level === 'watch').length} to watch, ${flags.filter((f) => f.level === 'note').length} notes)`,
   `- These times are estimates. After filming, polish the real transcript and use its times.`, '');
 if (flags.length) { L.push('## Director\'s notes', ''); for (const f of flags) L.push(`- **${f.level}** at ${mmss(f.at)}: ${f.msg}`); L.push(''); }
-L.push('## Beats', '', '| # | Time | Words | Line | Block ideas |', '|---|---|---|---|---|');
-for (const b of beats) L.push(`| ${b.n} | ${mmss(b.start)}-${mmss(b.end)} | ${b.words} | ${b.text.replace(/\|/g, '/')} | ${[...new Set(b.blocks.map((x) => x.id))].join(', ') || '-'} |`);
-L.push('', 'Block ideas come from the same rules as `npm run plan` and are drafts: keep one change every 2 to 3 seconds, not one per beat.', '');
+L.push('## Beats', '', '| # | Time | Job | Words | Line | Block ideas |', '|---|---|---|---|---|---|');
+for (const b of beats) L.push(`| ${b.n} | ${mmss(b.start)}-${mmss(b.end)} | ${b.job} | ${b.words} | ${b.text.replace(/\|/g, '/')} | ${[...new Set(b.blocks.map((x) => x.id))].join(', ') || '-'} |`);
+L.push('', 'Job is a guess from the words (hook, turn, proof, ask, explain): each beat should buy the viewer one belief; read it and overrule it. Block ideas come from the same rules as `npm run plan` and are drafts: keep one change every 2 to 3 seconds, not one per beat.', '');
 if (notes.length) L.push('## Notes in the script (kept out of the timing)', '', ...notes.map((n) => '- ' + n), '');
 fs.writeFileSync(prefix + '.beats.md', L.join('\n'));
 

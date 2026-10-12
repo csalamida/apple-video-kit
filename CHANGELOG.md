@@ -2,6 +2,12 @@
 
 Update an existing project with `npx github:csalamida/apple-video-kit update` (add `--dry-run` to preview).
 
+## 0.8.0
+- `npm run sfx`: a sound-effects track synthesized from the page's cues (deterministic, no stock audio), panned to the side each block sits on.
+- `npm run qa`: end-hold check. A reel that ends on a still for over 1.5 s warns; a landscape video warns past 20 s (a YouTube end screen needs at most 20 s).
+- `npm run script`: each beat gets a job (hook, turn, proof, ask, explain); four explanation beats in a row, or no proof in a reel over 20 s, are flagged.
+- `npm run taste`: the owner's rejections and insistences kept in `inputs/taste.md`; the skill reads it before planning.
+
 ## 0.7.0
 
 **Long videos (10 to 30 minutes)**

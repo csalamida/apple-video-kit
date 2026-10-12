@@ -350,7 +350,7 @@ function buildCueList() {
 // ---- automated results ----
 function buildAuto() {
   const A = (REPORT && REPORT.autoChecks) || {};
-  const order = [...Object.keys(A).filter((k) => k.startsWith('gate:')), 'black', 'frozen', 'duplicates', 'flash', 'loudness'].filter((k) => A[k]);
+  const order = [...Object.keys(A).filter((k) => k.startsWith('gate:')), 'black', 'frozen', 'endhold', 'duplicates', 'flash', 'loudness'].filter((k) => A[k]);
   const jumps = (k) => {
     const C = M.checks || {};
     const r = k === 'black' ? ((C.black || {}).ranges || []).filter((x) => !inFlash(x)) : k === 'frozen' ? ((C.frozen || {}).ranges || []).filter((x) => x.dur >= 1.5) : k === 'flash' ? (C.flash || {}).windows : null;

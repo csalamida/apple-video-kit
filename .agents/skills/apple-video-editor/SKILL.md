@@ -14,7 +14,7 @@ description: >
 license: MIT
 metadata:
   author: Apple Video Kit contributors
-  version: "5.8.0"
+  version: "5.9.0"
 ---
 
 # Apple Video Editor & Director Handbook
@@ -37,6 +37,8 @@ an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "a
 ---
 
 ## 2. Workflow
+
+**Before any video:** read `inputs/taste.md` if it exists (`npm run taste`): the owner's own rejections and insistences from earlier videos. Obey it over any default in this guide. Whenever the owner rejects or insists on something, add one line in their words: `npm run taste -- add "..."`.
 
 **Screen share**
 1. Sources: a silent screen/window recording -> `#screen`, the webcam (carries the voice) -> `#cam` in `projects/screen-share/index.html`. Set `data-duration` on both.
@@ -68,7 +70,8 @@ an `.mp4/.mov/.webm` + optional `.srt/.vtt` transcript; "package this video", "a
 2. `npm run chapters -- inputs/capcut.polished.srt` (chapters, YouTube timestamps, the pill schedule, cold open, recap and pattern-interrupt slots; rename every title marked review). Screen share: `npm run activity -- inputs/screen.mp4` drafts zooms and idle stretches.
 3. Share screen: mark `keepClear: [{ t, end, x, y, w, h }]` in `share.js` for the parts of the screen that must stay visible. Cards with `safe: true` move off them; `npm run share:check` fails a card that covers one.
 4. Render with `npm run share:render:long` (or `render:long`, `speaker:render:long`): segmented and resumable. Then `npm run audio -- renders/<file>.mp4` (-14 LUFS, optional `--denoise`, `--music bed.mp3` ducking under the voice) and `npm run qa` (about 3600 images at most). Cutout in a long video: `npm run cutout -- inputs/me.mp4 --ranges "0-25,310-330"` (resumable).
-5. `npm run stress -- --minutes 5 --render` measures this machine on a synthetic project; trust its numbers over any estimate.
+5. Sound: `npm run sfx -- <page>` synthesizes a quiet effects track from the page's own cues (no stock audio; deterministic); mix it under the voice with `npm run audio -- <render> --music inputs/sfx.wav --music-db -6`. Listen once and cut what is busy. Script planning: `npm run script` now labels each beat's job (hook, turn, proof, ask, explain). `npm run qa` warns when a reel ends on a still (over 1.5 s) or a long video holds the last frame over 20 s.
+6. `npm run stress -- --minutes 5 --render` measures this machine on a synthetic project; trust its numbers over any estimate.
 
 **Finishing (every mode)** - read `references/finishing.md` first.
 1. CapCut transcript in: `npm run polish -- inputs/capcut.srt --audio inputs/export.mp4 --glossary inputs/glossary.json`; read the report, fix what rules cannot hear, ask about new terms, then `npm run plan` from the polished SRT. Filler cuts: `npm run trim -- <voice file> --cut-list inputs/capcut.fillers.json` (the CapCut export is already edited: do not silence-trim it again).

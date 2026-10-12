@@ -114,6 +114,7 @@ In a screen-share video you can mark parts of the screen that must never be cove
 
 | Command | What it does |
 |---|---|
+| `npm run sfx -- index.html` | Writes a quiet sound-effects track from the page's own cues (whoosh for cards and transitions, pop for chips, ticks for keys). Generated in code: no stock audio, no licences. |
 | `npm run audio -- renders/video.mp4 --music bed.mp3` | Loudness to -14 LUFS, optional noise cleanup, and a music bed that ducks under your voice. The picture is copied untouched. |
 | `npm run grade -- inputs/me.mp4` | Fixes white balance and exposure from your face, then applies a look. A skin-tone guard refuses any grade that makes skin look wrong. Speaker only, never screen recordings. |
 | `npm run qa -- renders/video.mp4 --page index.html` | Reviews the finished file: size, length, sound, black frames, frozen stretches, flashing, loudness. Saves every frame for the QA page. It never approves a video; you do. |
