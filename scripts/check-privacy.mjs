@@ -37,8 +37,10 @@ try {
   });
   walk('');
 }
-// bin/gitignore.template is what `npx ... init/update` installs (npm drops .gitignore files): keep it equal to .gitignore
+// bin/gitignore.template is what `npx ... init/update` installs (npm drops .gitignore files): keep it equal to .gitignore.
+// Only in the kit source: a project's .gitignore is the kit's rules plus its own, so it never equals the template.
 try {
+  if (fs.existsSync(path.join(ROOT, '.kit/manifest.json'))) throw new Error('project');
   const tpl = fs.readFileSync(path.join(ROOT, 'bin/gitignore.template'), 'utf8'), gi = fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8');
   if (tpl !== gi) problems.push('bin/gitignore.template differs from .gitignore (run: cp .gitignore bin/gitignore.template)');
 } catch (e) { /* not the kit source (a project): nothing to compare */ }

@@ -34,6 +34,9 @@ const STARTER = ['index.html', 'components/camera.js', 'projects/screen-share/in
   'projects/screen-share/meta.json', 'projects/screen-share/hyperframes.json', 'hyperframes.json',
   'projects/speaker-cutout/index.html', 'projects/speaker-cutout/cutout.js', 'projects/speaker-cutout/meta.json', 'projects/speaker-cutout/hyperframes.json',
   'projects/short-form/index.html', 'projects/short-form/meta.json', 'projects/short-form/hyperframes.json'];
+// Starter projects the kit added after 0.2.0, with the version that introduced them. update creates one only for a project older than that.
+const STARTER_SINCE = { 'projects/short-form': '0.6.0' };
+const older = (a, b) => { const x = String(a).split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== y[i]) return (x[i] || 0) < y[i]; } return false; };
 const SKIP = /(^|\/)(node_modules|\.git|\.DS_Store|snapshots)(\/|$)/;
 
 const rel = (p) => p.split(path.sep).join('/');
@@ -120,7 +123,7 @@ function update(dry) {
   const state = fs.existsSync(path.join(dest, STATE)) ? JSON.parse(fs.readFileSync(path.join(dest, STATE), 'utf8')) : null;
   const known = (state && state.files) || {};
   const files = kitFiles();
-  const plan = { add: [], update: [], same: [], backup: [], remove: [], keep: [] };
+  const plan = { add: [], update: [], same: [], backup: [], remove: [], keep: [], starter: [] };
 
   for (const r of files) {
     const to = path.join(dest, r);
@@ -138,10 +141,12 @@ function update(dry) {
   }
 
   const from = (state && state.version) || (fs.existsSync(path.join(dest, 'package.json')) && (JSON.parse(fs.readFileSync(path.join(dest, 'package.json'), 'utf8')).kit || {}).version) || 'unknown';
+  plan.starter = STARTER.filter((r) => { const p = r.split('/').slice(0, 2).join('/'); return STARTER_SINCE[p] && older(from === 'unknown' ? '0.0.0' : from, STARTER_SINCE[p]) && fs.existsSync(path.join(KIT, r)) && !fs.existsSync(path.join(dest, p)); });
   console.log(`apple-video-kit ${from} -> ${PKG.version}${dry ? '  (dry run, nothing changed)' : ''}`);
-  console.log(`  ${plan.add.length} new, ${plan.update.length} updated, ${plan.remove.length} removed, ${plan.same.length} unchanged`);
+  console.log(`  ${plan.add.length + plan.starter.length} new, ${plan.update.length} updated, ${plan.remove.length} removed, ${plan.same.length} unchanged`);
   const list = (label, arr) => { if (arr.length) console.log(`  ${label}:\n` + arr.map((r) => '    ' + r).join('\n')); };
   list('new', plan.add);
+  list('new starter project (yours from now on)', plan.starter);
   list('updated', plan.update.filter((r) => !plan.backup.includes(r)));
   list('updated, your edits backed up first', plan.backup);
   list('removed (no longer in the kit)', plan.remove);
@@ -155,7 +160,7 @@ function update(dry) {
     fs.mkdirSync(path.dirname(b), { recursive: true });
     fs.copyFileSync(path.join(dest, r), b);
   }
-  [...plan.add, ...plan.update].forEach((r) => copy(r, dest));
+  [...plan.add, ...plan.update, ...plan.starter].forEach((r) => copy(r, dest));
   plan.remove.forEach((r) => fs.rmSync(path.join(dest, r)));
   const pkgChanged = mergePackage(dest, path.basename(dest));
   const ignoreAdded = mergeGitignore(dest);

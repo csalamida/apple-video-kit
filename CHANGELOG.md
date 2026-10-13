@@ -2,6 +2,11 @@
 
 Update an existing project with `npx github:csalamida/apple-video-kit update` (add `--dry-run` to preview).
 
+## 0.8.1
+Found by updating a real v0.5.0 project to 0.8.0.
+- `update` now creates the short-form reel project when an older project does not have one. Before, it added the `short:check` command but not the project it checks, so `npm run check:all` crashed. A project that already has the folder is never touched.
+- `check:privacy` no longer fails in an updated project: it compared the project's `.gitignore` to the kit's template, which never match once your own rules are added. The comparison now runs only in the kit source (and still fails on drift there).
+
 ## 0.8.0
 - `npm run sfx`: a sound-effects track synthesized from the page's cues (deterministic, no stock audio), panned to the side each block sits on.
 - `npm run qa`: end-hold check. A reel that ends on a still for over 1.5 s warns; a landscape video warns past 20 s (a YouTube end screen needs at most 20 s).
